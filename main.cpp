@@ -1,62 +1,143 @@
+#include <iostream>
+#include <memory>
+#include <fstream>
+
 #include "SFML/Graphics.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Window Title");
-    ImGui::SFML::Init(window);
+	//create new window of size w*h pixels
+	//top-left of the window is (0,0) and bottom right is (w,h)
+	// you will have to read these from the confic file
+	const int wWidth = 1280;
+	const int wHeight = 720;
+	sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "SFML works!");
+	window.setFramerateLimit(60); //limit frame rate to 60 fps
 
-    bool circleExists = true;
-    float circleRadius = 200.f;
-    int circleSegments = 100;
-    float circleColor[3] = { (float)204 / 255,(float)77 / 255, float(5) / 255 };
-    sf::CircleShape shape(circleRadius, circleSegments);
-    shape.setFillColor(sf::Color(
-        (int)(circleColor[0] * 255), 
-        (int)(circleColor[1] * 255),
-        (int)(circleColor[2] * 255))); // Color circle
-    shape.setOrigin(circleRadius, circleRadius);
-    shape.setPosition(400, 400); // Center circle
-    sf::Clock deltaClock;
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            ImGui::SFML::ProcessEvent(event);
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-        //IMGUI
-        ImGui::SFML::Update(window, deltaClock.restart());
-
-        ImGui::Begin("Window title");
-        ImGui::Text("Window text!");
-        ImGui::Checkbox("Circle", &circleExists);
-        ImGui::SliderFloat("Radius", &circleRadius, 100.0f, 300.0f);
-        ImGui::SliderInt("Sides", &circleSegments, 3, 150);
-        ImGui::ColorEdit3("Color Circle", circleColor);
-        ImGui::End();
-
-        shape.setRadius(circleRadius);
-        shape.setOrigin(circleRadius, circleRadius);
-        shape.setPointCount(circleSegments);
-        shape.setFillColor(sf::Color(
-            (int)(circleColor[0] * 255),
-            (int)(circleColor[1] * 255),
-            (int)(circleColor[2] * 255))); // Color circle
-
-        window.clear(sf::Color(18, 33, 43)); // Color background
-        if (circleExists)
-            {
-                window.draw(shape);
-            }
-        ImGui::SFML::Render(window);
-        window.display();
-    }
+	//initialize IMGUI and create a clock used for internal timing
+	ImGui::SFML::Init(window);
+	sf::Clock deltaClock;
 
 
-    ImGui::SFML::Shutdown();
-    return 0;
+	//scale the imgui ui by a given factorm does not affect text size
+	ImGui::GetStyle().ScaleAllSizes(1.0f);
+
+	//the imgui color {r,g,b} wheel requires floats from 0-1 instead of ints from 0-255
+	float c[3] = { 0.1f,1.0f,1.0f };
+
+	//let's make a shape that we will draw to the screen
+	float circleRadius = 50;//radius to draw the circle
+	int circleSegments = 32; //number of segments to draw the circle with
+	float circleSpeedX = 1.0f;//we will use this to move the cirlce later
+	float circleSpeedY = 0.5f; //you will read these values from the file
+	bool drawCircle = true; // whether or not to draw the cricle
+	bool drawText = true; //whether or not to draw the text
+
+	//create sfml cricle shape based on our parameters
+	sf::CircleShape circle(circleRadius, circleSegments); //create a circle shape with radius 50
+
+	circle.setPosition(10.0f, 10.0f); // set the top left position of the circle
+
+	//let's load a font so we can display some text
+
+	sf::Font myFont;
+
+	//attemtp to load the font from a file
+	if (!myFont.loadFromFile("fonts/tech.ttf"))
+	{
+		//if we can't load the font, print and error to the the console and exit
+		std::cerr << "Could not load font! \n";
+		exit(-1);
+	}
+
+	//set up the text object that will be drawn to the screen
+	sf::Text text("Sample Text", myFont, 24);
+
+	//poisition the top left corner of the text so that the text aligns on the bottom
+	//text character size is in pixels, so move the text up from the bottom by its height
+
+	text.setPosition(0, wHeight - (float)text.getCharacterSize());
+
+	//set up a character array to set the text
+	char displayString[255] = "Sample Text";
+
+	//main loop -  continues for each frame while window is open
+	while (window.isOpen())
+	{
+		//event handling
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			//pass the event to igui to be parsed
+			ImGui::SFML::ProcessEvent(window, event);
+
+			/// this event trggers when the window is closed
+			if (event.type == sf::Event::Closed)
+			{
+				window.close();
+			}
+
+			//this event is triggered when a key is pressed
+			if (event.type == sf::Event::KeyPressed)
+			{
+				//print the key that was pressed to the console
+				std::cout << "Key pressed with code = " << event.key.code << "\n";
+
+				//example , what happens when x is pressed
+				if (event.key.code == sf::Keyboard::X)
+				{
+					//reverse the x direction the circle on the screen
+					circleSpeedX *= -1.0f;
+				}
+			}
+		}
+
+		//update imgui for this frame with the time that the last frame took
+		ImGui::SFML::Update(window, deltaClock.restart());
+
+		//draw the UI
+		ImGui::Begin("Window title");
+		ImGui::Text("Window text");
+		ImGui::Checkbox("Draw Circle", &drawCircle);
+		ImGui::SameLine();
+		ImGui::Checkbox("Draw Text", &drawText);
+		ImGui::SliderFloat("Radius", &circleRadius, 0.0f, 300.0f);
+		ImGui::SliderInt("Sides", &circleSegments, 3, 64);
+		ImGui::ColorEdit3("Color Circle", c);
+		ImGui::InputText("Text", displayString, 255);
+		if (ImGui::Button("Set Text"))
+		{
+			text.setString(displayString);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset Cricle"))
+		{
+			circle.setPosition(0, 0);
+		}
+		ImGui::End();
+
+		//set the circle properties, because they may have been updated with the ui
+		circle.setFillColor(sf::Color(c[0] * 255, c[1] * 255, c[2] * 255));
+		circle.setPointCount(circleSegments);
+		circle.setRadius(circleRadius);
+
+		//basic animation - move each from if it's still in frame
+		circle.setPosition(circle.getPosition().x + circleSpeedX, circle.getPosition().y + circleSpeedY);
+
+		//basic rendering function calls
+		window.clear(); //clear the window of anything previously drawn
+		if (drawCircle) //draw the ciricle if the boolean is true
+		{
+			window.draw(circle);
+		}
+		if (drawText) //draw the text if the boolean is true
+		{
+			window.draw(text);
+		}
+		ImGui::SFML::Render(window); //draw the ui last so it's on top
+		window.display(); //cal the window display function
+	}
+	return 0;
 }
