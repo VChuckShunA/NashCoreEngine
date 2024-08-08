@@ -204,6 +204,14 @@ int main(int argc, char* argv[])
 		for (customCircle* shape : shapes) {
 			shape->setPosition(shape->getPosition().x + shape->speedX, shape->getPosition().y + shape->speedY);
 			shape->myText.setPosition(shape->getPosition().x+shape->radius , shape->getPosition().y + shape->radius );
+			if (shape->getPosition().y + shape->radius*2 >= wHeight || shape->getPosition().y <= 0)
+			{
+				shape->speedY *= -1.0f;
+			}
+			if (shape->getPosition().x + shape->radius*2 >= wWidth || shape->getPosition().x  <= 0)
+			{
+				shape->speedX *= -1.0f;
+			}
 		}
 
 		for (customCircle* shape : shapes) {
