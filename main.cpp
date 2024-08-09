@@ -9,12 +9,11 @@
 
 class customCircle :public sf::CircleShape
 {
-private:
 public:
 	std::string shapeText;
 	int positionX, positionY, speedX, speedY;
 	float colour[3];
-	int radius, width, height;
+	int radius;
 	sf::Text myText;
 	sf::Font myFont;
 	customCircle(std::string shapeText, int positionX, int positionY, int speedX, int speedY, int radius, float colours[3],std:: string fontPath)
@@ -46,6 +45,45 @@ public:
 	
 };
 
+class customRectangle : public sf::RectangleShape
+{
+public:
+	std::string shapeText;
+	int positionX, positionY, speedX, speedY;
+	float colour[3];
+	int myWidth, myHeight;
+	sf::Text myText;
+	sf::Font myFont;
+
+	customRectangle(std::string shapeText, int positionX, int positionY, int speedX, int speedY, float width, float height, float colours[3], std::string fontPath)
+		:shapeText(shapeText), positionX(positionX), positionY(positionY), speedX(speedX), speedY(speedY), myWidth(width), myHeight(height)
+	{
+
+
+		this->setSize(sf::Vector2f(myWidth, myHeight));
+		for (int i = 0; i < 3; ++i) {
+			this->colour[i] = colours[i];
+		}
+		this->setPosition(positionX, positionY);
+		this->setFillColor(sf::Color(colour[0], colour[1], colour[2]));
+		std::cout << shapeText << std::endl;
+		std::cout << "R : " << colour[0] << " G : " << colour[1] << " B : " << colour[2] << std::endl;
+		if (!myFont.loadFromFile(fontPath))
+		{
+			//if we can't load the font, print and error to the the console and exit
+			std::cerr << "Could not load font! \n";
+			exit(-1);
+		}
+		myText.setString(shapeText);
+		myText.setFont(myFont);
+		myText.setCharacterSize(25);
+		myText.setPosition(positionX, positionY);
+
+	}
+
+
+};
+
 int main(int argc, char* argv[])
 {
 	//create new window of size w*h pixels
@@ -58,7 +96,7 @@ int main(int argc, char* argv[])
 	int fontSize;
 	std::string fontPath;
 	//let's make a shape that we will draw to the screen
-	float circleRadius;//radius to draw the circle 50
+	float circleRadius, rectWidth,rectHeight;//radius to draw the circle 50
 	int circleSegments = 32; //number of segments to draw the circle with 32
 	float circleSpeedX;//we will use this to move the cirlce later 1.0
 	float circleSpeedY; //you will read these values from the file 0.5
@@ -68,6 +106,7 @@ int main(int argc, char* argv[])
 	float positionY;
 	float c1, c2, c3;
 	std::vector<customCircle*> shapes;
+	std::vector<customRectangle*> rectangles;
 	std::string shapeText;
 	while (fin >> temp)
 	{
@@ -91,6 +130,13 @@ int main(int argc, char* argv[])
 				" : " << circleSpeedY << " : " << circleSpeedY <<std::endl<< "RGB : " << 
 				c1 << " "<< c2 << " " <<c3 <<std::endl<< " Circle radius : " << circleRadius << std::endl;*/
 
+		}
+		else if (temp == "Rectangle")
+		{
+			fin >> shapeText >> positionX >> positionY >> circleSpeedX >> circleSpeedY >> c1 >> c2 >> c3 >> rectWidth >> rectHeight;
+			float newColour[3] = { c1,c2,c3 };
+			customRectangle* rectangle = new customRectangle(shapeText, positionX, positionY, circleSpeedX, circleSpeedY, rectWidth, rectHeight, newColour, fontPath);
+			rectangles.push_back(rectangle);
 		}
 	}
 
@@ -212,12 +258,22 @@ int main(int argc, char* argv[])
 			{
 				shape->speedX *= -1.0f;
 			}
-		}
-
-		for (customCircle* shape : shapes) {
 			window.draw(*shape);
 		}
 
+		for (customRectangle* shape : rectangles) {
+			shape->setPosition(shape->getPosition().x + shape->speedX, shape->getPosition().y + shape->speedY);
+			shape->myText.setPosition(shape->getPosition().x + shape->myWidth/2, shape->getPosition().y + shape->myHeight/2);
+			if (shape->getPosition().y + shape->myHeight  >= wHeight || shape->getPosition().y <= 0)
+			{
+				shape->speedY *= -1.0f;
+			}
+			if (shape->getPosition().x + shape->myWidth  >= wWidth || shape->getPosition().x <= 0)
+			{
+				shape->speedX *= -1.0f;
+			}
+			window.draw(*shape);
+		}
 		
 		//basic rendering function calls
 		window.clear(); //clear the window of anything previously drawn
@@ -227,12 +283,18 @@ int main(int argc, char* argv[])
 			for (sf::Shape* shape : shapes) {
 				window.draw(*shape);
 			}
+			for (sf::Shape* shape : rectangles) {
+				window.draw(*shape);
+			}
 		}
 		if (drawText) //draw the text if the boolean is true
 		{
 			window.draw(text);
 
 			for (customCircle* shape : shapes) {
+				window.draw(shape->myText);
+			}
+			for (customRectangle* shape : rectangles) {
 				window.draw(shape->myText);
 			}
 		}
