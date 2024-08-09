@@ -23,19 +23,20 @@ public:
 		
 		
 		this->setRadius(radius);
-		this->setPointCount(32);
+		this->setPointCount(64);
 		for (int i = 0; i < 3; ++i) {
 			this->colour[i] = colours[i];
 		}
 		this->setPosition(positionX, positionY);
-		this->setFillColor(sf::Color(colour[0] * 255, colour[1] * 255, colour[2] * 255));
+		this->setFillColor(sf::Color(colour[0] , colour[1] , colour[2]));
+		std::cout << shapeText << std::endl;
+		std::cout << "R : " << colour[0] << " G : " << colour[1] << " B : " << colour[2] << std::endl;
 		if (!myFont.loadFromFile(fontPath))
 		{
 			//if we can't load the font, print and error to the the console and exit
 			std::cerr << "Could not load font! \n";
 			exit(-1);
 		}
-		std::cout << shapeText << std::endl;
 		myText.setString(shapeText);
 		myText.setFont(myFont);
 		myText.setCharacterSize(25);
@@ -85,11 +86,10 @@ int main(int argc, char* argv[])
 			
 			float newColour[3] = { c1,c2,c3 };
 			customCircle* circle = new customCircle(shapeText,positionX,positionY,circleSpeedX,circleSpeedY,circleRadius,newColour,fontPath);
-			circle->setPosition(positionX, positionY); // set the top left position of the circle
-			circle->setFillColor(sf::Color(c1 * 255, c2 * 255, c3 * 255));
 			shapes.push_back(circle); 
-			std::cout << shapeText << " : " << positionX << positionY << " : " << circleSpeedX <<
-				" : " << circleSpeedY << " : " << circleSpeedY << " : " << c1 << c2 << c3 << " : " << circleRadius << std::endl;
+			/*std::cout << shapeText << " : " << positionX << positionY << " : " << circleSpeedX <<
+				" : " << circleSpeedY << " : " << circleSpeedY <<std::endl<< "RGB : " << 
+				c1 << " "<< c2 << " " <<c3 <<std::endl<< " Circle radius : " << circleRadius << std::endl;*/
 
 		}
 	}
