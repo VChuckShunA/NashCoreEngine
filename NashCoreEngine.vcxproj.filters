@@ -104,5 +104,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />
+    <Text Include="config(old).txt" />
   </ItemGroup>
 </Project>
