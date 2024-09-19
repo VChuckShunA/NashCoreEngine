@@ -4,6 +4,7 @@
 #include <string>
 
 #include <tuple>
+class EntityManager;
 
 typedef std::tuple<
 	CTransform,
@@ -75,4 +76,3 @@ public:
 		component.has = false;
 	}
 };
-

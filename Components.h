@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation.h"
 #include "Vec2.h"
 #include <SFML/Graphics.hpp>
 class Component
@@ -8,7 +9,7 @@ public:
 	bool has = false;
 };
 
-class CTransform
+class CTransform : public Component
 {
 public:
 	Vec2  prevPos = { 0.0f, 0.0f };
@@ -86,6 +87,8 @@ public:
 		, total(total)
 	{
 	}
+
+	CLifespan() {}
 };
 
 class CInput {

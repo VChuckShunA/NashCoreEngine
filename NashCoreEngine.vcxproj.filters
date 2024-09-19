@@ -145,11 +145,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="config.txt" />
     <Text Include="config(old).txt" />
     <Text Include="bin\assets.txt" />
     <Text Include="bin\config.txt" />
     <Text Include="bin\level1.txt" />
+    <Text Include="config(old2).txt" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fonts\Arial.ttf" />

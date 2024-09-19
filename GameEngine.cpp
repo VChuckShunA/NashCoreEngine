@@ -1,6 +1,6 @@
 #include "Action.h"
 #include "GameEngine.h"
-#include "Scene_Menu.h"
+#include "SceneMenu.h"
 
 #include <fstream>
 #include <SFML/Graphics.hpp>
