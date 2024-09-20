@@ -38,6 +38,8 @@ private:
 	void drawLine(const Vec2& p1, const Vec2& p2);
 	void spawnPlayer();
 
+	Vec2 gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity);
+
 public:
 	ScenePlay(GameEngine* gameEngine, const std::string& levelPath);
 };

@@ -2,6 +2,8 @@
 #include "SceneMenu.h"
 #include "ScenePlay.h"
 #include "Vec2.h"
+#include <iostream>
+#include <fstream>
 
 ScenePlay::ScenePlay(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine)
@@ -34,7 +36,27 @@ void ScenePlay::loadLevel(const std::string& levelPath)
 {
     // Reset entity manager on every new level
     m_entityManager = EntityManager();
-
+    std::ifstream fin(levelPath);
+    std::string temp;
+    while(fin>>temp)
+    {
+        if (temp == "Tile")
+        {
+            std::string tileType;
+            int tileX, tileY;
+            fin >> tileType>>tileX>>tileY; 
+            auto entity = m_entityManager.addEntity(tileType);
+            entity->addComponent<CAnimation>(
+                m_game->assets().getAnimation("Ground"),
+                true);
+            entity->addComponent<CTransform>(Vec2(tileX, tileY), Vec2(0.0f, 0.0f),
+                Vec2(4.0f, 4.0f), 0);
+            entity->addComponent<CBoundingBox>(Vec2(64, 64));
+            std::cout << tileType << std::endl;
+            std::cout << tileX << std::endl;
+            std::cout << tileY << std::endl;
+        }
+    }
     // TODO: Read level from level file
     // TODO: Read player config from player config file
 
@@ -57,6 +79,16 @@ void ScenePlay::spawnPlayer()
     entity->addComponent<CGravity>(0.75);
 
     m_player = entity;
+}
+
+Vec2 ScenePlay::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
+{
+    //TODO: this function takes in grid x,y position and and entity,
+    //  return a vec2 indicating WHERE the CENTER position of the entity should be
+    // you must be use the entity's animation size to position it correctly
+    // the size of the grid with the height is store in m_gridSize.x and m_gridSize.y
+    //  the bottom-left corner of the animation should allign with the bottom left of the grid cell
+    return Vec2(0,0);
 }
 
 void ScenePlay::update()
@@ -151,7 +183,7 @@ void ScenePlay::sMovement()
                 playerState = "jump";
             }
 
-            // When you go into a jump from running state, preserve the x direction velocity
+            // Preserve the X velocity when going from running to Jump
             playerVelocity.x = playerTransform.velocity.x;
 
             playerVelocity.y -= 15;
@@ -188,12 +220,11 @@ void ScenePlay::sMovement()
         // Gravity
         if (e->hasComponent<CGravity>())
         {
-            e->getComponent<CTransform>().velocity.y +=
-                e->getComponent<CGravity>().gravity;
+            e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+            //TODO: clamp max speed
         }
 
-        e->getComponent<CTransform>().pos +=
-            e->getComponent<CTransform>().velocity;
+        e->getComponent<CTransform>().pos += e->getComponent<CTransform>().velocity;
     }
 }
 
@@ -235,9 +266,9 @@ void ScenePlay::sCollision()
     auto& playerTransform = m_player->getComponent<CTransform>();
     auto& playerState = m_player->getComponent<CState>().state;
 
-    if (playerTransform.pos.y > 200) // collision with platform
+    if (playerTransform.pos.y > 400) // collision with platform
     {
-        playerTransform.pos.y = 200;
+        playerTransform.pos.y = 400;
         if (playerState == "jump")
         {
             playerState = "idle";
