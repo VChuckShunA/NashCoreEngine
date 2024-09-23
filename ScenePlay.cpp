@@ -83,12 +83,15 @@ void ScenePlay::spawnPlayer()
 
 Vec2 ScenePlay::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
 {
-    //TODO: this function takes in grid x,y position and and entity,
+    //TODO: this function takes in grid x,y position and and entity
     //  return a vec2 indicating WHERE the CENTER position of the entity should be
     // you must be use the entity's animation size to position it correctly
     // the size of the grid with the height is store in m_gridSize.x and m_gridSize.y
     //  the bottom-left corner of the animation should allign with the bottom left of the grid cell
-    return Vec2(0,0);
+    float x, y;
+    x = gridX + entity->getComponent<CAnimation>().animation.getSize().x / 2;
+    y = gridY - entity->getComponent<CAnimation>().animation.getSize().y / 2;
+    return Vec2(x, y);
 }
 
 void ScenePlay::update()
