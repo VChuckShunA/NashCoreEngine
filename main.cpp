@@ -5,9 +5,8 @@
 
 int main()
 {
-	//srand((unsigned)time(NULL));
-	//Game g("config.txt");
-	GameEngine g("bin/config.txt");
+	//srand((unsigned)time(NULL));;
+	GameEngine g("bin/assets.txt");
 	g.run();
 	return 0;
 }

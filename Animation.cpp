@@ -1,61 +1,49 @@
 #include "Animation.h"
 #include "Vec2.h"
 
-Animation::Animation()
-{
+Animation::Animation() = default;
+
+Animation::Animation(const std::string& name, const sf::Texture& t)
+    : Animation(name, t, 1, 0) {}
+
+Animation::Animation(std::string name, const sf::Texture& t, size_t frameCount, size_t speed)
+    : m_name(std::move(name)), m_sprite(t), m_frameCount(frameCount), m_currentFrame(0), m_speed(speed) {
+    m_size = Vec2((float)t.getSize().x / float(frameCount), (float)t.getSize().y);
+    m_sprite.setOrigin(m_size.x / 2.0f, m_size.y / 2.0f);
+    m_sprite.setTextureRect(sf::IntRect(std::floor(float(m_currentFrame) * m_size.x), 0, int(m_size.x), int(m_size.y)));
 }
 
-Animation::Animation(const std::string& name, const sf::Texture& texture)
-	: Animation(name, texture, 1, 0)
-{
+// updates the animation to show the next frame, depending on its speed
+// animation loops when it reaches the end
+void Animation::update() {
+    // add the speed variable to the current frame
+    m_currentFrame++;
+
+    // 1) calculate the correct frame of animation to play based on currentFrame and speed
+    // 2) set the texture rectangle properly (see constructor for sample)
+    size_t animationFrame = (m_currentFrame / m_speed) % m_frameCount;
+    //    std::cout << "Ivan: m_currentFrame " << m_currentFrame << "\n";
+    //    std::cout << "Ivan: m_speed " << m_speed << "\n";
+    //    std::cout << "Ivan: m_frameCount " << m_frameCount << "\n";
+    //    std::cout << "Ivan: animationFrame = (m_currentFrame / m_speed) % m_frameCount) " << animationFrame << "\n";
+    m_sprite.setTextureRect(sf::IntRect(int(animationFrame) * int(m_size.x), 0, int(m_size.x), int(m_size.y)));
 }
 
-Animation::Animation(const std::string& name, const sf::Texture& texture,
-	size_t keyframesCount, size_t duration)
-	: m_name(name)
-	, m_sprite(texture)
-	, m_keyframesCount(keyframesCount)
-	, m_currentKeyframe(0)
-	, m_duration(duration)
-{
-	m_size = Vec2(
-		(float)texture.getSize().x / keyframesCount,
-		(float)texture.getSize().y
-	);
-	m_sprite.setOrigin(m_size.x / 2.0f, m_size.y / 2.0f);
-	m_sprite.setTextureRect(
-		sf::IntRect(m_currentKeyframe * m_size.x, 0, m_size.x, m_size.y)
-	);
+bool Animation::hasEnded() const {
+    // detect when animation has ended (last frame waw played) and return true
+    // if (m_speed == 0) return true;
+    return (m_currentFrame / m_speed) % m_frameCount == m_frameCount - 1;
 }
 
-sf::Sprite& Animation::getSprite()
-{
-	return m_sprite;
+const Vec2& Animation::getSize() const {
+    return m_size;
 }
 
-void Animation::update()
-{
-	m_gameFrames++;
-	m_currentKeyframe = (m_gameFrames / m_duration) % m_keyframesCount;
-	const auto rectange = sf::IntRect(
-		m_currentKeyframe * m_size.x, 0, m_size.x, m_size.y
-	);
-	m_sprite.setTextureRect(rectange);
+const std::string& Animation::getName() const {
+    return m_name;
 }
 
-const Vec2& Animation::getSize() const
-{
-	return m_size;
+sf::Sprite& Animation::getSprite() {
+    return m_sprite;
 }
 
-const std::string& Animation::getName() const
-{
-	return m_name;
-}
-
-bool Animation::hasEnded() const
-{
-	// At least one keyframe has been played but current keyframe is still the 0th,
-	// hence it's looped around, which implies at least one loop of animation has ended
-	return (m_gameFrames > m_duration && m_currentKeyframe == 0) ? true : false;
-}

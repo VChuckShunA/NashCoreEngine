@@ -3,166 +3,88 @@
 #include "Animation.h"
 #include "Vec2.h"
 #include <SFML/Graphics.hpp>
-class Component
-{
+
+class Component {
 public:
-	bool has = false;
+    bool has = false;
 };
 
-class CTransform : public Component
-{
+class CTransform : public Component {
 public:
-	Vec2  prevPos = { 0.0f, 0.0f };
-	Vec2  pos = { 0.0f, 0.0f };
-	Vec2  velocity = { 0.0f, 0.0f };
-	Vec2  scale = { 1.0f, 1.0f };
-	float angle = 0;
+    Vec2 pos = { 0.0, 0.0 };
+    Vec2 prevPos = { 0.0, 0.0 };
+    Vec2 velocity = { 0.0, 0.0 };
+    Vec2 scale = { 1.0, 1.0 };
+    float angle = 0;
 
-	CTransform(const Vec2 & p,const Vec2 & v, float a)
-		: pos(p), velocity(v),	angle(a) {}
+    CTransform() = default;
 
-	CTransform()
-	{
-	}
+    explicit CTransform(const Vec2& p) : pos(p) {}
 
-	CTransform(const Vec2& p)
-		: pos(p)
-	{
-	}
-
-	CTransform(const Vec2& _pos, const Vec2& _velocity, const Vec2& _scale,
-		float _angle)
-		: pos(_pos)
-		, prevPos(_pos)
-		, velocity(_velocity)
-		, scale(_scale)
-		, angle(_angle)
-	{
-	}
+    CTransform(const Vec2& p, const Vec2& speed, const Vec2& s, float a)
+        : pos(p), prevPos(p), velocity(speed), scale(s), angle(a) {}
 };
 
-class CShape
-{
+class CLifespan : public Component {
 public:
-	sf::CircleShape circle;
-	CShape(float radius, int points, const sf::Color& fill,
-		const sf::Color& outline, float thickness)
-		: circle(radius, points)
-	{
-		circle.setFillColor(fill);
-		circle.setOutlineColor(outline);
-		circle.setOutlineThickness(thickness);
-		circle.setOrigin(radius, radius);
-	}
+    int lifespan = 0;
+    int frameCreated = 0;
 
+    CLifespan() = default;
+
+    explicit CLifespan(int duration, int frame)
+        : lifespan(duration), frameCreated(frame) {}
 };
 
-class CCollision {
+class CInput : public Component {
 public:
-	float collisionRadius = 0;
+    bool up = false;
+    bool down = false;
+    bool left = false;
+    bool right = false;
+    bool shoot = false;
+    bool canShoot = true;
+    bool canJump = true;
 
-	CCollision(float r)
-		: collisionRadius(r)
-	{
-	}
+    CInput() = default;
 };
 
-class CScore {
+class CBoundingBox : public Component {
 public:
-	int score = 0;
+    Vec2 size;
+    Vec2 halfSize;
 
-	CScore(int s)
-		: score(s)
-	{
-	}
+    CBoundingBox() = default;
+
+    explicit CBoundingBox(const Vec2& s) : size(s), halfSize(s.x / 2.0f, s.y / 2.0f) {}
 };
 
-class CLifespan {
+class CAnimation : public Component {
 public:
-	int remaining = 0;  // amount of lifespan remaining on the entity
-	int total = 0;	    // the total initial amount of lifespan
+    Animation animation;
+    bool repeat = false;
 
-	CLifespan(int total)
-		: remaining(total)
-		, total(total)
-	{
-	}
+    CAnimation() = default;
 
-	CLifespan() {}
+    CAnimation(Animation a, bool r) : animation(std::move(a)), repeat(r) {}
 };
 
-class CInput {
+class CGravity : public Component {
 public:
-	bool up = false;
-	bool down = false;
-	bool left = false;
-	bool right = false;
-	bool shoot = false;
-	bool canShoot = true;
-	bool canJump = true;
+    float gravity = 0;
 
-	CInput()
-	{
-	}
+    CGravity() = default;
+
+    explicit CGravity(float g) : gravity(g) {}
 };
 
-class CAnimation : public Component
-{
+class CState : public Component {
 public:
-	Animation animation;
-	bool repeat = false;
+    std::string state = "jumping";
+    std::string previousState = "jumping";
+    bool changeAnimation = false;
 
-	CAnimation()
-	{
-	}
+    CState() = default;
 
-	CAnimation(const Animation& _animation, bool _repeat)
-		: animation(_animation)
-		, repeat(_repeat)
-	{
-	}
-};
-
-class CGravity : public Component
-{
-public:
-	float gravity = 0;
-
-	CGravity()
-	{
-	}
-
-	CGravity(float g)
-		: gravity(g)
-	{
-	}
-};
-
-class CState : public Component
-{
-public:
-	std::string state = "None";
-	CState()
-	{
-	}
-
-	CState(const std::string& _state)
-		: state(_state)
-	{
-	}
-};
-
-class CBoundingBox : public Component
-{
-public:
-	Vec2 size;
-	Vec2 halfSize;
-	CBoundingBox()
-	{
-	}
-
-	CBoundingBox(const Vec2& _size)
-		: size(_size), halfSize(_size.x / 2.0f, _size.y / 2.0f)
-	{
-	}
+    explicit CState(std::string s) : state(std::move(s)) {}
 };

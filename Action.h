@@ -2,16 +2,17 @@
 
 #include <string>
 
-class Action
-{
-private:
-	std::string m_name = "NONE"; // Ex: "SHOOT", "JUMP", "RIGHT"
-	std::string m_type = "NONE"; // "START" or "END"
-
+class Action {
 public:
-	Action();
-	Action(const std::string& name, const std::string& type);
+    Action();
 
-	const std::string& name() const;
-	const std::string& type() const;
+    Action(std::string name, std::string type);
+
+    [[nodiscard]] const std::string& name() const;
+
+    [[nodiscard]] const std::string& type() const;
+
+private:
+    std::string m_name;
+    std::string m_type;
 };
