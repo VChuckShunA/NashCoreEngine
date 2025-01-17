@@ -26,5 +26,8 @@ public:
 
     const Vec2& getSize() const;
 
+
+    void setSize(Vec2 size);
+
     sf::Sprite& getSprite();
 };

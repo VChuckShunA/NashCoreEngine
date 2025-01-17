@@ -43,6 +43,12 @@ const std::string& Animation::getName() const {
     return m_name;
 }
 
+void Animation::setSize(Vec2 size)
+{
+    // TODO: insert return statement here
+    m_size = (m_size , size);
+}
+
 sf::Sprite& Animation::getSprite() {
     return m_sprite;
 }

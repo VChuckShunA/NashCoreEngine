@@ -44,6 +44,38 @@ void Scene_Play::loadLevel(const std::string& fileName) {
         std::cerr << "Scene_Play::loadLevel could not load " << fileName << " file.\n";
         exit(-1);
     }
+    //Implement WFC here
+    std::cout << "Start WFC" << std::endl;
+
+    std::cout << &grid << std::endl;
+    ImplementWFC(grid);
+   /* for (int x = 0; x < 20; x++) {
+        for (int y = 0; y < 12; y++) {
+            if ((x % 2 == 0) &&  (y % 2 != 1))
+            {
+                auto dec = m_entityManager.addEntity("dec");
+                dec->addComponent<CAnimation>(m_game->assets().getAnimation("Bridge"), true);
+                grid[x][y].collapsed = true;
+                dec->getComponent<CAnimation>().animation.setSize(Vec2(64, 64));
+                dec->addComponent<CTransform>(
+                    gridToMidPixel(x-0.39, y+0.39, dec),
+                    Vec2(0, 0),
+                    Vec2(1, 1),
+                    0
+                );
+            }
+
+        }
+    }*/
+
+    //// Iterate through the 2D array
+    //for (int row = 0; row < 20; ++row) {
+    //    for (int col = 0; col < 12; ++col) {
+    //       std:: cout <<"Grid "<<row <<" , " <<col <<" = " << grid[row][col].collapsed <<std::endl;
+    //    }
+    //}
+
+    std::cout << "End WFC" << std::endl;
 
     std::string entityType;
     while (file >> entityType) {
@@ -93,6 +125,8 @@ void Scene_Play::loadLevel(const std::string& fileName) {
             std::cerr << "Unknown entity type " << entityType << "\n";
             // exit(-1);
         }
+
+        
     }
 
     // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
@@ -109,6 +143,338 @@ void Scene_Play::loadLevel(const std::string& fileName) {
     //       auto& transform2 = entity->get<CTransform>()
 }
 
+void Scene_Play::ImplementWFC(TileState(&grid)[20][12]){
+    // Seed for randomness
+    std::srand(std::time(nullptr));
+
+    std::cout << &grid << std::endl;
+    // Generate a random number from the TileType enum
+    int randomTile = std::rand() % 14; // 14 because the enum has 14 values (0-13)
+
+    // Generate a random position on the grid
+    int randomRow = std::rand() % 20;  // 20 rows
+    int randomCol = std::rand() % 12;  // 12 columns
+
+    // Output results
+    std::cout << "Random Tile: " << randomTile << std::endl;
+    std::cout << "Random Position: (" << randomRow << ", " << randomCol << ")" << std::endl;
+
+    
+    RenderTile(&randomTile, &randomRow, &randomCol);
+    
+
+    UpdateRuleSet(&grid[randomRow][randomCol], randomRow, randomCol);
+    Collapse(randomRow, randomCol);
+}
+
+void Scene_Play::Collapse(int currentX,int currentY)
+{
+     int randomIndex;
+     int selectedTile;
+     int possibleTileSize;
+     int newX, newY;
+    for (int x = 1; x < 19; x++) 
+    {
+        for (int y = 1; y < 12; y++) 
+        {
+            if (!grid[currentX][currentY + y].collapsed)
+            {
+                
+                if ((currentY + y) <= 12)
+                {
+                    for (int tile : grid[currentX][currentY + y].possibleTiles)
+                    {
+                        std::cout << currentX << " , " << currentY + y << " : " << tile << std::endl;
+                    }
+                    if (!grid[currentX][currentY + y].possibleTiles.empty()) {
+                        possibleTileSize = grid[currentX][currentY + y].possibleTiles.size();
+                        std::cout << "Possible Tiles Size : " << possibleTileSize << std::endl;
+
+
+                        std::srand(std::time(nullptr));
+                        randomIndex = std::rand() % possibleTileSize;
+                        selectedTile = grid[currentX][currentY + y].possibleTiles[randomIndex];
+                        newX = currentX;
+                        newY = currentY + y;
+                        RenderTile(&selectedTile, &newX, &newY);
+                        grid[currentX][currentY + y].collapsed = true;
+                    }
+                }
+
+            }
+            if (!grid[currentX][currentY-y].collapsed)
+            {
+                
+                if ((currentY - y) >= 0)
+                {
+                    for (int tile : grid[currentX][currentY - y].possibleTiles)
+                    {
+                        std::cout << currentX << " , " << currentY - y << " : " << tile << std::endl;
+                    }
+                    if (!grid[currentX][currentY - y].possibleTiles.empty()) {
+                        possibleTileSize = grid[currentX][currentY - y].possibleTiles.size();
+                        std::cout << "Possible Tiles Size : " << possibleTileSize << std::endl;
+
+
+                        std::srand(std::time(nullptr));
+                        randomIndex = std::rand() % possibleTileSize;
+                        selectedTile = grid[currentX][currentY - y].possibleTiles[randomIndex];
+                        newX = currentX;
+                        newY = currentY - y;
+                        RenderTile(&selectedTile, &newX, &newY);
+                        grid[currentX][currentY - y].collapsed = true;
+                    }
+                }
+
+                
+             
+            }
+            if (!grid[currentX+ x][currentY].collapsed)
+            {
+                
+                std::cout<< "x: " << currentX +x << " , y: " << currentY<<std::endl;
+                if ((currentX + x)<=19)
+                {
+                    for (int tile : grid[currentX + x][currentY].possibleTiles)
+                    {
+                        std::cout << currentX + x << " , " << currentY << " : " << tile << std::endl;
+                    }
+                    if (!grid[currentX + x][currentY].possibleTiles.empty()) {
+                        possibleTileSize = grid[currentX + x][currentY].possibleTiles.size();
+                        std::cout << "Possible Tiles Size : " << possibleTileSize << std::endl;
+
+
+                        std::srand(std::time(nullptr));
+                        randomIndex = std::rand() % possibleTileSize;
+                        selectedTile = grid[currentX + x][currentY].possibleTiles[randomIndex];
+                        newX = currentX + x;
+                        newY = currentY;
+                        RenderTile(&selectedTile, &newX, &newY);
+                        grid[currentX + x][currentY].collapsed = true;
+                    }
+                }
+               
+
+            }
+            if (!grid[currentX - x][currentY].collapsed)
+            {
+                if ((currentX - x) > 0)
+                {
+                    for (int tile : grid[currentX - x][currentY].possibleTiles)
+                    {
+                        std::cout << currentX - x << " , " << currentY << " : " << tile << std::endl;
+                    }
+                    if (!grid[currentX - x][currentY].possibleTiles.empty()) {
+                        possibleTileSize = grid[currentX - x][currentY].possibleTiles.size();
+                        std::cout << "Possible Tiles Size : " << possibleTileSize << std::endl;
+
+
+                        std::srand(std::time(nullptr));
+                        randomIndex = std::rand() % possibleTileSize;
+                        selectedTile = grid[currentX - x][currentY].possibleTiles[randomIndex];
+                        newX = currentX - x;
+                        newY = currentY;
+                        RenderTile(&selectedTile, &newX, &newY);
+                        grid[currentX + x][currentY].collapsed = true;
+                    }
+                }
+
+               
+
+            }
+        }
+    }
+}
+
+void Scene_Play::UpdateRuleSet(TileState* cell,int x ,int y)
+{ 
+    int left = x - 1;
+    int right = x + 1;
+    int up = y - 1;
+    int down = y+1;
+    std::vector<TileType> leftRules, rightRules, upRules, downRules;
+    //extract rules
+    if (adjacencyRules.find(static_cast<TileType>(cell->currentTile)) != adjacencyRules.end()) {
+        const auto& rules = adjacencyRules[static_cast<TileType>(cell->currentTile)];
+
+        // Iterate over the directions and print them
+        for (const auto& [direction, tileList] : rules) {
+            std::cout << direction << ": ";
+            for (const auto& tile : tileList) {
+                std::cout << tile << " "; // Prints the TileType enum as int
+            }
+            std::cout << std::endl;
+            
+            if (direction == "up")
+            {
+                upRules = tileList;
+            }
+            else if (direction == "down")
+            {
+                downRules = tileList;
+            }
+            else if (direction == "left")
+            {
+                leftRules = tileList;
+            }
+            else if (direction == "right")
+            {
+                rightRules = tileList;
+            }
+        }
+    }
+    else {
+        std::cout << "No rules found for this TileType." << std::endl;
+    }
+    std::cout << "Extracted Left Rules: ";
+    for (auto rule : leftRules) {
+        std::cout << rule << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "Extracted Right Rules: ";
+    for (auto rule : rightRules) {
+        std::cout << rule << " ";
+    }
+    std::cout << std::endl;
+
+    //Update possible tiles
+    if (x >= 0 && x < 20 && y >= 0 && y < 12) // Ensure bounds are valid
+    {
+        //Up tiles
+        if (!grid[x][up].collapsed)
+        {
+            grid[x][up].possibleTiles.insert(
+                grid[x][up].possibleTiles.end(),
+                upRules.begin(),
+                upRules.end()
+            );
+
+            std::cout << "Up Rules: ";
+            for (int rule : grid[x][up].possibleTiles) {
+                std::cout << rule << " , ";
+            }
+        }
+        //Right tiles
+        if (!grid[right][y].collapsed)
+        {
+            
+            grid[right][y].possibleTiles.insert(
+                grid[right][y].possibleTiles.end(),
+                rightRules.begin(),
+                rightRules.end()
+            );
+            std::cout << std::endl;
+
+            std::cout << "Right Rules: ";
+            for (int rule : grid[right][y].possibleTiles) {
+                std::cout << rule << " , ";
+            }
+        }
+
+        //Down tiles
+        if (!grid[x][down].collapsed)
+        {
+
+            grid[x][down].possibleTiles.insert(
+                grid[x][down].possibleTiles.end(),
+                downRules.begin(),
+                downRules.end()
+            );
+            std::cout << std::endl;
+
+            std::cout << "Down Rules: ";
+            for (int rule : grid[x][down].possibleTiles) {
+                std::cout << rule << " , ";
+            }
+        }
+
+        //Left tiles
+        if (!grid[left][y].collapsed)
+        {
+
+            grid[left][y].possibleTiles.insert(
+                grid[left][y].possibleTiles.end(),
+                leftRules.begin(),
+                leftRules.end()
+            );
+            std::cout << std::endl;
+
+            std::cout << "Left Rules: ";
+            for (int rule : grid[left][y].possibleTiles) {
+                std::cout << rule << " , ";
+            }
+        }
+    }
+    else
+    {
+        std::cerr << "Error: Right or y index out of bounds!" << std::endl;
+    }
+}
+
+void Scene_Play::RenderTile(int* tileID,int* randomRow, int* randomCol)
+{
+    auto dec = m_entityManager.addEntity("dec");
+    switch (*tileID)
+    {
+    case BRIDGE:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Bridge"), true);
+        break;
+    case COMPONENT:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Component"), true);
+        break;
+    case CONNECTION:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Connection"), true);
+        break;
+    case CORNER:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Corner"), true);
+        break;
+    case DSKEW:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("DSkew"), true);
+        break;
+    case SKEW:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Skew"), true);
+        break;
+    case SUBSTRATE:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Substrate"), true);
+        break;
+    case T:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("T"), true);
+        break;
+    case TRACK:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Track"), true);
+        break;
+    case TRANSITION:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Transition"), true);
+        break;
+    case TURN:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Turn"), true);
+        break;
+    case VIAD:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("ViaD"), true);
+        break;
+    case VIAS:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("ViaS"), true);
+        break;
+    case WIRE:
+        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Wire"), true);
+        break;
+    }
+
+    grid[*randomRow][*randomCol].collapsed = true;
+    grid[*randomRow][*randomCol].currentTile = *tileID;
+   // dec->getComponent<CAnimation>().animation.setSize(Vec2(64, 64));
+    dec->addComponent<CTransform>(
+        gridToMidPixel(*randomRow, *randomCol, dec),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    std::cout << "Rendered tile " << *tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
+}
+
+
+
 Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<Entity>& entity) {
     // This function takes in a grid (x,y) position and an Entity
     // Return a vec2 indicating where the CENTER position of the Entity should be
@@ -118,7 +484,6 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
 
     auto entitySize = entity->getComponent<CAnimation>().animation.getSize();
     // vec2 offset = m_gridSize - entitySize;
-
     return {
             gridX * m_gridSize.x + entitySize.x / 2.0f,
             height() - gridY * m_gridSize.y - entitySize.y / 2.0f
