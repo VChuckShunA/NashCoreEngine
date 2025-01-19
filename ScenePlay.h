@@ -181,7 +181,8 @@ public:
     void RenderTile(int *tileID, int *randRow, int* randCol);
 
     void Collapse(int currentX, int currentY);
-
+    void SpiralTraverse(TileState(&grid)[20][12]);
+    void UpdateCommonElements(int x, int y, std::vector<TileType>* rulesToCompare);
     std::string enumToString(int tile)
     {
         return circuitToString[tile];
