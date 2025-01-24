@@ -533,12 +533,7 @@ void Scene_Play::UpdateRuleSet(TileState* cell,int x ,int y)
 
         // Iterate over the directions and print them
         for (const auto& [direction, tileList] : rules) {
-            //std::cout << direction << ": ";
-            //for (const auto& tile : tileList) {
-            //    std::cout << tile << " "; // Prints the TileType enum as int
-            //}
-            //std::cout << std::endl;
-            //
+           
             if (direction == "up")
             {
                 upRules = tileList;
@@ -574,12 +569,6 @@ void Scene_Play::UpdateRuleSet(TileState* cell,int x ,int y)
                     upRules.begin(),
                     upRules.end()
                 );
-                /* std::cout << "No existing rules were found, and new Up rules were added." << std::endl;
-                 std::cout << "Up Rules: ";
-                */ /*for (int rule : grid[x][up].possibleTiles) {
-                     std::cout << rule << " , ";
-                 }
-                 std::cout<< std::endl;*/
             }
             else if (!grid[x][up].possibleTiles.empty())
             {
@@ -598,13 +587,6 @@ void Scene_Play::UpdateRuleSet(TileState* cell,int x ,int y)
                     rightRules.begin(),
                     rightRules.end()
                 );
-
-                /* std::cout << "No existing rules were found, and new Right rules were added." << std::endl;
-                 std::cout << "Right Rules: ";*/
-                 /*for (int rule : grid[right][y].possibleTiles) {
-                     std::cout << rule << " , ";
-                 }
-                 std::cout << std::endl;*/
             }
             else if (!grid[right][y].possibleTiles.empty())
             {
@@ -623,12 +605,6 @@ void Scene_Play::UpdateRuleSet(TileState* cell,int x ,int y)
                     downRules.begin(),
                     downRules.end()
                 );
-                /*std::cout << "No existing rules were found, and new Down rules were added." << std::endl;
-                std::cout << "Down Rules: ";
-                for (int rule : grid[x][down].possibleTiles) {
-                    std::cout << rule << " , ";
-                }
-                std::cout << std::endl;*/
             }
             else if (!grid[x][down].possibleTiles.empty())
             {
@@ -646,13 +622,7 @@ void Scene_Play::UpdateRuleSet(TileState* cell,int x ,int y)
                     grid[left][y].possibleTiles.end(),
                     leftRules.begin(),
                     leftRules.end()
-                );/*
-                std::cout << "No existing rules were found, and new Left rules were added." << std::endl;
-                std::cout << "Left Rules: ";
-                for (int rule : grid[left][y].possibleTiles) {
-                    std::cout << rule << " , ";
-                }
-                std::cout << std::endl;*/
+                );
             }
             else if (!grid[left][y].possibleTiles.empty())
             {

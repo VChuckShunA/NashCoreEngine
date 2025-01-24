@@ -69,6 +69,13 @@ public:
         BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE
     }tiles;
 
+    struct TileSockets {
+        int up[3];
+        int down[3];
+        int left[3];
+        int right[3];
+    };
+
     std::map<int, std::string> circuitToString = { 
         { BRIDGE, "BRIDGE" },
         { COMPONENT, "COMPONENT" },
@@ -86,91 +93,20 @@ public:
         { WIRE, "WIRE" }
     };
 
-    std::unordered_map<TileType, std::unordered_map<std::string, std::vector<TileType>>> adjacencyRules = {
-     {BRIDGE, {
-        {"down", {T, TRACK}},
-        {"up", {TRACK, TURN,CONNECTION,SKEW,DSKEW}},
-        {"left", { WIRE}},
-        {"right", { WIRE}}
+    std::unordered_map<TileType, std::unordered_map<std::array<int, 3>, std::vector<TileType>>> adjacencyRules = {
+    {BRIDGE, {
+        {{1, 2, 3}, {T, TRACK}},  // Down socket
+        {{3, 2, 1}, {TRACK, TURN, CONNECTION, SKEW, DSKEW}},  // Up socket
+        {{2, 2, 2}, {WIRE}},  // Left socket
+        {{2, 2, 2}, {WIRE}}   // Right socket
     }},
     {COMPONENT, {
-        {"down", {COMPONENT,BRIDGE, CONNECTION,SUBSTRATE,T,TRACK,TRANSITION}},
-        {"up", {COMPONENT,CONNECTION,SUBSTRATE,T,TRACK,TRANSITION}},
-        {"left", {COMPONENT,BRIDGE,WIRE,SUBSTRATE,T,VIAD}},
-        {"right", {COMPONENT,BRIDGE,WIRE,SUBSTRATE,T,VIAD}}
-    }},
-    {CONNECTION, {
-        {"down", {T, TRACK,TRANSITION,BRIDGE}},
-        {"up", {COMPONENT}},
-        {"left", {SUBSTRATE}},
-        {"right", {SUBSTRATE, CORNER}}
-    }},
-    {CORNER, {
-        {"down", {SUBSTRATE,SKEW,TURN,VIAD,VIAS,WIRE}},
-        {"up", {SUBSTRATE}},
-        {"left", {SUBSTRATE,TURN,CONNECTION}},
-        {"right", {SUBSTRATE,TURN,VIAD,VIAS}}
-    }},
-    {DSKEW, {
-        {"down", { BRIDGE,T,TRACK,TRANSITION}},
-        {"up", {BRIDGE,TRACK,TURN,VIAS}},
-        {"left", {T,TURN,SKEW}},
-        {"right", {T}}
-    }},
-    {SKEW, {
-        {"down", {DSKEW,T,TRACK,TRANSITION}},
-        {"up", {CORNER,SUBSTRATE,T,WIRE}},
-        {"left", {COMPONENT,SUBSTRATE,TRACK,TRANSITION}},
-        {"right", {T,VIAD}}
-    }},
-    {SUBSTRATE, {
-        {"down", {SUBSTRATE,SKEW,TURN,WIRE}},
-        {"up", {SUBSTRATE,CORNER,T,WIRE}},
-        {"left", {SUBSTRATE,CORNER}},
-        {"right", {SUBSTRATE,TRACK,TURN}}
-    }},
-    {T, {
-        {"down", {SKEW,SUBSTRATE,TURN,VIAD,VIAS,WIRE}},
-        {"up", {TRACK,TURN,BRIDGE,SKEW,DSKEW,VIAS}},
-        {"left", {SKEW,DSKEW,TURN,VIAD}},
-        {"right", {DSKEW,VIAD}}
-    }},
-    {TRACK, {
-        {"down", {TRACK, BRIDGE,DSKEW,TRANSITION}},
-        {"up", {TRACK, BRIDGE,SKEW,DSKEW,TURN,CONNECTION,BRIDGE,VIAS}},
-        {"left", {TRACK,SUBSTRATE,CORNER}},
-        {"right", {TRACK,SUBSTRATE,TRACK,TURN}}
-    }},
-    {TRANSITION, {
-        {"down", {BRIDGE,DSKEW,T,TRACK}},
-        {"up", {BRIDGE,DSKEW,TURN,TRACK}},
-        {"left", {SUBSTRATE,TRACK,CORNER}},
-        {"right", {SUBSTRATE,SKEW,TURN}}
-    }},
-    {TURN, {
-        {"down", {BRIDGE,DSKEW,T,TRACK,TRANSITION}},
-        {"up", {CORNER,SUBSTRATE,T,WIRE}},
-        {"left", {TRACK,SUBSTRATE,CORNER}},
-        {"right", {DSKEW,VIAD,T}}
-    }},
-    {VIAD, {
-        {"down", {WIRE,TURN,SUBSTRATE,SKEW}},
-        {"up", {WIRE,SUBSTRATE,CORNER}},
-        {"left", {TURN,T,SKEW,DSKEW,VIAD,WIRE}},
-        {"right", {DSKEW,BRIDGE,T,VIAD,WIRE}}
-    }},
-    {VIAS, {
-        {"down", {TRACK,TRANSITION,T,DSKEW,BRIDGE}},
-        {"up", {CORNER,SUBSTRATE,T,WIRE}},
-        {"left", {TRACK,SUBSTRATE,CORNER}},
-        {"right", {TURN,TRACK,SUBSTRATE,SKEW}}
-    }},
-    {WIRE, {
-        {"down", {SUBSTRATE,SKEW,TURN}},
-        {"up", {CORNER,SUBSTRATE,T}},
-        {"left", {WIRE,BRIDGE,SKEW,DSKEW,T,TURN,VIAD}},
-        {"right", {WIRE,BRIDGE,DSKEW,T,VIAD}}
+        {{1, 1, 1}, {COMPONENT, BRIDGE, CONNECTION, SUBSTRATE, T, TRACK, TRANSITION}},
+        {{2, 2, 2}, {COMPONENT, CONNECTION, SUBSTRATE, T, TRACK, TRANSITION}},
+        {{3, 3, 3}, {COMPONENT, BRIDGE, WIRE, SUBSTRATE, T, VIAD}},
+        {{4, 4, 4}, {COMPONENT, BRIDGE, WIRE, SUBSTRATE, T, VIAD}}
     }}
+        // Add other tiles here...
     };
 
 
