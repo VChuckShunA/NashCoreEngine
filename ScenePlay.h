@@ -182,6 +182,9 @@ public:
 
     void Collapse(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
+    bool withinBounds(int x, int y) {
+        return x >= 0 && x < 20 && y >= 0 && y < 12;
+    }
     void UpdateCommonElements(int x, int y, std::vector<TileType>* rulesToCompare);
     std::string enumToString(int tile)
     {
