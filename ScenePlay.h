@@ -99,9 +99,9 @@ public:
     std::unordered_map<TileType, std::unordered_map<std::string, std::array<int, 3>>> adjacencyRules = {
         { BRIDGE, {
             { "up",   {1, 2, 1} },
-            { "down", {3, 2, 1} },
+            { "down", {1, 2, 1} },
             { "left", {1, 3, 1} },
-            { "right",{2, 3, 1} }
+            { "right",{1, 3, 1} }
         }},
         { COMPONENT, {
             { "up",   {0, 0, 0} },
@@ -200,7 +200,7 @@ public:
     {
         return circuitToString[tile];
     }
-
+    void RotateTile(TileType& tileID, int x, int y);
     std::string arrayToString(const std::array<int, 3>& arr);
     std::array<int, 3> extractRules(TileType tile, const std::string& direction);
 };

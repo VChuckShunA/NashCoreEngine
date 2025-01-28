@@ -200,7 +200,10 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     int x = startRow;    // Current row
     int y = startCol;    // Current column
 
-    std::cout << "Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
+    std::cout << "Up Rules " << arrayToString(grid[x][y].sockets.up) << std::endl;
+    std::cout << "Down Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
+    std::cout << "Left Rules " << arrayToString(grid[x][y].sockets.left) << std::endl;
+    std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
     // Traverse the grid
      /*
     while (layer <= std::max(N, M)) {
@@ -240,6 +243,31 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
         }
     }
     */
+}
+
+void Scene_Play::RotateTile( TileType& tileID, int x, int y)
+{
+    std::array<int, 3> upRules = adjacencyRules.at(tileID).at("up");
+    std::array<int, 3> downRules = adjacencyRules.at(tileID).at("down");
+    std::array<int, 3> leftRules = adjacencyRules.at(tileID).at("left");
+    std::array<int, 3> RightRules = adjacencyRules.at(tileID).at("right");
+    std::array<int, 3> tempRules = { NULL,NULL,NULL };
+    
+    tempRules = upRules;
+    reverse(leftRules.begin(), leftRules.end());
+    upRules= leftRules;
+    leftRules = downRules;
+    reverse(RightRules.begin(), RightRules.end());
+    downRules = RightRules;
+    RightRules = tempRules;
+
+    grid[x][y].sockets.up = upRules;
+    grid[x][y].sockets.down = downRules;
+    grid[x][y].sockets.left = leftRules;
+    grid[x][y].sockets.right = RightRules;
+
+   // tile.getComponent<CTransform>().angle = 45;
+
 }
 
 std::string Scene_Play::arrayToString(const std::array<int, 3>& arr)
@@ -339,6 +367,8 @@ void Scene_Play::RenderTile(int* tileID,int* randomRow, int* randomCol)
         Vec2(1, 1),
         0
     );
+    RotateTile(tile, *randomRow, *randomCol);
+    dec->getComponent<CTransform>().angle = 90;
     std::cout << "Rendered tile " << *tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
 }
 
