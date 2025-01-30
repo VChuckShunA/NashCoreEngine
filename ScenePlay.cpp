@@ -264,8 +264,8 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     int startCol = std::rand() % M;
     int randomTile = std::rand() % 14; // 14 because the enum has 14 values (0-13)
     std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
-
-    RenderTile(&randomTile, &startRow, &startCol);
+    int tileSelected = 2;
+    RenderTile(&tileSelected, &startRow, &startCol);
 
     // Direction vectors for movement (dx, dy)
     int directions[4][2] = {
