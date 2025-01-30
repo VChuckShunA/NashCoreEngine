@@ -195,6 +195,9 @@ public:
     bool withinBounds(int x, int y) {
         return x >= 0 && x < 20 && y >= 0 && y < 12;
     }
+    //utils
+    bool matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck);
+    std::vector<TileType> selectValidTiles(const std::unordered_map<std::string, std::array<int, 3>>& rulesToCheck);
     void UpdateCommonElements(int x, int y, std::vector<TileType>* rulesToCompare);
     std::string enumToString(int tile)
     {

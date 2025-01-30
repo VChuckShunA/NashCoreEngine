@@ -159,12 +159,95 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12]){
     //UpdateRuleSet(&grid[randomRow][randomCol], randomRow, randomCol);
     //Collapse(randomRow, randomCol);
 }
+std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unordered_map<std::string, std::array<int, 3>>& rulesToCheck)
+{
+    std::vector<TileType> validTiles;
+
+    for (const auto& [tile, rules] : adjacencyRules) {
+        bool matches = true;
+
+        for (const auto& [_, ruleArray] : rulesToCheck) {  // Iterate over rulesToCheck
+            if (ruleArray == std::array<int, 3>{NULL, NULL, NULL}) {
+                continue;  // Skip null rules
+            }
+
+            bool foundMatch = false;
+            for (const auto& [dir, tileRuleArray] : rules) {  // Iterate over the tile's adjacency rules
+                if (matchesRules(tileRuleArray, ruleArray)) {
+                    foundMatch = true;
+                    break;  // Stop searching once a match is found
+                }
+            }
+
+            if (!foundMatch) {
+                matches = false;
+                break;  // If one rule fails, no need to check further
+            }
+        }
+
+        if (matches) {
+            validTiles.push_back(tile);
+        }
+    }
+    return validTiles;
+}
 
 void Scene_Play::Collapse(int currentX,int currentY)
 {
      int selectedTile;
-     int newX, newY;
-     
+
+     std::array<int, 3> upRulesToCheck = { NULL,NULL,NULL };
+     std::array<int, 3> downRulesToCheck = { NULL,NULL,NULL };
+     std::array<int, 3> leftRulesToCheck = { NULL,NULL,NULL };
+     std::array<int, 3> rightRulesToCheck = { NULL,NULL,NULL };
+     if (grid[currentX - 1][currentY].collapsed)
+     {
+         leftRulesToCheck = grid[currentX - 1][currentY].sockets.right;
+     }
+
+     if (grid[currentX + 1][currentY].collapsed)
+     {
+         rightRulesToCheck = grid[currentX + 1][currentY].sockets.left;
+     }
+
+     if (grid[currentX][currentY-1].collapsed)
+     {
+         downRulesToCheck = grid[currentX][currentY-1].sockets.up;
+     }
+
+     if (grid[currentX][currentY+1].collapsed)
+     {
+         upRulesToCheck = grid[currentX][currentY+1].sockets.down;
+     }
+     std::unordered_map<std::string, std::array<int, 3>> rulesToCheck = {
+    { "up", upRulesToCheck },
+    { "down", downRulesToCheck },
+    { "left", leftRulesToCheck },
+    { "right", rightRulesToCheck }
+     };
+
+     std::vector<TileType> selectedTiles = selectValidTiles(rulesToCheck);
+
+     std::for_each(selectedTiles.begin(), selectedTiles.end(), [](TileType tile) {
+         std::cout << "Valid Tile: " << tile << std::endl;
+        /* switch (tile) {
+         case BRIDGE: std::cout << "BRIDGE" << std::endl;
+         case COMPONENT: std::cout << "COMPONENT" << std::endl;
+         case CONNECTION: std::cout << "CONNECTION" << std::endl;
+         case CORNER: std::cout << "CORNER" << std::endl;
+         case DSKEW: std::cout << "DSKEW" << std::endl;
+         case SKEW: std::cout << "SKEW" << std::endl;
+         case SUBSTRATE: std::cout << "SUBSTRATE" << std::endl;
+         case T: std::cout << "T" << std::endl;
+         case TRACK: std::cout << "TRACK" << std::endl;
+         case TRANSITION: std::cout << "TRANSITION" << std::endl;
+         case TURN: std::cout << "TURN" << std::endl;
+         case VIAD: std::cout << "VIAD" << std::endl;
+         case VIAS: std::cout << "VIAS" << std::endl;
+         case WIRE: std::cout << "WIRE" << std::endl;
+         default: std::cout << "UNKNOWN";
+         }*/
+     });
    
 }
 
@@ -204,6 +287,7 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     std::cout << "Down Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
     std::cout << "Left Rules " << arrayToString(grid[x][y].sockets.left) << std::endl;
     std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
+    Collapse(x, y+1);
     // Traverse the grid
      /*
     while (layer <= std::max(N, M)) {
@@ -244,6 +328,18 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     }
     */
 }
+
+bool Scene_Play::matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck)
+{
+    for (size_t i = 0; i < 3; i++) {
+        if (toCheck[i] != NULL && candidate[i] != toCheck[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 
 void Scene_Play::RotateTile( TileType& tileID, int x, int y)
 {
@@ -367,8 +463,8 @@ void Scene_Play::RenderTile(int* tileID,int* randomRow, int* randomCol)
         Vec2(1, 1),
         0
     );
-    RotateTile(tile, *randomRow, *randomCol);
-    dec->getComponent<CTransform>().angle = 90;
+    //RotateTile(tile, *randomRow, *randomCol);
+    //dec->getComponent<CTransform>().angle = 90;
     std::cout << "Rendered tile " << *tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
 }
 
