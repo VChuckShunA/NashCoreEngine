@@ -188,7 +188,7 @@ public:
     void ImplementWFC(TileState(&grid)[20][12]);
 
 
-    void RenderTile(int *tileID, int *randRow, int* randCol);
+    void RenderTile(int *tileID, int *randRow, int* randCol, int rotationCount=0);
 
     void Collapse(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
@@ -203,7 +203,7 @@ public:
     {
         return circuitToString[tile];
     }
-    void RotateTile(TileType& tileID, int x, int y);
+    void RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules);
     std::string arrayToString(const std::array<int, 3>& arr);
     std::array<int, 3> extractRules(TileType tile, const std::string& direction);
 };
