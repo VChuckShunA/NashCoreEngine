@@ -188,7 +188,7 @@ public:
     void ImplementWFC(TileState(&grid)[20][12]);
 
 
-    void RenderTile(int *tileID, int *randRow, int* randCol, int rotationCount=0);
+    void RenderTile(TileType tileID, int *randRow, int* randCol, int rotationCount=0);
 
     void Collapse(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
