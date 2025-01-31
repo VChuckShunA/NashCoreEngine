@@ -249,7 +249,7 @@ void Scene_Play::Collapse(int currentX,int currentY)
          std::array<int, 3> newRightRules = adjacencyRules.at(newTileId).at("right");
 
          
-         for (int i = 0; i < 3; i++) {
+         for (int i = 1; i < 4; i++) {
             //check if rules match
              if ((upRulesToCheck == std::array<int, 3>{NULL, NULL, NULL} || newUpRules == upRulesToCheck) &&
                  (downRulesToCheck == std::array<int, 3>{NULL, NULL, NULL} || newDownRules == downRulesToCheck) &&
@@ -263,6 +263,10 @@ void Scene_Play::Collapse(int currentX,int currentY)
                    // randomTile = static_cast<int>(newTileId);
                     foundMatchingTile = true;
                     std::cout << "found matching rules " << randomTile << std::endl;
+                    grid[currentX][currentY].sockets.up = newUpRules;
+                    grid[currentX][currentY].sockets.down = newDownRules;
+                    grid[currentX][currentY].sockets.left = newLeftRules;
+                    grid[currentX][currentY].sockets.right = newRightRules;
                     break;
             }
              //rotate rules
@@ -274,15 +278,10 @@ void Scene_Play::Collapse(int currentX,int currentY)
 
      }
     // std::cout << "SELECTED RANDOM TILE = " << randomTile<<std::endl; //for some reason this always returns 111
-     if (!selectedTiles.empty())
-     {
+    
 
          RenderTile(newTileId, &currentX, &currentY, rotatationCount);
-     }
-     else
-     {
-         std::cout << "COULDN'T FIND SUITABLE TILE" << std::endl;
-     }
+     
      //collapse tile
    
 }
@@ -301,7 +300,7 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     int randomTile = std::rand() % 14; // 14 because the enum has 14 values (0-13)
     std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
     int tileSelected = 2;
-    RenderTile(COMPONENT, &startRow, &startCol,false);
+    RenderTile(CORNER, &startRow, &startCol,false);
 
     // Direction vectors for movement (dx, dy)
     int directions[4][2] = {
@@ -373,7 +372,7 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
             ++layer;
         }
     }
-    
+     
 }
 
 bool Scene_Play::matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck)
@@ -403,6 +402,11 @@ void Scene_Play::RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>
     reverse(rotRightRules.begin(), rotRightRules.end());
     rotdownRules = rotRightRules;
     rotRightRules = tempRules;
+
+    upRules = rotUpRules;
+    downRules = rotdownRules;
+    leftRules = rotLeftRules;
+    rightRules = rotRightRules;
 
    /* grid[x][y].sockets.up = upRules;
     grid[x][y].sockets.down = downRules;
@@ -500,12 +504,12 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
     grid[*randomRow][*randomCol].currentTile = tileID;
     TileType tile = tileID;
     
-        grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
+    /*    grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
         grid[*randomRow][*randomCol].sockets.down = extractRules(tile, "down");
         grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
         grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
 
-   
+   */
    // dec->getComponent<CAnimation>().animation.setSize(Vec2(64, 64));
     dec->addComponent<CTransform>(
         gridToMidPixel(*randomRow, *randomCol, dec),
