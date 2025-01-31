@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <map>
 #include <iostream>
+#include <array>
 class Scene_Play : public Scene {
     struct PlayerConfig {
         float X, Y, CX, CY, SPEED, MAX_SPEED, JUMP, GRAVITY;
@@ -59,15 +60,24 @@ public:
 
     void update() override;
 
-    struct TileState {
-        std::vector<int> possibleTiles; // IDs of possible tiles
-        int currentTile = NULL;
-        bool collapsed = false;        // Whether this cell is collapsed
-    }grid[20][12];
 
     enum TileType {
         BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE
     }tiles;
+
+    struct TileSockets {
+        std::array<int, 3> up = { 9, 9, 9 };
+        std::array<int, 3> down = { 9, 9, 9 };
+        std::array<int, 3> left = { 9, 9, 9 };
+        std::array<int, 3> right = { 9, 9, 9 };
+    };
+
+
+    struct TileState {
+        TileSockets sockets;
+        int currentTile = NULL;
+        bool collapsed = false;        // Whether this cell is collapsed
+    }grid[20][12];
 
     std::map<int, std::string> circuitToString = { 
         { BRIDGE, "BRIDGE" },
@@ -81,113 +91,119 @@ public:
         { TRACK, "TRACK" },
         { TRANSITION, "TRANSITION" },
         { TURN, "TURN" },
-        { TURN, "TURN" },
+        { VIAD, "VIAD"},
         { VIAS, "VIAS" },
         { WIRE, "WIRE" }
     };
+    
+    std::unordered_map<TileType, std::unordered_map<std::string, std::array<int, 3>>> adjacencyRules = {
+        { BRIDGE, {
+            { "up",   {1, 2, 1} },
+            { "down", {1, 2, 1} },
+            { "left", {1, 3, 1} },
+            { "right",{1, 3, 1} }
+        }},
+        { COMPONENT, {
+            { "up",   {9, 9, 9} },
+            { "down", {9, 9, 9}},
+            { "left", {9, 9, 9}},
+            { "right",{9, 9, 9} }
+        }},
+        { CONNECTION, {
+            { "up",   {1, 2, 1} },
+            { "down", {9, 9, 9} },
+            { "left", {1, 1, 9} },
+            { "right",{1, 1, 9} }
+        }},
+        { CORNER, {
+            { "up",   {1, 1, 1} },
+            { "down", {9, 1, 1}},
+            { "left", {1, 1, 9}},
+            { "right",{1, 1, 1} }
+        }},
+        { DSKEW, {
+            { "up",   {1, 2, 1} },
+            { "down", {1, 2, 1}},
+            { "left", {1, 2, 1}},
+            { "right",{1, 2, 1} }
+        }},
+        { SKEW, {
+            { "up",   {1, 2, 1} },
+            { "down", {1, 1, 1}},
+            { "left", {1, 1, 1}},
+            { "right",{1, 2, 1} }
+        }},
+        { SUBSTRATE, {
+            { "up",   {1, 1, 1} },
+            { "down", {1, 1, 1}},
+            { "left", {1, 1, 1}},
+            { "right",{1, 1, 1} }
+        }},
+        { T, {
+            { "up",   {1, 1, 1} },
+            { "down", {1, 2, 1}},
+            { "left", {1, 2, 1}},
+            { "right",{1, 2, 1} }
+        }},
+        { TRACK, {
+            { "up",   {1, 2, 1} },
+            { "down", {1, 2, 1}},
+            { "left", {1, 1, 1}},
+            { "right",{1, 1, 1} }
+        }},
+        { TRANSITION, {
+            { "up",   {1, 3, 1} },
+            { "down", {1, 2, 1}},
+            { "left", {1, 1, 1}},
+            { "right",{1, 1, 1} }
+        }},
+        { TURN, {
+            { "up",   {1, 2, 1} },
+            { "down", {1, 1, 1}},
+            { "left", {1, 1, 1}},
+            { "right",{1, 2, 1} }
+        }},
+        { VIAD, {
+            { "up",   {1, 1, 1} },
+            { "down", {1, 1, 1}},
+            { "left", {1, 2, 1}},
+            { "right",{1, 2, 1} }
+        }},
+        { VIAS, {
+            { "up",   {1, 2, 1} },
+            { "down", {1, 1, 1}},
+            { "left", {1, 1, 1}},
+            { "right",{1, 1, 1} }
+        }},
+        { WIRE, {
+            { "up",   {1, 1, 1} },
+            { "down", {1, 1, 1}},
+            { "left", {1, 3, 1}},
+            { "right",{1, 3, 1} }
+        }},
 
-    std::unordered_map<TileType, std::unordered_map<std::string, std::vector<TileType>>> adjacencyRules = {
-     {BRIDGE, {
-        {"down", {T, TRACK}},
-        {"up", {TRACK, TURN,CONNECTION,SKEW,DSKEW}},
-        {"left", { WIRE}},
-        {"right", { WIRE}}
-    }},
-    {COMPONENT, {
-        {"down", {COMPONENT,BRIDGE, CONNECTION,SUBSTRATE,T,TRACK,TRANSITION}},
-        {"up", {COMPONENT,CONNECTION,SUBSTRATE,T,TRACK,TRANSITION}},
-        {"left", {COMPONENT,BRIDGE,WIRE,SUBSTRATE,T,VIAD}},
-        {"right", {COMPONENT,BRIDGE,WIRE,SUBSTRATE,T,VIAD}}
-    }},
-    {CONNECTION, {
-        {"down", {T, TRACK,TRANSITION,BRIDGE}},
-        {"up", {COMPONENT}},
-        {"left", {SUBSTRATE}},
-        {"right", {SUBSTRATE, CORNER}}
-    }},
-    {CORNER, {
-        {"down", {SUBSTRATE,SKEW,TURN,VIAD,VIAS,WIRE}},
-        {"up", {SUBSTRATE}},
-        {"left", {SUBSTRATE,TURN,CONNECTION}},
-        {"right", {SUBSTRATE,TURN,VIAD,VIAS}}
-    }},
-    {DSKEW, {
-        {"down", { BRIDGE,T,TRACK,TRANSITION}},
-        {"up", {BRIDGE,TRACK,TURN,VIAS}},
-        {"left", {T,TURN,SKEW}},
-        {"right", {T}}
-    }},
-    {SKEW, {
-        {"down", {DSKEW,T,TRACK,TRANSITION}},
-        {"up", {CORNER,SUBSTRATE,T,WIRE}},
-        {"left", {COMPONENT,SUBSTRATE,TRACK,TRANSITION}},
-        {"right", {T,VIAD}}
-    }},
-    {SUBSTRATE, {
-        {"down", {SUBSTRATE,SKEW,TURN,WIRE}},
-        {"up", {SUBSTRATE,CORNER,T,WIRE}},
-        {"left", {SUBSTRATE,CORNER}},
-        {"right", {SUBSTRATE,TRACK,TURN}}
-    }},
-    {T, {
-        {"down", {SKEW,SUBSTRATE,TURN,VIAD,VIAS,WIRE}},
-        {"up", {TRACK,TURN,BRIDGE,SKEW,DSKEW,VIAS}},
-        {"left", {SKEW,DSKEW,TURN,VIAD}},
-        {"right", {DSKEW,VIAD}}
-    }},
-    {TRACK, {
-        {"down", {TRACK, BRIDGE,DSKEW,TRANSITION}},
-        {"up", {TRACK, BRIDGE,SKEW,DSKEW,TURN,CONNECTION,BRIDGE,VIAS}},
-        {"left", {TRACK,SUBSTRATE,CORNER}},
-        {"right", {TRACK,SUBSTRATE,TRACK,TURN}}
-    }},
-    {TRANSITION, {
-        {"down", {BRIDGE,DSKEW,T,TRACK}},
-        {"up", {BRIDGE,DSKEW,TURN,TRACK}},
-        {"left", {SUBSTRATE,TRACK,CORNER}},
-        {"right", {SUBSTRATE,SKEW,TURN}}
-    }},
-    {TURN, {
-        {"down", {BRIDGE,DSKEW,T,TRACK,TRANSITION}},
-        {"up", {CORNER,SUBSTRATE,T,WIRE}},
-        {"left", {TRACK,SUBSTRATE,CORNER}},
-        {"right", {DSKEW,VIAD,T}}
-    }},
-    {VIAD, {
-        {"down", {WIRE,TURN,SUBSTRATE,SKEW}},
-        {"up", {WIRE,SUBSTRATE,CORNER}},
-        {"left", {TURN,T,SKEW,DSKEW,VIAD,WIRE}},
-        {"right", {DSKEW,BRIDGE,T,VIAD,WIRE}}
-    }},
-    {VIAS, {
-        {"down", {TRACK,TRANSITION,T,DSKEW,BRIDGE}},
-        {"up", {CORNER,SUBSTRATE,T,WIRE}},
-        {"left", {TRACK,SUBSTRATE,CORNER}},
-        {"right", {TURN,TRACK,SUBSTRATE,SKEW}}
-    }},
-    {WIRE, {
-        {"down", {SUBSTRATE,SKEW,TURN}},
-        {"up", {CORNER,SUBSTRATE,T}},
-        {"left", {WIRE,BRIDGE,SKEW,DSKEW,T,TURN,VIAD}},
-        {"right", {WIRE,BRIDGE,DSKEW,T,VIAD}}
-    }}
     };
-
+    
 
     void ImplementWFC(TileState(&grid)[20][12]);
 
-    void UpdateRuleSet(TileState* cell, int x, int y);
 
-    void RenderTile(int *tileID, int *randRow, int* randCol);
+    void RenderTile(TileType tileID, int *randRow, int* randCol, int rotationCount=0);
 
     void Collapse(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
     bool withinBounds(int x, int y) {
         return x >= 0 && x < 20 && y >= 0 && y < 12;
     }
+    //utils
+    bool matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck);
+    std::vector<TileType> selectValidTiles(const std::unordered_map<std::string, std::array<int, 3>>& rulesToCheck);
     void UpdateCommonElements(int x, int y, std::vector<TileType>* rulesToCompare);
     std::string enumToString(int tile)
     {
         return circuitToString[tile];
     }
+    void RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules);
+    std::string arrayToString(const std::array<int, 3>& arr);
+    std::array<int, 3> extractRules(TileType tile, const std::string& direction);
 };
