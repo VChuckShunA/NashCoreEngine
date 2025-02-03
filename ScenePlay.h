@@ -66,10 +66,10 @@ public:
     }tiles;
 
     struct TileSockets {
-        std::array<int, 3> up = { 9, 9, 9 };
-        std::array<int, 3> down = { 9, 9, 9 };
-        std::array<int, 3> left = { 9, 9, 9 };
-        std::array<int, 3> right = { 9, 9, 9 };
+        std::array<int, 3> up = { 0, 0, 0 };
+        std::array<int, 3> down = { 0, 0, 0 };
+        std::array<int, 3> left = { 0, 0, 0 };
+        std::array<int, 3> right = { 0, 0, 0 };
     };
 
 
