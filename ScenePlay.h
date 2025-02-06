@@ -75,6 +75,7 @@ public:
 
     struct TileState {
         TileSockets sockets;
+        std::vector<TileType> possibleTiles; // IDs of possible tiles
         int currentTile = NULL;
         bool collapsed = false;        // Whether this cell is collapsed
     }grid[20][12];
@@ -191,6 +192,7 @@ public:
     void RenderTile(TileType tileID, int *randRow, int* randCol, int rotationCount=0);
 
     void Collapse(int currentX, int currentY);
+    void UpdateNeighbourRules(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
     bool withinBounds(int x, int y) {
         return x >= 0 && x < 20 && y >= 0 && y < 12;

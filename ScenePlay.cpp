@@ -175,6 +175,9 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
 
 void Scene_Play::Collapse(int currentX,int currentY)
 {
+    
+    
+    /*
      int selectedTile;
 
      std::array<int, 3> upRulesToCheck = { 0,0,0 };
@@ -274,7 +277,15 @@ void Scene_Play::Collapse(int currentX,int currentY)
          }
      }
      //collapse tile
-  /* */
+   */
+}
+
+void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
+{
+    grid[currentX-1][currentY].sockets.right= grid[currentX][currentY].sockets.left;
+    grid[currentX+1][currentY].sockets.left = grid[currentX][currentY].sockets.right;
+    grid[currentX][currentY+1].sockets.down = grid[currentX][currentY].sockets.up;
+    grid[currentX][currentY-1].sockets.up = grid[currentX][currentY].sockets.down;
 }
 
 void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
@@ -315,6 +326,7 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     grid[x][y].sockets.left = adjacencyRules.at(CONNECTION).at("left");
     grid[x][y].sockets.right = adjacencyRules.at(CONNECTION).at("right");
 
+    UpdateNeighbourRules(x, y);
     std::cout << "First Tile's Rules" << std::endl;
     std::cout << "Up Rules " << arrayToString(grid[x][y].sockets.up) << std::endl;
     std::cout << "Down Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
@@ -322,7 +334,7 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
 
     std::cout << "End of First Tile's Rules" << std::endl;
-   /*
+   
     Collapse(x-1, y);
     Collapse(x + 1, y);
     Collapse(x, y + 1);
@@ -331,8 +343,8 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     Collapse(x + 1, y + 1);
     Collapse(x + 1, y - 1);
     Collapse(x - 1, y - 1);
-    */
-    bool canSpiral = true;
+    
+    bool canSpiral = false;
     std::cout << "Tile 1 : " << std::endl;
     std::cout << "Up Rules " << arrayToString(grid[x-1][y].sockets.up) << std::endl;
     std::cout << "Down Rules " << arrayToString(grid[x-1][y].sockets.down) << std::endl;
