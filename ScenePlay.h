@@ -75,7 +75,7 @@ public:
 
     struct TileState {
         TileSockets sockets;
-        std::vector<TileType> possibleTiles; // IDs of possible tiles
+        std::vector<TileType> possibleTiles = {BRIDGE,COMPONENT,CONNECTION,CORNER,DSKEW,SKEW,SUBSTRATE,T,TRACK,TRANSITION,TURN,VIAD,VIAS,WIRE}; // IDs of possible tiles
         int currentTile = NULL;
         bool collapsed = false;        // Whether this cell is collapsed
     }grid[20][12];
@@ -193,6 +193,7 @@ public:
 
     void Collapse(int currentX, int currentY);
     void UpdateNeighbourRules(int currentX, int currentY);
+    void UpdatePossibleTiles(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
     bool withinBounds(int x, int y) {
         return x >= 0 && x < 20 && y >= 0 && y < 12;
@@ -208,4 +209,7 @@ public:
     void RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules);
     std::string arrayToString(const std::array<int, 3>& arr);
     std::array<int, 3> extractRules(TileType tile, const std::string& direction);
+
+
+    
 };

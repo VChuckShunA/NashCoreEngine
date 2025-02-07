@@ -175,109 +175,9 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
 
 void Scene_Play::Collapse(int currentX,int currentY)
 {
-    
-    
-    /*
-     int selectedTile;
-
-     std::array<int, 3> upRulesToCheck = { 0,0,0 };
-     std::array<int, 3> downRulesToCheck = { 0,0,0 };
-     std::array<int, 3> leftRulesToCheck = { 0,0,0 };
-     std::array<int, 3> rightRulesToCheck = { 0,0,0 };
-
-     if (grid[currentX - 1][currentY].collapsed)
-     {
-         leftRulesToCheck = grid[currentX - 1][currentY].sockets.right;
-     }
-
-     if (grid[currentX + 1][currentY].collapsed)
-     {
-         rightRulesToCheck = grid[currentX + 1][currentY].sockets.left;
-     }
-
-     if (grid[currentX][currentY-1].collapsed)
-     {
-         downRulesToCheck = grid[currentX][currentY-1].sockets.up;
-     }
-
-     if (grid[currentX][currentY+1].collapsed)
-     {
-         upRulesToCheck = grid[currentX][currentY+1].sockets.down;
-     }
-     std::unordered_map<std::string, std::array<int, 3>> rulesToCheck = {
-    { "up", upRulesToCheck },
-    { "down", downRulesToCheck },
-    { "left", leftRulesToCheck },
-    { "right", rightRulesToCheck }
-     };
-
-     std::vector<TileType> selectedTiles = selectValidTiles(rulesToCheck);
-
-     std::cout << "Find Valid Tiles for " << currentX << " , " << currentY << std::endl;
-     std::for_each(selectedTiles.begin(), selectedTiles.end(), [](TileType tile) {
-         std::cout << "Valid Tile: " << tile << std::endl;
-     });
-     std::cout << "\n";
-
-     
-     bool foundMatchingTile = false;
-     int rotatationCount = 0;
-     //int randomTile = 111; 
-     TileType newTileId;
-     while (!foundMatchingTile && !selectedTiles.empty())
-     {
-         //get random tile from selected tile
-
-         int randomTile = std::rand() % selectedTiles.size();
-         newTileId =selectedTiles.at(randomTile);
-         //get the rules of that tile
-         std::array<int, 3> newUpRules = adjacencyRules.at(newTileId).at("up");
-         std::array<int, 3> newDownRules = adjacencyRules.at(newTileId).at("down");
-         std::array<int, 3> newLeftRules = adjacencyRules.at(newTileId).at("left");
-         std::array<int, 3> newRightRules = adjacencyRules.at(newTileId).at("right");
-
-         rotatationCount = 0;
-         for (int i = 0; i < 3; i++) {
-            //check if rules match
-             if ((upRulesToCheck == std::array<int, 3>{0, 0, 0} || newUpRules == upRulesToCheck) &&
-                 (downRulesToCheck == std::array<int, 3>{0, 0, 0} || newDownRules == downRulesToCheck) &&
-                 (leftRulesToCheck == std::array<int, 3>{0, 0, 0} || newLeftRules == leftRulesToCheck) &&
-                 (rightRulesToCheck == std::array<int, 3>{0, 0, 0} || newRightRules == rightRulesToCheck))
-
-            {
-                // std::cout <<"found matching rules" << std::endl;
-                // if rules match in all directions 
-                   // randomTile = static_cast<int>(newTileId);
-                   // std::cout << "found matching rules " << randomTile << std::endl;
-                    grid[currentX][currentY].sockets.up = newUpRules;
-                    grid[currentX][currentY].sockets.down = newDownRules;
-                    grid[currentX][currentY].sockets.left = newLeftRules;
-                    grid[currentX][currentY].sockets.right = newRightRules;
-                    foundMatchingTile = true;
-                    break;
-            }
-             //rotate rules
-             //std::cout<<"rotating rules" << std::endl;
-             rotatationCount++;
-             RotateTileRules(newUpRules,newDownRules,newLeftRules,newRightRules);
-         }
-         //remove tile from selected tiles
-         selectedTiles.erase(std::remove(selectedTiles.begin(), selectedTiles.end(), newTileId), selectedTiles.end());
-
-     }
-    // std::cout << "SELECTED RANDOM TILE = " << randomTile<<std::endl; //for some reason this always returns 111
-    
-     if (!selectedTiles.empty())
-     {
-
-         RenderTile(newTileId, &currentX, &currentY, rotatationCount);
-         if (grid[currentX][currentY-1].sockets.down == std::array<int,3>{9, 9, 9})
-         {
-             Collapse(currentX, currentY);
-         }
-     }
-     //collapse tile
-   */
+    UpdatePossibleTiles(currentX,currentY);
+    int randomTile = std::rand() % grid[currentX][currentY].possibleTiles.size();
+    RenderTile(static_cast<TileType>(randomTile), &currentX, &currentY);
 }
 
 void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
@@ -286,6 +186,67 @@ void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
     grid[currentX+1][currentY].sockets.left = grid[currentX][currentY].sockets.right;
     grid[currentX][currentY+1].sockets.down = grid[currentX][currentY].sockets.up;
     grid[currentX][currentY-1].sockets.up = grid[currentX][currentY].sockets.down;
+}
+
+void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
+{
+    std::cout << "UPDATING POSSIBLE TILES" << std::endl;
+    std::cout << grid[currentX][currentY].possibleTiles.size()<<std::endl;
+    TileState& tileState = grid[currentX][currentY];
+
+    // Check each direction's socket to filter possible tiles
+    std::vector<std::pair<std::string, std::array<int, 3>>> socketRules = {
+        {"left",  tileState.sockets.left},
+        {"right", tileState.sockets.right},
+        {"up",    tileState.sockets.up},
+        {"down",  tileState.sockets.down}
+    };
+
+    // Iterate through possible tiles in reverse order (safe for removal)
+    for (auto it = tileState.possibleTiles.begin(); it != tileState.possibleTiles.end(); ) {
+        TileType tileType = *it;
+
+        // Find the adjacency rules for this tile type
+        auto tileRulesIt = adjacencyRules.find(tileType);
+        if (tileRulesIt == adjacencyRules.end()) {
+            it = tileState.possibleTiles.erase(it); // Remove invalid tile type
+            continue;
+        }
+
+        const auto& tileAdjacencyRules = tileRulesIt->second;
+        bool isValid = true;
+
+        // Check if each socket matches *any* adjacency rule direction
+        for (const auto& [direction, socket] : socketRules) {
+            if (socket != std::array<int, 3>{0, 0, 0}) { // Ignore null sockets
+                bool matchFound = false;
+
+                // Check if this tile's adjacency rules contain the required socket
+                for (const auto& [adjDir, adjRule] : tileAdjacencyRules) {
+                    if (socket == adjRule) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+
+                if (!matchFound) {
+                    isValid = false;
+                    break; // No need to check further
+                }
+            }
+        }
+
+        // Remove tile if it does not match the constraints
+        if (!isValid) {
+            it = tileState.possibleTiles.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+
+    std::cout << "UPDATED POSSIBLE TILES" << std::endl;
+    std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl;
 }
 
 void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
@@ -335,15 +296,6 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
 
     std::cout << "End of First Tile's Rules" << std::endl;
    
-    Collapse(x-1, y);
-    Collapse(x + 1, y);
-    Collapse(x, y + 1);
-    Collapse(x, y - 1);
-    Collapse(x - 1, y + 1);
-    Collapse(x + 1, y + 1);
-    Collapse(x + 1, y - 1);
-    Collapse(x - 1, y - 1);
-    
     bool canSpiral = false;
     std::cout << "Tile 1 : " << std::endl;
     std::cout << "Up Rules " << arrayToString(grid[x-1][y].sockets.up) << std::endl;
@@ -402,7 +354,16 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     std::cout << "Right Rules " << arrayToString(grid[x - 1][y - 1].sockets.right) << std::endl;
     std::cout << "End of Tile 8.\n" << std::endl;
 
-    
+
+    Collapse(x - 1, y);
+    Collapse(x + 1, y);
+    Collapse(x, y + 1);
+    Collapse(x, y - 1);
+    /*Collapse(x - 1, y + 1);
+    Collapse(x + 1, y + 1);
+    Collapse(x + 1, y - 1);
+    Collapse(x - 1, y - 1);*/
+
     
     
     // Traverse the grid
