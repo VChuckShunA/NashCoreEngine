@@ -176,8 +176,29 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
 void Scene_Play::Collapse(int currentX,int currentY)
 {
     UpdatePossibleTiles(currentX,currentY);
-    int randomTile = std::rand() % grid[currentX][currentY].possibleTiles.size();
-    RenderTile(static_cast<TileType>(randomTile), &currentX, &currentY);
+    FindLowestEntropy();
+    //int randomTile = std::rand() % grid[currentX][currentY].possibleTiles.size();
+    //RenderTile(static_cast<TileType>(randomTile), &currentX, &currentY);
+}
+
+std::pair<int, int> Scene_Play::FindLowestEntropy()
+{
+    int minSize = INT_MAX;
+    std::pair<int, int> minCoords = { -1, -1 }; // Default invalid position
+
+    for (int x = 0; x < 20; x++) {
+        for (int y = 0; y < 12; y++) {
+            if (!grid[x][y].collapsed) { // Skip collapsed tiles
+                int tileCount = grid[x][y].possibleTiles.size();
+                if (tileCount > 1 && tileCount < minSize) { // Ignore fully collapsed tiles (size = 1)
+                    minSize = tileCount;
+                    minCoords = { x, y };
+                }
+            }
+        }
+    }
+    std::cout << "Lowest Entropy is at " << minCoords.first <<" , "<<minCoords.second << std::endl;
+    return minCoords; // Returns (-1, -1) if no valid tile is found
 }
 
 void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
@@ -190,61 +211,60 @@ void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
 
 void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
 {
-    std::cout << "UPDATING POSSIBLE TILES" << std::endl;
-    std::cout << grid[currentX][currentY].possibleTiles.size()<<std::endl;
-    TileState& tileState = grid[currentX][currentY];
+    std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , "<<currentY << std::endl;
 
-    // Check each direction's socket to filter possible tiles
-    std::vector<std::pair<std::string, std::array<int, 3>>> socketRules = {
-        {"left",  tileState.sockets.left},
-        {"right", tileState.sockets.right},
-        {"up",    tileState.sockets.up},
-        {"down",  tileState.sockets.down}
-    };
-
-    // Iterate through possible tiles in reverse order (safe for removal)
-    for (auto it = tileState.possibleTiles.begin(); it != tileState.possibleTiles.end(); ) {
-        TileType tileType = *it;
-
-        // Find the adjacency rules for this tile type
-        auto tileRulesIt = adjacencyRules.find(tileType);
-        if (tileRulesIt == adjacencyRules.end()) {
-            it = tileState.possibleTiles.erase(it); // Remove invalid tile type
-            continue;
+    grid[currentX][currentY].possibleTiles.erase(
+        std::remove_if(
+            grid[currentX][currentY].possibleTiles.begin(),
+            grid[currentX][currentY].possibleTiles.end(),
+            [&](TileType tile) { // Lambda function to check each tile
+        // Check if tile exists in adjacencyRules
+        if (adjacencyRules.find(tile) == adjacencyRules.end()) {
+            return true; // Remove if no adjacency rules exist
         }
 
-        const auto& tileAdjacencyRules = tileRulesIt->second;
-        bool isValid = true;
-
-        // Check if each socket matches *any* adjacency rule direction
-        for (const auto& [direction, socket] : socketRules) {
-            if (socket != std::array<int, 3>{0, 0, 0}) { // Ignore null sockets
-                bool matchFound = false;
-
-                // Check if this tile's adjacency rules contain the required socket
-                for (const auto& [adjDir, adjRule] : tileAdjacencyRules) {
-                    if (socket == adjRule) {
-                        matchFound = true;
-                        break;
-                    }
-                }
-
-                if (!matchFound) {
-                    isValid = false;
-                    break; // No need to check further
-                }
+        bool matches = false;
+        for (const auto& [direction, values] : adjacencyRules[tile]) {
+            if (values == grid[currentX][currentY].sockets.left ||
+                values == grid[currentX][currentY].sockets.right ||
+                values == grid[currentX][currentY].sockets.up ||
+                values == grid[currentX][currentY].sockets.down) {
+                matches = true; // Keep this tile
+                break;
             }
         }
+        return !matches; // Remove if no match is found
+    }),
+        grid[currentX][currentY].possibleTiles.end()
+    );
 
-        // Remove tile if it does not match the constraints
-        if (!isValid) {
-            it = tileState.possibleTiles.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
 
+    //// Check each direction's socket to filter possible tiles
+    //for (TileType tile : grid[currentX][currentY].possibleTiles) 
+    //{
+    //    // Check if tile exists in adjacencyRules
+    //    if (adjacencyRules.find(tile) != adjacencyRules.end()) {
+    //        for (const auto& [direction, values] : adjacencyRules[tile]) {
+    //            if (values==(grid[currentX][currentY].sockets.left) || 
+    //                values == (grid[currentX][currentY].sockets.right) ||
+    //                values == (grid[currentX][currentY].sockets.up)||
+    //                values == (grid[currentX][currentY].sockets.down))
+    //            {
+    //                std::cout << "Grid[" << currentX << "][" << currentY << "]" << std::endl;
+    //                std::cout<<"Tile "<<tile << " matches at "<< direction<<std::endl;
+    //            }
+    //            else {
+    //                grid[currentX][currentY].possibleTiles.erase(find(grid[currentX][currentY].possibleTiles.begin(), grid[currentX][currentY].possibleTiles.end(), tile));
+    //             
+    //            }
+    //        }
+    //    }
+    //    else {
+    //        std::cout << "  No adjacency rules found for this tile." << std::endl;
+    //    }
+    //}
+
+    
     std::cout << "UPDATED POSSIBLE TILES" << std::endl;
     std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl;
 }
@@ -264,7 +284,7 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
     int tileSelected = 2;
     int startx = 9, starty = 7;
-    RenderTile(CONNECTION, &startx, &starty,false);
+    RenderTile(TRANSITION, &startx, &starty,false);
 
     // Direction vectors for movement (dx, dy)
     int directions[4][2] = {
@@ -282,10 +302,10 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     int x = startx;    // Current row
     int y = starty;    // Current column
 
-    grid[x][y].sockets.up = adjacencyRules.at(CONNECTION).at("up");
-    grid[x][y].sockets.down = adjacencyRules.at(CONNECTION).at("down");
-    grid[x][y].sockets.left = adjacencyRules.at(CONNECTION).at("left");
-    grid[x][y].sockets.right = adjacencyRules.at(CONNECTION).at("right");
+    grid[x][y].sockets.up = adjacencyRules.at(TRANSITION).at("up");
+    grid[x][y].sockets.down = adjacencyRules.at(TRANSITION).at("down");
+    grid[x][y].sockets.left = adjacencyRules.at(TRANSITION).at("left");
+    grid[x][y].sockets.right = adjacencyRules.at(TRANSITION).at("right");
 
     UpdateNeighbourRules(x, y);
     std::cout << "First Tile's Rules" << std::endl;

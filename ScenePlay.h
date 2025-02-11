@@ -192,6 +192,7 @@ public:
     void RenderTile(TileType tileID, int *randRow, int* randCol, int rotationCount=0);
 
     void Collapse(int currentX, int currentY);
+    std::pair<int, int> FindLowestEntropy();
     void UpdateNeighbourRules(int currentX, int currentY);
     void UpdatePossibleTiles(int currentX, int currentY);
     void SpiralTraverse(TileState(&grid)[20][12]);
