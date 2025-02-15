@@ -175,10 +175,19 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
 
 void Scene_Play::Collapse(int currentX,int currentY)
 {
-    UpdatePossibleTiles(currentX,currentY);
-    FindLowestEntropy();
-    //int randomTile = std::rand() % grid[currentX][currentY].possibleTiles.size();
-    //RenderTile(static_cast<TileType>(randomTile), &currentX, &currentY);
+    UpdatePossibleTiles(currentX-1,currentY);
+    UpdatePossibleTiles(currentX + 1, currentY);
+    UpdatePossibleTiles(currentX , currentY-1);
+    UpdatePossibleTiles(currentX , currentY+1);
+    std::pair<int, int> tileToCollapse = FindLowestEntropy();
+    int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
+    
+    std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
+    for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
+        std::cout << enumToString(i) << " , ";
+    }
+    std::cout << "RANDOM TILE IS "<< enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) <<std::endl;
+    RenderTile(static_cast<TileType>(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)), &tileToCollapse.first, &tileToCollapse.second);
 }
 
 std::pair<int, int> Scene_Play::FindLowestEntropy()
@@ -265,7 +274,10 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
     //}
 
     
-    std::cout << "UPDATED POSSIBLE TILES" << std::endl;
+    std::cout << "UPDATED POSSIBLE TILES FOR"<< currentX<<" , "<< currentY << std::endl;
+    for (auto i : grid[currentX][currentY].possibleTiles) {
+        std::cout << enumToString(i) << " ";
+    }
     std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl;
 }
 
@@ -280,11 +292,11 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     // Pick a random starting point
     int startRow = std::rand() % N;
     int startCol = std::rand() % M;
-    int randomTile = std::rand() % 14; // 14 because the enum has 14 values (0-13)
+    TileType randomTile = static_cast<TileType>(std::rand() % 14); // 14 because the enum has 14 values (0-13)
     std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
     int tileSelected = 2;
     int startx = 9, starty = 7;
-    RenderTile(TRANSITION, &startx, &starty,false);
+    RenderTile(randomTile, &startx, &starty,false);
 
     // Direction vectors for movement (dx, dy)
     int directions[4][2] = {
@@ -302,10 +314,10 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     int x = startx;    // Current row
     int y = starty;    // Current column
 
-    grid[x][y].sockets.up = adjacencyRules.at(TRANSITION).at("up");
-    grid[x][y].sockets.down = adjacencyRules.at(TRANSITION).at("down");
-    grid[x][y].sockets.left = adjacencyRules.at(TRANSITION).at("left");
-    grid[x][y].sockets.right = adjacencyRules.at(TRANSITION).at("right");
+    grid[x][y].sockets.up = adjacencyRules.at(randomTile).at("up");
+    grid[x][y].sockets.down = adjacencyRules.at(randomTile).at("down");
+    grid[x][y].sockets.left = adjacencyRules.at(randomTile).at("left");
+    grid[x][y].sockets.right = adjacencyRules.at(randomTile).at("right");
 
     UpdateNeighbourRules(x, y);
     std::cout << "First Tile's Rules" << std::endl;
@@ -317,115 +329,12 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     std::cout << "End of First Tile's Rules" << std::endl;
    
     bool canSpiral = false;
-    std::cout << "Tile 1 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x-1][y].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x-1][y].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x-1][y].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x-1][y].sockets.right) << std::endl;
-    std::cout << "End of Tile 1.\n" << std::endl;
-
-    std::cout << "Tile 2 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x - 1][y+1].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x - 1][y+1].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x - 1][y+1].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x - 1][y+1].sockets.right) << std::endl;
-    std::cout << "End of Tile 2.\n" << std::endl;
     
-    std::cout << "Tile 3 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x][y+1].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x][y+1].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x][y+1].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x][y+1].sockets.right) << std::endl;
-    std::cout << "End of Tile 3.\n" << std::endl;
 
-    std::cout << "Tile 4 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x+1][y + 1].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x+1][y + 1].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x+1][y + 1].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x+1][y + 1].sockets.right) << std::endl;
-    std::cout << "End of Tile 4.\n" << std::endl;
-
-    std::cout << "Tile 5 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x + 1][y].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x + 1][y ].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x + 1][y].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x + 1][y].sockets.right) << std::endl;
-    std::cout << "End of Tile 4.\n" << std::endl;
-
-
-    std::cout << "Tile 6 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x + 1][y - 1].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x + 1][y - 1].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x + 1][y - 1].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x + 1][y - 1].sockets.right) << std::endl;
-    std::cout << "End of Tile 6.\n" << std::endl;
-
-    std::cout << "Tile 7 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x][y - 1].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x][y - 1].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x][y - 1].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x][y - 1].sockets.right) << std::endl;
-    std::cout << "End of Tile 7.\n" << std::endl;
-
-    std::cout << "Tile 8 : " << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x - 1][y - 1].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x - 1][y - 1].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x - 1][y - 1].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x - 1][y - 1].sockets.right) << std::endl;
-    std::cout << "End of Tile 8.\n" << std::endl;
-
-
-    Collapse(x - 1, y);
-    Collapse(x + 1, y);
-    Collapse(x, y + 1);
-    Collapse(x, y - 1);
-    /*Collapse(x - 1, y + 1);
-    Collapse(x + 1, y + 1);
-    Collapse(x + 1, y - 1);
-    Collapse(x - 1, y - 1);*/
+    Collapse(x , y);
 
     
-    
-    // Traverse the grid
-   if(canSpiral)
-   {
-       while (layer <= std::max(N, M)) {
-           for (int step = 0; step < steps; ++step) {
-               // Check if the current cell is within bounds
-               if (x >= 0 && x < M && y >= 0 && y < N) {
-                   // Process the grid cell
-                   TileState& tile = grid[y][x];
-                   std::cout << "Visiting (" << y << ", " << x << "): ";
-                   Collapse(y, x);
-
-
-                   std::cout << std::endl;
-               }
-
-               // Move to the next cell
-               x += directions[dirIndex][0];
-               y += directions[dirIndex][1];
-           }
-
-           // Rotate direction (0 -> 1 -> 2 -> 3 -> 0)
-           dirIndex = (dirIndex + 1) % 4;
-
-           // Update the number of steps and layer when changing direction
-           if (dirIndex == 0 || dirIndex == 2) {
-               ++steps;
-           }
-
-           // Break when we have traversed beyond the largest layer
-           if (x < -layer || x > layer + M || y < -layer || y > layer + N) {
-               break;
-           }
-
-           // Increase the layer size after completing all four directions
-           if (dirIndex == 3) {
-               ++layer;
-           }
-       }
-   }
+ 
      
 }
 
@@ -552,12 +461,12 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
     grid[*randomRow][*randomCol].currentTile = tileID;
     TileType tile = tileID;
     
-    /*    grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
+        grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
         grid[*randomRow][*randomCol].sockets.down = extractRules(tile, "down");
         grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
         grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
 
-   */
+   
    // dec->getComponent<CAnimation>().animation.setSize(Vec2(64, 64));
     dec->addComponent<CTransform>(
         gridToMidPixel(*randomRow, *randomCol, dec),
