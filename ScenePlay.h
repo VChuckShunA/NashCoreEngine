@@ -66,10 +66,10 @@ public:
     }tiles;
 
     struct TileSockets {
-        std::array<int, 3> up = { 0, 0, 0 };
-        std::array<int, 3> down = { 0, 0, 0 };
-        std::array<int, 3> left = { 0, 0, 0 };
-        std::array<int, 3> right = { 0, 0, 0 };
+        std::array<int, 3> up = { 90, 90, 90 };
+        std::array<int, 3> down = { 90, 90, 90 };
+        std::array<int, 3> left = { 90, 90, 90 };
+        std::array<int, 3> right = { 90, 90, 90 };
     };
 
 
@@ -210,7 +210,7 @@ public:
     void RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules);
     std::string arrayToString(const std::array<int, 3>& arr);
     std::array<int, 3> extractRules(TileType tile, const std::string& direction);
-
+    bool DoesTileFit(TileType tile,int &x,int& y);
 
     
 };

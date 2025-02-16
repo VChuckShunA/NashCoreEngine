@@ -405,6 +405,80 @@ std::array<int, 3> Scene_Play::extractRules(TileType tile, const std::string& di
     }
 }
 
+bool Scene_Play::DoesTileFit(TileType tile,int& x, int& y)
+{
+
+    bool upMatch = false, downMatch = false, leftMatch = false, rightMatch = false;
+    TileType currentTile = static_cast<TileType>(grid[x][y].currentTile);
+    if (grid[x][y+1].sockets.down == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.up == grid[x][y + 1].sockets.down)
+    {
+        std::cout << "UP MATCH this" << x << " , " << y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x][y].sockets.right[i] << " ";
+        std::cout << std::endl;
+
+        std::cout << "UP MATCH neighbour" << x + 1 << " , " << y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x][y + 1].sockets.right[i] << " ";
+        std::cout << std::endl;
+
+        upMatch = true;
+       
+    }
+
+    if (grid[x][y-1].sockets.up == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.down == grid[x][y - 1].sockets.up)
+    {
+        std::cout << "DOWN MATCH this" << x << " , " << y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x][y].sockets.right[i] << " ";
+        std::cout << std::endl;
+
+        std::cout << "DOWN MATCH neighbour" << x + 1 << " , " << y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x][y-1].sockets.right[i] << " ";
+        std::cout << std::endl;
+        downMatch = true;
+    }
+
+    if (grid[x-1][y].sockets.right == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.left == grid[x - 1][y].sockets.right)
+    {
+        std::cout << "LEFT MATCH this" << x << " , " << y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x][y].sockets.right[i] << " ";
+        std::cout << std::endl;
+
+        std::cout << "LEFT MATCH neighbour" << x + 1 << " , " << y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x - 1][y].sockets.right[i] << " ";
+        std::cout << std::endl;
+        leftMatch = true;
+    }
+
+    if (grid[x+1][y].sockets.left == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.right == grid[x + 1][y].sockets.left)
+    {
+        std::cout << "RIGHT MATCH this" <<x<<" , "<<y<< std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x][y].sockets.right[i] << " ";
+        std::cout << std::endl;
+
+        std::cout << "RIGHT MATCH neighbour"<< x+1<<" , "<< y << std::endl;
+        for (int i = 0; i < 3; i++)
+            std::cout << grid[x + 1][y].sockets.right[i] << " ";
+        std::cout << std::endl;
+        rightMatch = true;
+    }
+
+    if (leftMatch&rightMatch&upMatch&downMatch)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 
 
 
@@ -466,7 +540,7 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
         grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
 
-   
+   // UpdateNeighbourRules(*randomRow, *randomCol);
    // dec->getComponent<CAnimation>().animation.setSize(Vec2(64, 64));
     dec->addComponent<CTransform>(
         gridToMidPixel(*randomRow, *randomCol, dec),
@@ -475,11 +549,21 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         0
     );
     //RotateTile(tile, *randomRow, *randomCol);
-    if(rotationCount!=0)
-        {
-        dec->getComponent<CTransform>().angle = 90*(rotationCount);
-    }
+   
     std::cout << "Rendered tile " << tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
+    bool itFits = DoesTileFit(tileID, *randomRow, *randomCol);
+    std::cout << "FIT STATUS " << itFits ;
+    while (!itFits)
+    {
+        dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle +90;
+        RotateTileRules(grid[*randomRow][*randomCol].sockets.up,
+            grid[*randomRow][*randomCol].sockets.down,
+            grid[*randomRow][*randomCol].sockets.left,
+            grid[*randomRow][*randomCol].sockets.right);
+        itFits = DoesTileFit(tileID, *randomRow, *randomCol);
+        rotationCount++;
+    }
+    std::cout << "Rotated " <<rotationCount<<" times !"<< std::endl;
 }
 
 Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<Entity>& entity) {
