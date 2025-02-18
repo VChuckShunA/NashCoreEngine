@@ -107,22 +107,12 @@ void Scene_Play::loadLevel(const std::string& fileName) {
     //Implement WFC here
     std::cout << "Start WFC" << std::endl;
 
-    //ImplementWFC(grid);
-    //std::srand(std::time(nullptr));
 
-    //std::cout << &grid << std::endl;
-    //// Generate a random number from the TileType enum
-    //int randomTile = std::rand() % 14; // 14 because the enum has 14 values (0-13)
+    ImplementWFC(grid);
+    std::pair<int, int> newLowest = FindLowestEntropy();
 
-    //// Generate a random position on the grid
-    //int randomRow = std::rand() % 19;  // 20 rows
-    //int randomCol = std::rand() % 12;  // 12 columns
+    std::cout << "NEW LOWEST : "<<newLowest.first << " , " << newLowest.second << std::endl;
 
-    //// Output results
-    //std::cout << "Random Tile: " << randomTile << std::endl;
-    //std::cout << "Random Position: (" << randomRow << ", " << randomCol << ")" << std::endl;
-
-    SpiralTraverse(grid);
     std::cout << "End WFC" << std::endl;
 
     // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
@@ -173,22 +163,26 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
     return validTiles;
 }
 
-void Scene_Play::Collapse(int currentX,int currentY)
+void Scene_Play::Collapse()
 {
-    UpdatePossibleTiles(currentX-1,currentY);
-    UpdatePossibleTiles(currentX + 1, currentY);
-    UpdatePossibleTiles(currentX , currentY-1);
-    UpdatePossibleTiles(currentX , currentY+1);
-    std::pair<int, int> tileToCollapse = FindLowestEntropy();
-    int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
     
-    std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
-    for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
-        std::cout << enumToString(i) << " , ";
-    }
-    std::cout << "RANDOM TILE IS "<< enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) <<std::endl;
-    RenderTile(static_cast<TileType>(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)), &tileToCollapse.first, &tileToCollapse.second);
-}
+
+        std::pair<int, int> tileToCollapse = FindLowestEntropy();
+        if (tileToCollapse.first < 0 || tileToCollapse.first > 20 || tileToCollapse.second < 0 || tileToCollapse.second > 12)
+        {
+            return;
+        }
+        int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
+
+        std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
+        for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
+            std::cout << enumToString(i) << " , ";
+        }
+        std::cout << "RANDOM TILE IS " << enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) << std::endl;
+        RenderTile(static_cast<TileType>(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)), &tileToCollapse.first, &tileToCollapse.second);
+
+       
+   }
 
 std::pair<int, int> Scene_Play::FindLowestEntropy()
 {
@@ -220,6 +214,11 @@ void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
 
 void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
 {
+    if (currentX <= 0 || currentX>=20 || currentY <= 0 || currentY>=12)
+    {
+        return;
+    }
+
     std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , "<<currentY << std::endl;
 
     grid[currentX][currentY].possibleTiles.erase(
@@ -248,31 +247,6 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
     );
 
 
-    //// Check each direction's socket to filter possible tiles
-    //for (TileType tile : grid[currentX][currentY].possibleTiles) 
-    //{
-    //    // Check if tile exists in adjacencyRules
-    //    if (adjacencyRules.find(tile) != adjacencyRules.end()) {
-    //        for (const auto& [direction, values] : adjacencyRules[tile]) {
-    //            if (values==(grid[currentX][currentY].sockets.left) || 
-    //                values == (grid[currentX][currentY].sockets.right) ||
-    //                values == (grid[currentX][currentY].sockets.up)||
-    //                values == (grid[currentX][currentY].sockets.down))
-    //            {
-    //                std::cout << "Grid[" << currentX << "][" << currentY << "]" << std::endl;
-    //                std::cout<<"Tile "<<tile << " matches at "<< direction<<std::endl;
-    //            }
-    //            else {
-    //                grid[currentX][currentY].possibleTiles.erase(find(grid[currentX][currentY].possibleTiles.begin(), grid[currentX][currentY].possibleTiles.end(), tile));
-    //             
-    //            }
-    //        }
-    //    }
-    //    else {
-    //        std::cout << "  No adjacency rules found for this tile." << std::endl;
-    //    }
-    //}
-
     
     std::cout << "UPDATED POSSIBLE TILES FOR"<< currentX<<" , "<< currentY << std::endl;
     for (auto i : grid[currentX][currentY].possibleTiles) {
@@ -281,7 +255,7 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
     std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl;
 }
 
-void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
+void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
 {
     const int N = 20; // Number of rows
     const int M = 12; // Number of columns
@@ -294,23 +268,10 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     int startCol = std::rand() % M;
     TileType randomTile = static_cast<TileType>(std::rand() % 14); // 14 because the enum has 14 values (0-13)
     std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
-    int tileSelected = 2;
-    int startx = 9, starty = 7;
+    int startx = startRow, starty = startCol;
     RenderTile(randomTile, &startx, &starty,false);
 
-    // Direction vectors for movement (dx, dy)
-    int directions[4][2] = {
-        {0, 1},   // Right
-        {1, 0},   // Down
-        {0, -1},  // Left
-        {-1, 0}   // Up
-    };
-
-
-    // Spiral traversal parameters
-    int layer = 0;       // Current layer of the spiral
-    int dirIndex = 0;    // Direction index
-    int steps = 1;       // Steps in the current direction
+   
     int x = startx;    // Current row
     int y = starty;    // Current column
 
@@ -327,15 +288,9 @@ void Scene_Play::SpiralTraverse(TileState(&grid)[20][12])
     std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
 
     std::cout << "End of First Tile's Rules" << std::endl;
-   
-    bool canSpiral = false;
-    
-
-    Collapse(x , y);
-
-    
- 
-     
+  
+    Collapse();
+  
 }
 
 bool Scene_Play::matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck)
@@ -540,15 +495,12 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
         grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
 
-   // UpdateNeighbourRules(*randomRow, *randomCol);
-   // dec->getComponent<CAnimation>().animation.setSize(Vec2(64, 64));
     dec->addComponent<CTransform>(
         gridToMidPixel(*randomRow, *randomCol, dec),
         Vec2(0, 0),
         Vec2(1, 1),
         0
     );
-    //RotateTile(tile, *randomRow, *randomCol);
    
     std::cout << "Rendered tile " << tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
     bool itFits = DoesTileFit(tileID, *randomRow, *randomCol);
@@ -562,8 +514,19 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
             grid[*randomRow][*randomCol].sockets.right);
         itFits = DoesTileFit(tileID, *randomRow, *randomCol);
         rotationCount++;
+        if (rotationCount == 3)
+        {
+            break;
+        }
+        
     }
     std::cout << "Rotated " <<rotationCount<<" times !"<< std::endl;
+    UpdateNeighbourRules(*randomRow, *randomCol);
+    UpdatePossibleTiles(*randomRow - 1, *randomCol);
+    UpdatePossibleTiles(*randomRow + 1, *randomCol);
+    UpdatePossibleTiles(*randomRow, *randomCol - 1);
+    UpdatePossibleTiles(*randomRow, *randomCol + 1);
+  
 }
 
 Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<Entity>& entity) {
@@ -572,7 +535,7 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
     // You must use the Entity's Animation size to position it correctly
     // The size of the grid width and height is stored in m_gridSize.x and m_gridSize.y
     // The bottom-left corner of the Animation should align with the bottom left of the grid cell
-
+    
     auto entitySize = entity->getComponent<CAnimation>().animation.getSize();
     // vec2 offset = m_gridSize - entitySize;
     return {
@@ -814,7 +777,7 @@ void Scene_Play::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-       // else if (action.name() == "WFC") { SpiralTraverse(grid); }
+        else if (action.name() == "WFC") { Collapse(); }
 
         else if (action.name() == "JUMP") {
             if (m_player->getComponent<CInput>().canJump) { m_player->getComponent<CInput>().up = true; }

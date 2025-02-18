@@ -186,23 +186,19 @@ public:
     };
     
 
-    void ImplementWFC(TileState(&grid)[20][12]);
-
-
     void RenderTile(TileType tileID, int *randRow, int* randCol, int rotationCount=0);
 
-    void Collapse(int currentX, int currentY);
+    void Collapse();
     std::pair<int, int> FindLowestEntropy();
     void UpdateNeighbourRules(int currentX, int currentY);
     void UpdatePossibleTiles(int currentX, int currentY);
-    void SpiralTraverse(TileState(&grid)[20][12]);
+    void ImplementWFC(TileState(&grid)[20][12]);
     bool withinBounds(int x, int y) {
         return x >= 0 && x < 20 && y >= 0 && y < 12;
     }
     //utils
     bool matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck);
     std::vector<TileType> selectValidTiles(const std::unordered_map<std::string, std::array<int, 3>>& rulesToCheck);
-    void UpdateCommonElements(int x, int y, std::vector<TileType>* rulesToCompare);
     std::string enumToString(int tile)
     {
         return circuitToString[tile];
