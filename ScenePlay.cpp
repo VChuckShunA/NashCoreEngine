@@ -165,27 +165,62 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
 
 void Scene_Play::Collapse()
 {
-    
 
-        std::pair<int, int> tileToCollapse = FindLowestEntropy();
-        if (tileToCollapse.first < 0 || tileToCollapse.first > 20 || tileToCollapse.second < 0 || tileToCollapse.second > 12)
-        {
-            return;
-        }
-        int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
+    std::pair<int, int> tileToCollapse = FindLowestEntropy(); 
+    if (grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.empty()) {
+        std::cerr << "No possible tiles for " << tileToCollapse.first << ", " << tileToCollapse.second << "\n";
+        return;
+    }
+    if (tileToCollapse.first < 0 || tileToCollapse.first > 20 || tileToCollapse.second < 0 || tileToCollapse.second > 12)
+    {
+        return;
+    }
 
-        std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
-        for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
-            std::cout << enumToString(i) << " , ";
-        }
-        std::cout << "RANDOM TILE IS " << enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) << std::endl;
-        RenderTile(static_cast<TileType>(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)), &tileToCollapse.first, &tileToCollapse.second);
+    UpdatePossibleTiles(tileToCollapse.first, tileToCollapse.second);
+    int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
+
+    std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
+    for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
+        std::cout << enumToString(i) << " , ";
+    }
+    std::cout << "RANDOM TILE IS " << enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) << std::endl;
+    RenderTile(static_cast<TileType>(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)), &tileToCollapse.first, &tileToCollapse.second);
 
        
    }
 
 std::pair<int, int> Scene_Play::FindLowestEntropy()
 {
+        int minEntropy = INT_MAX;
+        std::vector<std::pair<int, int>> candidates;
+
+        for (int y = 0; y < 12; ++y) {  // Iterate over rows (height)
+            for (int x = 0; x < 20; ++x) {  // Iterate over columns (width)
+                TileState& cell = grid[x][y];
+
+                if (!cell.collapsed) {  // Only consider non-collapsed cells
+                    int entropy = cell.possibleTiles.size();  // Count valid tile choices
+
+                    if (entropy < minEntropy) {
+                        minEntropy = entropy;
+                        candidates.clear();
+                        candidates.emplace_back(x, y);
+                    }
+                    else if (entropy == minEntropy) {
+                        candidates.emplace_back(x, y);
+                    }
+                }
+            }
+        }
+
+        if (candidates.empty()) {
+            return { -1, -1 };  // No available cell to collapse
+        }
+
+        // Randomly pick a tile from the candidates with the lowest entropy
+        return candidates[rand() % candidates.size()];
+
+    /*
     int minSize = INT_MAX;
     std::pair<int, int> minCoords = { -1, -1 }; // Default invalid position
 
@@ -201,20 +236,29 @@ std::pair<int, int> Scene_Play::FindLowestEntropy()
         }
     }
     std::cout << "Lowest Entropy is at " << minCoords.first <<" , "<<minCoords.second << std::endl;
-    return minCoords; // Returns (-1, -1) if no valid tile is found
+    return minCoords; // Returns (-1, -1) if no valid tile is found*/
 }
 
 void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
 {
-    grid[currentX-1][currentY].sockets.right= grid[currentX][currentY].sockets.left;
+    if (currentX > 0)
+        grid[currentX - 1][currentY].sockets.right = grid[currentX][currentY].sockets.left;
+    if (currentX < 19)
+        grid[currentX + 1][currentY].sockets.left = grid[currentX][currentY].sockets.right;
+    if (currentY > 0)
+        grid[currentX][currentY - 1].sockets.up = grid[currentX][currentY].sockets.down;
+    if (currentY < 11)
+        grid[currentX][currentY + 1].sockets.down = grid[currentX][currentY].sockets.up;
+
+    /*grid[currentX-1][currentY].sockets.right= grid[currentX][currentY].sockets.left;
     grid[currentX+1][currentY].sockets.left = grid[currentX][currentY].sockets.right;
     grid[currentX][currentY+1].sockets.down = grid[currentX][currentY].sockets.up;
-    grid[currentX][currentY-1].sockets.up = grid[currentX][currentY].sockets.down;
+    grid[currentX][currentY-1].sockets.up = grid[currentX][currentY].sockets.down;*/
 }
 
 void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
 {
-    if (currentX <= 0 || currentX>=20 || currentY <= 0 || currentY>=12)
+    if (currentX < 0 || currentX>=20 || currentY < 0 || currentY>=12)
     {
         return;
     }
@@ -288,8 +332,12 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
 
     std::cout << "End of First Tile's Rules" << std::endl;
-  
-    Collapse();
+
+    UpdatePossibleTiles(startRow - 1, startCol);
+    UpdatePossibleTiles(startRow + 1, startCol);
+    UpdatePossibleTiles(startRow, startCol - 1);
+    UpdatePossibleTiles(startRow, startCol + 1);
+   // Collapse();
   
 }
 
@@ -363,19 +411,20 @@ std::array<int, 3> Scene_Play::extractRules(TileType tile, const std::string& di
 bool Scene_Play::DoesTileFit(TileType tile,int& x, int& y)
 {
 
+    
     bool upMatch = false, downMatch = false, leftMatch = false, rightMatch = false;
     TileType currentTile = static_cast<TileType>(grid[x][y].currentTile);
     if (grid[x][y+1].sockets.down == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.up == grid[x][y + 1].sockets.down)
     {
-        std::cout << "UP MATCH this" << x << " , " << y << std::endl;
+        //std::cout << "UP MATCH this" << x << " , " << y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x][y].sockets.right[i] << " ";
-        std::cout << std::endl;
+          //  std::cout << grid[x][y].sockets.right[i] << " ";
+      //  std::cout << std::endl;
 
-        std::cout << "UP MATCH neighbour" << x + 1 << " , " << y << std::endl;
+      //  std::cout << "UP MATCH neighbour" << x + 1 << " , " << y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x][y + 1].sockets.right[i] << " ";
-        std::cout << std::endl;
+       //     std::cout << grid[x][y + 1].sockets.right[i] << " ";
+      //  std::cout << std::endl;
 
         upMatch = true;
        
@@ -383,43 +432,43 @@ bool Scene_Play::DoesTileFit(TileType tile,int& x, int& y)
 
     if (grid[x][y-1].sockets.up == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.down == grid[x][y - 1].sockets.up)
     {
-        std::cout << "DOWN MATCH this" << x << " , " << y << std::endl;
+       // std::cout << "DOWN MATCH this" << x << " , " << y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x][y].sockets.right[i] << " ";
-        std::cout << std::endl;
+      //      std::cout << grid[x][y].sockets.right[i] << " ";
+      //  std::cout << std::endl;
 
-        std::cout << "DOWN MATCH neighbour" << x + 1 << " , " << y << std::endl;
+      //  std::cout << "DOWN MATCH neighbour" << x + 1 << " , " << y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x][y-1].sockets.right[i] << " ";
-        std::cout << std::endl;
+     //       std::cout << grid[x][y-1].sockets.right[i] << " ";
+     //   std::cout << std::endl;
         downMatch = true;
     }
 
     if (grid[x-1][y].sockets.right == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.left == grid[x - 1][y].sockets.right)
     {
-        std::cout << "LEFT MATCH this" << x << " , " << y << std::endl;
+      //  std::cout << "LEFT MATCH this" << x << " , " << y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x][y].sockets.right[i] << " ";
-        std::cout << std::endl;
+     //       std::cout << grid[x][y].sockets.right[i] << " ";
+    //    std::cout << std::endl;
 
-        std::cout << "LEFT MATCH neighbour" << x + 1 << " , " << y << std::endl;
+    //    std::cout << "LEFT MATCH neighbour" << x + 1 << " , " << y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x - 1][y].sockets.right[i] << " ";
-        std::cout << std::endl;
+   //         std::cout << grid[x - 1][y].sockets.right[i] << " ";
+    //    std::cout << std::endl;
         leftMatch = true;
     }
 
     if (grid[x+1][y].sockets.left == std::array<int, 3>{90, 90, 90} || grid[x][y].sockets.right == grid[x + 1][y].sockets.left)
     {
-        std::cout << "RIGHT MATCH this" <<x<<" , "<<y<< std::endl;
+    //    std::cout << "RIGHT MATCH this" <<x<<" , "<<y<< std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x][y].sockets.right[i] << " ";
-        std::cout << std::endl;
+      //      std::cout << grid[x][y].sockets.right[i] << " ";
+     //   std::cout << std::endl;
 
-        std::cout << "RIGHT MATCH neighbour"<< x+1<<" , "<< y << std::endl;
+    //    std::cout << "RIGHT MATCH neighbour"<< x+1<<" , "<< y << std::endl;
         for (int i = 0; i < 3; i++)
-            std::cout << grid[x + 1][y].sockets.right[i] << " ";
-        std::cout << std::endl;
+   //         std::cout << grid[x + 1][y].sockets.right[i] << " ";
+   //     std::cout << std::endl;
         rightMatch = true;
     }
 
@@ -431,6 +480,72 @@ bool Scene_Play::DoesTileFit(TileType tile,int& x, int& y)
     {
         return false;
     }
+}
+
+Scene_Play::TileSockets Scene_Play::getSocketsForTile(TileType tile)
+{
+    TileSockets sockets;
+
+    if (adjacencyRules.find(tile) != adjacencyRules.end()) {
+        sockets.up = adjacencyRules[tile]["up"];
+        sockets.down = adjacencyRules[tile]["down"];
+        sockets.left = adjacencyRules[tile]["left"];
+        sockets.right = adjacencyRules[tile]["right"];
+    }
+    else {
+        // Default to an invalid socket if tile type is missing
+        sockets.up = sockets.down = sockets.left = sockets.right = { -1, -1, -1 };
+    }
+
+    return sockets;
+}
+
+std::pair<Scene_Play::TileType, int> Scene_Play::FindMatchingTile(int* randRow, int* randCol)
+{
+    int randomTile = std::rand() % grid[*randRow][*randCol].possibleTiles.size();
+    TileType tile = static_cast<TileType>(randomTile);
+    bool itFits = DoesTileFit(tile, *randRow, *randCol);
+    int rotationCount = 0;
+    grid[*randRow][*randCol].sockets.up = extractRules(tile, "up");
+    grid[*randRow][*randCol].sockets.down = extractRules(tile, "down");
+    grid[*randRow][*randCol].sockets.left = extractRules(tile, "left");
+    grid[*randRow][*randCol].sockets.right = extractRules(tile, "right");
+
+    while (!itFits)
+    {
+
+        
+    
+        itFits = DoesTileFit(tile, *randRow, *randCol);
+        rotationCount++;
+        if (rotationCount == 3)
+        {
+            if (!itFits)
+            {
+                grid[*randRow][*randCol].possibleTiles.erase(find(grid[*randRow][*randCol].possibleTiles.begin(), grid[*randRow][*randCol].possibleTiles.end(),tile));
+                if (!grid[*randRow][*randCol].possibleTiles.empty())
+                {
+                    randomTile = std::rand() % grid[*randRow][*randCol].possibleTiles.size();
+                    tile = static_cast<TileType>(randomTile);
+                    grid[*randRow][*randCol].sockets.up = extractRules(tile, "up");
+                    grid[*randRow][*randCol].sockets.down = extractRules(tile, "down");
+                    grid[*randRow][*randCol].sockets.left = extractRules(tile, "left");
+                    grid[*randRow][*randCol].sockets.right = extractRules(tile, "right");
+                    rotationCount = 0;
+                }
+                else {
+                    std::cout << "ERROR! Could not find Matching Tile" << std::endl;
+                    break;
+                }
+            }
+        }
+
+        RotateTileRules(grid[*randRow][*randCol].sockets.up,
+            grid[*randRow][*randCol].sockets.down,
+            grid[*randRow][*randCol].sockets.left,
+            grid[*randRow][*randCol].sockets.right);
+    }
+    return { tile, rotationCount };
 }
 
 
@@ -485,15 +600,14 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         dec->addComponent<CAnimation>(m_game->assets().getAnimation("Wire"), true);
         break;
     }
-
     grid[*randomRow][*randomCol].collapsed = true;
     grid[*randomRow][*randomCol].currentTile = tileID;
     TileType tile = tileID;
-    
-        grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
-        grid[*randomRow][*randomCol].sockets.down = extractRules(tile, "down");
-        grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
-        grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
+
+    grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
+    grid[*randomRow][*randomCol].sockets.down = extractRules(tile, "down");
+    grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
+    grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
 
     dec->addComponent<CTransform>(
         gridToMidPixel(*randomRow, *randomCol, dec),
@@ -501,13 +615,13 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         Vec2(1, 1),
         0
     );
-   
+
     std::cout << "Rendered tile " << tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
     bool itFits = DoesTileFit(tileID, *randomRow, *randomCol);
-    std::cout << "FIT STATUS " << itFits ;
+    std::cout << "FIT STATUS " << itFits;
     while (!itFits)
     {
-        dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle +90;
+        dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle + 90;
         RotateTileRules(grid[*randomRow][*randomCol].sockets.up,
             grid[*randomRow][*randomCol].sockets.down,
             grid[*randomRow][*randomCol].sockets.left,
@@ -518,9 +632,9 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         {
             break;
         }
-        
+
     }
-    std::cout << "Rotated " <<rotationCount<<" times !"<< std::endl;
+    std::cout << "Rotated " << rotationCount << " times !" << std::endl;
     UpdateNeighbourRules(*randomRow, *randomCol);
     UpdatePossibleTiles(*randomRow - 1, *randomCol);
     UpdatePossibleTiles(*randomRow + 1, *randomCol);

@@ -208,5 +208,7 @@ public:
     std::array<int, 3> extractRules(TileType tile, const std::string& direction);
     bool DoesTileFit(TileType tile,int &x,int& y);
 
-    
+    TileSockets getSocketsForTile(TileType tile);
+
+    std::pair<TileType, int> FindMatchingTile(int* randRow, int* randCol);
 };
