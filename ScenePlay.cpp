@@ -179,11 +179,12 @@ void Scene_Play::Collapse()
     UpdatePossibleTiles(tileToCollapse.first, tileToCollapse.second);
     int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
 
+    std::cout << "LOWEST ENTROPY IS AT " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
     std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
     for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
         std::cout << enumToString(i) << " , ";
     }
-    std::cout << "RANDOM TILE IS " << enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) << std::endl;
+   // std::cout << "RANDOM TILE IS " << enumToString(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)) << std::endl;
     RenderTile(static_cast<TileType>(grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.at(randomTile)), &tileToCollapse.first, &tileToCollapse.second);
 
        
@@ -257,13 +258,20 @@ void Scene_Play::UpdateNeighbourRules(int currentX, int currentY)
 }
 
 void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
-{
+{/*
+    if (currentX < 0 || currentX >= 20 || currentY < 0 || currentY >= 12)
+    {
+        return;
+    }
+    std::array<int, 3> upToCheck, downToCheck, leftToCheck, rightToCheck = { 90, 90, 90 };
+
+    */
     if (currentX < 0 || currentX>=20 || currentY < 0 || currentY>=12)
     {
         return;
     }
 
-    std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , "<<currentY << std::endl;
+  //  std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , "<<currentY << std::endl;
 
     grid[currentX][currentY].possibleTiles.erase(
         std::remove_if(
@@ -292,11 +300,11 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
 
 
     
-    std::cout << "UPDATED POSSIBLE TILES FOR"<< currentX<<" , "<< currentY << std::endl;
-    for (auto i : grid[currentX][currentY].possibleTiles) {
-        std::cout << enumToString(i) << " ";
-    }
-    std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl;
+   //// std::cout << "UPDATED POSSIBLE TILES FOR"<< currentX<<" , "<< currentY << std::endl;
+   // for (auto i : grid[currentX][currentY].possibleTiles) {
+   //     std::cout << enumToString(i) << " ";
+   // }
+   // std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl;
 }
 
 void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
@@ -618,7 +626,7 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
 
     std::cout << "Rendered tile " << tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
     bool itFits = DoesTileFit(tileID, *randomRow, *randomCol);
-    std::cout << "FIT STATUS " << itFits;
+   // std::cout << "FIT STATUS " << itFits;
     while (!itFits)
     {
         dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle + 90;
@@ -634,7 +642,7 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         }
 
     }
-    std::cout << "Rotated " << rotationCount << " times !" << std::endl;
+   // std::cout << "Rotated " << rotationCount << " times !" << std::endl;
     UpdateNeighbourRules(*randomRow, *randomCol);
     UpdatePossibleTiles(*randomRow - 1, *randomCol);
     UpdatePossibleTiles(*randomRow + 1, *randomCol);
