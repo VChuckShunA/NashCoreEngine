@@ -143,7 +143,7 @@ std::vector<Scene_Play::TileType> Scene_Play::selectValidTiles(const std::unorde
             }
 
             bool foundMatch = false;
-            for (const auto& [dir, tileRuleArray] : rules) {  // Iterate over the tile's adjacency rules
+            for (const auto& [dir, tileRuleArray] : rules.adjacencyRules) {  // Iterate over the tile's adjacency rules
                 if (matchesRules(tileRuleArray, ruleArray)) {
                     foundMatch = true;
                     break;  // Stop searching once a match is found
@@ -180,6 +180,12 @@ void Scene_Play::Collapse()
     int randomTile = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
 
     std::cout << "LOWEST ENTROPY IS AT " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
+
+    std::cout << tileToCollapse.first <<" , " << tileToCollapse.second << "'s Rules" << std::endl;
+    std::cout << "Up Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.up) << std::endl;
+    std::cout << "Down Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.down) << std::endl;
+    std::cout << "Left Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.left) << std::endl;
+    std::cout << "Right Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.right) << std::endl;
     std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
     for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
         std::cout << enumToString(i) << " , ";
@@ -191,7 +197,7 @@ void Scene_Play::Collapse()
    }
 
 std::pair<int, int> Scene_Play::FindLowestEntropy()
-{
+{/*
         int minEntropy = INT_MAX;
         std::vector<std::pair<int, int>> candidates;
 
@@ -220,8 +226,8 @@ std::pair<int, int> Scene_Play::FindLowestEntropy()
 
         // Randomly pick a tile from the candidates with the lowest entropy
         return candidates[rand() % candidates.size()];
-
-    /*
+*/
+   
     int minSize = INT_MAX;
     std::pair<int, int> minCoords = { -1, -1 }; // Default invalid position
 
@@ -284,7 +290,7 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
         }
 
         bool matches = false;
-        for (const auto& [direction, values] : adjacencyRules[tile]) {
+        for (const auto& [direction, values] : adjacencyRules[tile].adjacencyRules) {
             if (values == grid[currentX][currentY].sockets.left ||
                 values == grid[currentX][currentY].sockets.right ||
                 values == grid[currentX][currentY].sockets.up ||
@@ -309,6 +315,7 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
 
 void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
 {
+    ProcessTiles();
     const int N = 20; // Number of rows
     const int M = 12; // Number of columns
 
@@ -327,10 +334,10 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     int x = startx;    // Current row
     int y = starty;    // Current column
 
-    grid[x][y].sockets.up = adjacencyRules.at(randomTile).at("up");
-    grid[x][y].sockets.down = adjacencyRules.at(randomTile).at("down");
-    grid[x][y].sockets.left = adjacencyRules.at(randomTile).at("left");
-    grid[x][y].sockets.right = adjacencyRules.at(randomTile).at("right");
+    grid[x][y].sockets.up = adjacencyRules[randomTile].adjacencyRules["up"];
+    grid[x][y].sockets.down = adjacencyRules[randomTile].adjacencyRules["down"];
+    grid[x][y].sockets.left = adjacencyRules[randomTile].adjacencyRules["left"];
+    grid[x][y].sockets.right = adjacencyRules[randomTile].adjacencyRules["right"];
 
     UpdateNeighbourRules(x, y);
     std::cout << "First Tile's Rules" << std::endl;
@@ -403,9 +410,9 @@ std::array<int, 3> Scene_Play::extractRules(TileType tile, const std::string& di
 { // Check if the tile type exists in the map
     if (adjacencyRules.find(tile) != adjacencyRules.end()) {
         // Check if the direction key exists for the tile type
-        if (adjacencyRules.at(tile).find(direction) != adjacencyRules.at(tile).end()) {
+        if (adjacencyRules.at(tile).adjacencyRules.find(direction) != adjacencyRules.at(tile).adjacencyRules.end()) {
            // std::cout << arrayToString(adjacencyRules.at(tile).at(direction)) << std::endl;
-            return adjacencyRules.at(tile).at(direction);
+            return adjacencyRules.at(tile).adjacencyRules.at(direction);
         }
         else {
             throw std::runtime_error("Direction '" + direction + "' not found for the given tile type.");
@@ -490,15 +497,73 @@ bool Scene_Play::DoesTileFit(TileType tile,int& x, int& y)
     }
 }
 
+void Scene_Play::ProcessTiles()
+{
+    TileInfo newTileInfo;
+    int newTile = 14;
+    std::unordered_map<TileType, TileInfo> newAdjacencyRules;
+    std::array<int, 3> newUpRules, newDownRules, newRightRules, newLeftRules;
+    for (const auto& [tile, info] : adjacencyRules) {
+        if (tile == COMPONENT || tile == SUBSTRATE) continue; // Skip these tile types
+
+        newUpRules= adjacencyRules[tile].adjacencyRules["up"];
+        newDownRules = adjacencyRules[tile].adjacencyRules["down"];
+        newRightRules = adjacencyRules[tile].adjacencyRules["left"];
+        newLeftRules = adjacencyRules[tile].adjacencyRules["right"];
+        newTileInfo.textureName = info.textureName;
+
+
+        for (int i = 1; i <= 3; i++) {
+            RotateTileRules(newUpRules, newDownRules, newLeftRules, newRightRules);
+            newTileInfo.rotationCount = i;
+            newTileInfo.adjacencyRules["up"] = newUpRules;
+            newTileInfo.adjacencyRules["down"] = newDownRules;
+            newTileInfo.adjacencyRules["left"] = newLeftRules;
+            newTileInfo.adjacencyRules["right"] = newRightRules;
+            newAdjacencyRules.insert({ static_cast<TileType>(newTile),newTileInfo });
+            newTile++;
+        }
+
+       /* std::cout << "TileType: " << static_cast<int>(tile)
+            << " (" << info.textureName << "), Rotations: " << info.rotationCount << std::endl;
+
+        for (const auto& [direction, ruleSet] : info.adjacencyRules) {
+            std::cout << "  Direction: " << direction << " -> Rules: [ ";
+
+            for (int rule : ruleSet) {
+                std::cout << rule << " ";
+            }
+
+            std::cout << "]" << std::endl;
+        }*/
+    }
+    adjacencyRules.insert(newAdjacencyRules.begin(), newAdjacencyRules.end());
+    for (const auto& [tile, info] : adjacencyRules) {
+
+        std::cout << "TileType: " << static_cast<int>(tile)
+            << " (" << info.textureName << "), Rotations: " << info.rotationCount << std::endl;
+
+        for (const auto& [direction, ruleSet] : info.adjacencyRules) {
+            std::cout << "  Direction: " << direction << " -> Rules: [ ";
+
+            for (int rule : ruleSet) {
+                std::cout << rule << " ";
+            }
+
+            std::cout << "]" << std::endl;
+        }
+    }
+}
+
 Scene_Play::TileSockets Scene_Play::getSocketsForTile(TileType tile)
 {
     TileSockets sockets;
 
     if (adjacencyRules.find(tile) != adjacencyRules.end()) {
-        sockets.up = adjacencyRules[tile]["up"];
-        sockets.down = adjacencyRules[tile]["down"];
-        sockets.left = adjacencyRules[tile]["left"];
-        sockets.right = adjacencyRules[tile]["right"];
+        sockets.up = adjacencyRules[tile].adjacencyRules["up"];
+        sockets.down = adjacencyRules[tile].adjacencyRules["down"];
+        sockets.left = adjacencyRules[tile].adjacencyRules["left"];
+        sockets.right = adjacencyRules[tile].adjacencyRules["right"];
     }
     else {
         // Default to an invalid socket if tile type is missing
@@ -563,51 +628,7 @@ std::pair<Scene_Play::TileType, int> Scene_Play::FindMatchingTile(int* randRow, 
 void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int rotationCount)
 {
     auto dec = m_entityManager.addEntity("dec");
-    switch (tileID)
-    {
-    case BRIDGE:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Bridge"), true);
-        break;
-    case COMPONENT:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Component"), true);
-        break;
-    case CONNECTION:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Connection"), true);
-        break;
-    case CORNER:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Corner"), true);
-        break;
-    case DSKEW:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("DSkew"), true);
-        break;
-    case SKEW:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Skew"), true);
-        break;
-    case SUBSTRATE:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Substrate"), true);
-        break;
-    case T:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("T"), true);
-        break;
-    case TRACK:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Track"), true);
-        break;
-    case TRANSITION:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Transition"), true);
-        break;
-    case TURN:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Turn"), true);
-        break;
-    case VIAD:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("ViaD"), true);
-        break;
-    case VIAS:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("ViaS"), true);
-        break;
-    case WIRE:
-        dec->addComponent<CAnimation>(m_game->assets().getAnimation("Wire"), true);
-        break;
-    }
+   
     grid[*randomRow][*randomCol].collapsed = true;
     grid[*randomRow][*randomCol].currentTile = tileID;
     TileType tile = tileID;
@@ -617,19 +638,13 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
     grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
     grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
 
-    dec->addComponent<CTransform>(
-        gridToMidPixel(*randomRow, *randomCol, dec),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
+    
 
     std::cout << "Rendered tile " << tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
     bool itFits = DoesTileFit(tileID, *randomRow, *randomCol);
    // std::cout << "FIT STATUS " << itFits;
     while (!itFits)
     {
-        dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle + 90;
         RotateTileRules(grid[*randomRow][*randomCol].sockets.up,
             grid[*randomRow][*randomCol].sockets.down,
             grid[*randomRow][*randomCol].sockets.left,
@@ -638,8 +653,47 @@ void Scene_Play::RenderTile(TileType tileID,int* randomRow, int* randomCol,int r
         rotationCount++;
         if (rotationCount == 3)
         {
-            break;
+            if (!itFits)
+            {
+                
+                if (!grid[*randomRow][*randomCol].possibleTiles.empty())
+                {
+                    //grid[*randomRow][*randomCol].possibleTiles.erase(find(grid[*randomRow][*randomCol].possibleTiles.begin(), grid[*randomRow][*randomCol].possibleTiles.end(), tileID));
+                    rotationCount = 0;
+                    tileID = static_cast<TileType>(std::rand() % grid[*randomRow][*randomCol].possibleTiles.size());
+                    tile = tileID;
+                    std::cout << "New Tile is " << enumToString(tileID) << std::endl;
+                    grid[*randomRow][*randomCol].sockets.up = extractRules(tile, "up");
+                    grid[*randomRow][*randomCol].sockets.down = extractRules(tile, "down");
+                    grid[*randomRow][*randomCol].sockets.left = extractRules(tile, "left");
+                    grid[*randomRow][*randomCol].sockets.right = extractRules(tile, "right");
+                    grid[*randomRow][*randomCol].currentTile = tileID;
+                    itFits = DoesTileFit(tileID, *randomRow, *randomCol);
+                }
+                else {
+                    return;
+                }
+            }
+            else{
+                break;
+            }
         }
+
+    }
+
+    dec->addComponent<CAnimation>(m_game->assets().getAnimation(adjacencyRules.at(tileID).textureName), true);
+    
+
+    dec->addComponent<CTransform>(
+        gridToMidPixel(*randomRow, *randomCol, dec),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+
+    if (rotationCount > 0)
+    {
+        dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle + (90 * rotationCount);
 
     }
    // std::cout << "Rotated " << rotationCount << " times !" << std::endl;

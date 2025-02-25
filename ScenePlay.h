@@ -62,7 +62,19 @@ public:
 
 
     enum TileType {
-        BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE
+        BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE,
+        BRIDGE1, BRIDGE2, BRIDGE3, 
+        CONNECTION1, CONNECTION2, CONNECTION3,
+        CORNER1, CORNER2, CORNER3, 
+        DSKEW1, DSKEW2, DSKEW3,
+        SKEW1, SKEW2, SKEW3, 
+        T1, T2, T3, 
+        TRACK1, TRACK2, TRACK3, 
+        TRANSITION1, TRANSITION2, TRANSITION3, 
+        TURN1, TURN2, TURN3, 
+        VIAD1, VIAD2, VIAD3, 
+        VIAS1, VIAS2, VIAS3, 
+        WIRE1, WIRE2, WIRE3,
     }tiles;
 
     struct TileSockets {
@@ -72,10 +84,30 @@ public:
         std::array<int, 3> right = { 90, 90, 90 };
     };
 
+    struct TileInfo {
+        std::string textureName;  // Stores tile name
+        int rotationCount; // Stores rotation count
+        std::unordered_map<std::string, std::array<int, 3>> adjacencyRules;
+    };
+
 
     struct TileState {
         TileSockets sockets;
-        std::vector<TileType> possibleTiles = {BRIDGE,COMPONENT,CONNECTION,CORNER,DSKEW,SKEW,SUBSTRATE,T,TRACK,TRANSITION,TURN,VIAD,VIAS,WIRE}; // IDs of possible tiles
+        std::vector<TileType> possibleTiles = {
+        BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE,
+        /*BRIDGE1, BRIDGE2, BRIDGE3,
+        CONNECTION1, CONNECTION2, CONNECTION3,
+        CORNER1, CORNER2, CORNER3,
+        DSKEW1, DSKEW2, DSKEW3,
+        SKEW1, SKEW2, SKEW3,
+        T1, T2, T3,
+        TRACK1, TRACK2, TRACK3,
+        TRANSITION1, TRANSITION2, TRANSITION3,
+        TURN1, TURN2, TURN3,
+        VIAD1, VIAD2, VIAD3,
+        VIAS1, VIAS2, VIAS3,
+        WIRE1, WIRE2, WIRE3,*/
+        }; // IDs of possible tiles
         int currentTile = NULL;
         bool collapsed = false;        // Whether this cell is collapsed
     }grid[20][12];
@@ -97,94 +129,109 @@ public:
         { WIRE, "WIRE" }
     };
     
-    std::unordered_map<TileType, std::unordered_map<std::string, std::array<int, 3>>> adjacencyRules = {
+    std::unordered_map<TileType, TileInfo> adjacencyRules = {
         { BRIDGE, {
-            { "up",   {1, 2, 1} },
+            "Bridge",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {1, 2, 1} },
             { "left", {1, 3, 1} },
-            { "right",{1, 3, 1} }
+            { "right",{1, 3, 1} }}
         }},
         { COMPONENT, {
-            { "up",   {9, 9, 9} },
+            "Component",0,
+            {{ "up",   {9, 9, 9} },
             { "down", {9, 9, 9}},
             { "left", {9, 9, 9}},
-            { "right",{9, 9, 9} }
+            { "right",{9, 9, 9} }}
         }},
         { CONNECTION, {
-            { "up",   {1, 2, 1} },
+            "Connection",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {9, 9, 9} },
             { "left", {1, 1, 9} },
-            { "right",{1, 1, 9} }
+            { "right",{1, 1, 9} }}
         }},
         { CORNER, {
-            { "up",   {1, 1, 1} },
+            "Corner",0,
+            {{ "up",   {1, 1, 1} },
             { "down", {9, 1, 1}},
             { "left", {1, 1, 9}},
-            { "right",{1, 1, 1} }
+            { "right",{1, 1, 1} }}
         }},
         { DSKEW, {
-            { "up",   {1, 2, 1} },
+            "DSkew",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {1, 2, 1}},
             { "left", {1, 2, 1}},
-            { "right",{1, 2, 1} }
+            { "right",{1, 2, 1} }}
         }},
         { SKEW, {
-            { "up",   {1, 2, 1} },
+            "Skew",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {1, 1, 1}},
             { "left", {1, 1, 1}},
-            { "right",{1, 2, 1} }
+            { "right",{1, 2, 1} }}
         }},
         { SUBSTRATE, {
-            { "up",   {1, 1, 1} },
+            "Substrate",0,
+            {{ "up",   {1, 1, 1} },
             { "down", {1, 1, 1}},
             { "left", {1, 1, 1}},
-            { "right",{1, 1, 1} }
+            { "right",{1, 1, 1} }}
         }},
         { T, {
-            { "up",   {1, 1, 1} },
+            "T",0,
+            {{ "up",   {1, 1, 1} },
             { "down", {1, 2, 1}},
             { "left", {1, 2, 1}},
-            { "right",{1, 2, 1} }
+            { "right",{1, 2, 1} }}
         }},
         { TRACK, {
-            { "up",   {1, 2, 1} },
+            "Track",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {1, 2, 1}},
             { "left", {1, 1, 1}},
-            { "right",{1, 1, 1} }
+            { "right",{1, 1, 1} }}
         }},
         { TRANSITION, {
-            { "up",   {1, 3, 1} },
+            "Transition",0,
+            {{ "up",   {1, 3, 1} },
             { "down", {1, 2, 1}},
             { "left", {1, 1, 1}},
-            { "right",{1, 1, 1} }
+            { "right",{1, 1, 1} }}
         }},
         { TURN, {
-            { "up",   {1, 2, 1} },
+            "Turn",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {1, 1, 1}},
             { "left", {1, 1, 1}},
-            { "right",{1, 2, 1} }
+            { "right",{1, 2, 1} }}
         }},
         { VIAD, {
-            { "up",   {1, 1, 1} },
+            "ViaD",0,
+            {{ "up",   {1, 1, 1} },
             { "down", {1, 1, 1}},
             { "left", {1, 2, 1}},
-            { "right",{1, 2, 1} }
+            { "right",{1, 2, 1} }}
         }},
         { VIAS, {
-            { "up",   {1, 2, 1} },
+            "ViaS",0,
+            {{ "up",   {1, 2, 1} },
             { "down", {1, 1, 1}},
             { "left", {1, 1, 1}},
-            { "right",{1, 1, 1} }
+            { "right",{1, 1, 1} }}
         }},
         { WIRE, {
-            { "up",   {1, 1, 1} },
+            "Wire",0,
+            {{ "up",   {1, 1, 1} },
             { "down", {1, 1, 1}},
             { "left", {1, 3, 1}},
-            { "right",{1, 3, 1} }
+            { "right",{1, 3, 1} }}
         }},
 
     };
     
+
 
     void RenderTile(TileType tileID, int *randRow, int* randCol, int rotationCount=0);
 
@@ -207,6 +254,8 @@ public:
     std::string arrayToString(const std::array<int, 3>& arr);
     std::array<int, 3> extractRules(TileType tile, const std::string& direction);
     bool DoesTileFit(TileType tile,int &x,int& y);
+
+    void ProcessTiles();
 
     TileSockets getSocketsForTile(TileType tile);
 
