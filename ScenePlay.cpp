@@ -108,11 +108,11 @@ void Scene_Play::loadLevel(const std::string& fileName) {
     std::cout << "Start WFC" << std::endl;
 
 
-    ImplementWFC(grid);
     std::pair<int, int> newLowest = FindLowestEntropy();
 
     std::cout << "NEW LOWEST : "<<newLowest.first << " , " << newLowest.second << std::endl;
 
+    ImplementWFC(grid);
     std::cout << "End WFC" << std::endl;
 
     // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
@@ -192,12 +192,12 @@ void Scene_Play::Collapse()
     }
     std::cout << "RANDOM TILE IS " << enumToString(randomTile) << std::endl;
     RenderTile(randomTile, &tileToCollapse.first, &tileToCollapse.second);
-
+    Collapse();
        
    }
 
 std::pair<int, int> Scene_Play::FindLowestEntropy()
-{/*
+{
         int minEntropy = INT_MAX;
         std::vector<std::pair<int, int>> candidates;
 
@@ -226,8 +226,8 @@ std::pair<int, int> Scene_Play::FindLowestEntropy()
 
         // Randomly pick a tile from the candidates with the lowest entropy
         return candidates[rand() % candidates.size()];
-*/
-   
+
+/*
     int minSize = INT_MAX;
     std::pair<int, int> minCoords = { -1, -1 }; // Default invalid position
 
@@ -330,6 +330,18 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
         std::cout << enumToString(i) << " ";
     }
     std::cout << "\nTotal Possible Tiles: " << grid[currentX][currentY].possibleTiles.size() << std::endl;
+
+    if (grid[currentX][currentY].possibleTiles.empty())
+    {
+        std::cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!" << std::endl;
+        std::cout << "ERROR IS AT " <<currentX<< " , "<< currentY << std::endl;
+
+        std::cout << "Up Rules " << arrayToString(grid[currentX][currentY].sockets.up) << std::endl;
+        std::cout << "Down Rules " << arrayToString(grid[currentX][currentY].sockets.down) << std::endl;
+        std::cout << "Left Rules " << arrayToString(grid[currentX][currentY].sockets.left) << std::endl;
+        std::cout << "Right Rules " << arrayToString(grid[currentX][currentY].sockets.right) << std::endl;
+
+    }
 
     /*
     if (currentX < 0 || currentX >= 20 || currentY < 0 || currentY >= 12)
@@ -440,7 +452,7 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     UpdatePossibleTiles(startRow + 1, startCol);
     UpdatePossibleTiles(startRow, startCol - 1);
     UpdatePossibleTiles(startRow, startCol + 1);
-   // Collapse();
+    Collapse();
   
 }
 
