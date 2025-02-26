@@ -105,15 +105,15 @@ void Scene_Play::loadLevel(const std::string& fileName) {
 
 
     //Implement WFC here
-    std::cout << "Start WFC" << std::endl;
+  //  std::cout << "Start WFC" << std::endl;
 
 
-    std::pair<int, int> newLowest = FindLowestEntropy();
+ //   std::pair<int, int> newLowest = FindLowestEntropy();
 
-    std::cout << "NEW LOWEST : "<<newLowest.first << " , " << newLowest.second << std::endl;
+  //  std::cout << "NEW LOWEST : "<<newLowest.first << " , " << newLowest.second << std::endl;
 
     ImplementWFC(grid);
-    std::cout << "End WFC" << std::endl;
+ //   std::cout << "End WFC" << std::endl;
 
     // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
     //       Components are now returned as references rather than pointers
@@ -179,18 +179,18 @@ void Scene_Play::Collapse()
     UpdatePossibleTiles(tileToCollapse.first, tileToCollapse.second);
     int randomTileID = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
     TileType randomTile = grid[tileToCollapse.first][tileToCollapse.second].possibleTiles[randomTileID];
-    std::cout << "LOWEST ENTROPY IS AT " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
+  //  std::cout << "LOWEST ENTROPY IS AT " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
 
-    std::cout << tileToCollapse.first <<" , " << tileToCollapse.second << "'s Rules" << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.right) << std::endl;
-    std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
-    for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
-        std::cout << enumToString(i) << " , ";
-    }
-    std::cout << "RANDOM TILE IS " << enumToString(randomTile) << std::endl;
+  //  std::cout << tileToCollapse.first <<" , " << tileToCollapse.second << "'s Rules" << std::endl;
+  //  std::cout << "Up Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.up) << std::endl;
+ //   std::cout << "Down Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.down) << std::endl;
+ //   std::cout << "Left Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.left) << std::endl;
+ //   std::cout << "Right Rules " << arrayToString(grid[tileToCollapse.first][tileToCollapse.second].sockets.right) << std::endl;
+ //   std::cout << "Now printing possible tile for " << tileToCollapse.first << " , " << tileToCollapse.second << std::endl;
+ //   for (auto i : grid[tileToCollapse.first][tileToCollapse.second].possibleTiles) {
+ //       std::cout << enumToString(i) << " , ";
+ //   }
+//    std::cout << "RANDOM TILE IS " << enumToString(randomTile) << std::endl;
     RenderTile(randomTile, &tileToCollapse.first, &tileToCollapse.second);
     Collapse();
        
@@ -273,7 +273,7 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
         return; // Prevent out-of-bounds access
     }
 
-    std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , " << currentY << std::endl;
+   // std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , " << currentY << std::endl;
 
     // Lambda function to determine whether a tile should be removed
     auto tileFilter = [&](TileType tile) {
@@ -325,23 +325,23 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
     );
 
     // Output possible tiles after update
-    std::cout << "UPDATED POSSIBLE TILES FOR " << currentX << " , " << currentY << ": ";
-    for (auto i : grid[currentX][currentY].possibleTiles) {
-        std::cout << enumToString(i) << " ";
-    }
-    std::cout << "\nTotal Possible Tiles: " << grid[currentX][currentY].possibleTiles.size() << std::endl;
+  //  std::cout << "UPDATED POSSIBLE TILES FOR " << currentX << " , " << currentY << ": ";
+  //  for (auto i : grid[currentX][currentY].possibleTiles) {
+ //       std::cout << enumToString(i) << " ";
+ //   }
+  //  std::cout << "\nTotal Possible Tiles: " << grid[currentX][currentY].possibleTiles.size() << std::endl;
 
-    if (grid[currentX][currentY].possibleTiles.empty())
-    {
-        std::cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!" << std::endl;
-        std::cout << "ERROR IS AT " <<currentX<< " , "<< currentY << std::endl;
+ //   if (grid[currentX][currentY].possibleTiles.empty())
+ //   {
+ //       std::cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!" << std::endl;
+   //     std::cout << "ERROR IS AT " <<currentX<< " , "<< currentY << std::endl;
 
-        std::cout << "Up Rules " << arrayToString(grid[currentX][currentY].sockets.up) << std::endl;
-        std::cout << "Down Rules " << arrayToString(grid[currentX][currentY].sockets.down) << std::endl;
-        std::cout << "Left Rules " << arrayToString(grid[currentX][currentY].sockets.left) << std::endl;
-        std::cout << "Right Rules " << arrayToString(grid[currentX][currentY].sockets.right) << std::endl;
+//        std::cout << "Up Rules " << arrayToString(grid[currentX][currentY].sockets.up) << std::endl;
+//        std::cout << "Down Rules " << arrayToString(grid[currentX][currentY].sockets.down) << std::endl;
+//        std::cout << "Left Rules " << arrayToString(grid[currentX][currentY].sockets.left) << std::endl;
+//        std::cout << "Right Rules " << arrayToString(grid[currentX][currentY].sockets.right) << std::endl;
 
-    }
+//    }
 
     /*
     if (currentX < 0 || currentX >= 20 || currentY < 0 || currentY >= 12)
@@ -426,7 +426,7 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     int startRow = std::rand() % N;
     int startCol = std::rand() % M;
     TileType randomTile = static_cast<TileType>(std::rand() % 14); // 14 because the enum has 14 values (0-13)
-    std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
+   // std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
     int startx = startRow, starty = startCol;
     RenderTile(randomTile, &startx, &starty,false);
 
@@ -440,13 +440,13 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     grid[x][y].sockets.right = adjacencyRules[randomTile].adjacencyRules["right"];
 
     UpdateNeighbourRules(x, y);
-    std::cout << "First Tile's Rules" << std::endl;
-    std::cout << "Up Rules " << arrayToString(grid[x][y].sockets.up) << std::endl;
-    std::cout << "Down Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
-    std::cout << "Left Rules " << arrayToString(grid[x][y].sockets.left) << std::endl;
-    std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
+  //  std::cout << "First Tile's Rules" << std::endl;
+  //  std::cout << "Up Rules " << arrayToString(grid[x][y].sockets.up) << std::endl;
+ //   std::cout << "Down Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
+ //   std::cout << "Left Rules " << arrayToString(grid[x][y].sockets.left) << std::endl;
+//    std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
 
-    std::cout << "End of First Tile's Rules" << std::endl;
+ //   std::cout << "End of First Tile's Rules" << std::endl;
 
     UpdatePossibleTiles(startRow - 1, startCol);
     UpdatePossibleTiles(startRow + 1, startCol);
