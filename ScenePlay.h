@@ -111,7 +111,6 @@ public:
         int currentTile = NULL;
         bool collapsed = false;        // Whether this cell is collapsed
 
-        std::vector<TileType> validUp, validDown, validLeft, validRight;
 
     }grid[20][12];
 
@@ -254,26 +253,14 @@ public:
     std::pair<int, int> FindLowestEntropy();
     void UpdateNeighbourRules(int currentX, int currentY);
     void UpdatePossibleTiles(int currentX, int currentY);
-    void UpdateValidTiles(int currentX, int currentY);
     void ImplementWFC(TileState(&grid)[20][12]);
-    bool withinBounds(int x, int y) {
-        return x >= 0 && x < 20 && y >= 0 && y < 12;
-    }
+    void ResetGrid();
     //utils
-    bool matchesRules(const std::array<int, 3>& candidate, const std::array<int, 3>& toCheck);
-    std::vector<TileType> selectValidTiles(const std::unordered_map<std::string, std::array<int, 3>>& rulesToCheck);
     std::string enumToString(int tile)
     {
         return circuitToString[tile];
     }
     void RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules);
     std::string arrayToString(const std::array<int, 3>& arr);
-    std::array<int, 3> extractRules(TileType tile, const std::string& direction);
-    bool DoesTileFit(TileType tile,int &x,int& y);
-
     void ProcessTiles();
-
-    TileSockets getSocketsForTile(TileType tile);
-
-    std::pair<TileType, int> FindMatchingTile(int* randRow, int* randCol);
 };

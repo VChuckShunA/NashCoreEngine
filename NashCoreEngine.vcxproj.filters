@@ -81,6 +81,12 @@
     <ClCompile Include="Quadtrees\Quadtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AshurasRevengence\AshuraLevel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AshurasRevengence\WFC\WFC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -153,6 +159,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Quadtrees\Quadtree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AshurasRevengence\AshuraLevel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AshurasRevengence\WFC\WFC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
