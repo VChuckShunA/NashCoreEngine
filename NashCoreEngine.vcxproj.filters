@@ -87,6 +87,9 @@
     <ClCompile Include="AshurasRevengence\WFC\WFC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AshurasRevengence\WFC\Tile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -165,6 +168,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AshurasRevengence\WFC\WFC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AshurasRevengence\WFC\Tile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

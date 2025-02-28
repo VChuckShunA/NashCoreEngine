@@ -1,69 +1,12 @@
 #pragma once
-#include "../Action.h"
-#include "../Entity.h"
-#include "../EntityManager.h"
-#include "../Scene.h"
-#include "WFC/WFC.h"
-//WFC includes
 #include <unordered_map>
 #include <map>
 #include <iostream>
 #include <array>
-class AshuraLevel :public Scene
+class Tile
 {
-    struct PlayerConfig {
-        float X, Y, CX, CY, SPEED, MAX_SPEED, JUMP, GRAVITY;
-        std::string WEAPON;
-    };
-
-protected:
-    std::shared_ptr<Entity> m_player;
-    std::string m_levelPath;
-    PlayerConfig m_playerConfig;
-    bool m_drawTextures = true;
-    bool m_drawCollision = false;
-    bool m_drawGrid = false;
-    const Vec2 m_gridSize = { 64, 64 };
-    sf::Text m_gridText;
-
-    void init(const std::string& levelPath);
-
-    Vec2 gridToMidPixel(float, float, const std::shared_ptr<Entity>& entity);
-
-    void loadLevel(const std::string& fileName);
-
-    void spawnPlayer();
-
-    void spawnBullet(const std::shared_ptr<Entity>& entity);
-
-    void sMovement();
-
-    void sLifespan();
-
-    void sCollision();
-
-    void sAnimation();
-
-    void sRender() override;
-
-    void sDoAction(const Action& action) override;
-
-    void onEnd() override;
-
-    void changePlayerStateTo(const std::string& state);
-
-    void spawnCoinSpin(const std::shared_ptr<Entity>& tile);
-
-    void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
-
 public:
-    friend class WFC;
-    WFC* wfcInstance;
-    AshuraLevel(GameEngine* gameEngine, const std::string& levelPath);
-
-    void update() override;
-
-    /*
+    Tile();
     enum TileType {
         BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE,
         BRIDGE1, BRIDGE2, BRIDGE3,
@@ -93,7 +36,6 @@ public:
         std::unordered_map<std::string, std::array<int, 3>> adjacencyRules;
     };
 
-
     struct TileState {
         TileSockets sockets;
         std::vector<TileType> possibleTiles = {
@@ -116,6 +58,7 @@ public:
 
 
     }grid[20][12];
+
 
     std::map<int, std::string> circuitToString = {
         { BRIDGE, "BRIDGE" },
@@ -146,7 +89,7 @@ public:
         { WIRE1, "WIRE1" }, { WIRE2, "WIRE2" }, { WIRE3, "WIRE3" }
     };
 
-    std::unordered_map<TileType, TileInfo> adjacencyRules = {
+   std::unordered_map<TileType, TileInfo> adjacencyRules = {
         { BRIDGE, {
             "Bridge",0,
             {{ "up",   {1, 2, 1} },
@@ -247,24 +190,9 @@ public:
         }},
 
     };
-
-
-
-    void RenderTile(TileType tileID, int* randomRow, int* randomCol, int rotationCount);
-
-    void Collapse();
-    std::pair<int, int> FindLowestEntropy();
-    void UpdateNeighbourRules(int currentX, int currentY);
-    void UpdatePossibleTiles(int currentX, int currentY);
-    void ImplementWFC(TileState(&grid)[20][12]);
-    void ResetGrid();
-    //utils
     std::string enumToString(int tile)
     {
         return circuitToString[tile];
     }
-    void RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules);
-    std::string arrayToString(const std::array<int, 3>& arr);
-    void ProcessTiles();*/
 };
 

@@ -1,6 +1,7 @@
 #include "Action.h"
 #include "SceneMenu.h"
 #include "ScenePlay.h"
+#include "AshurasRevengence/AshuraLevel.h"
 
 Scene_Menu::Scene_Menu(GameEngine* gameEngine) : Scene(gameEngine) {
     init();
@@ -12,7 +13,7 @@ void Scene_Menu::init() {
     registerAction(sf::Keyboard::D, "PLAY");
     registerAction(sf::Keyboard::Escape, "QUIT");
 
-    m_title = "Lunatics";
+    m_title = "Nashcore Engine";
     int titleSize = 30;
 
     m_menuText.setString(m_title);
@@ -68,7 +69,7 @@ void Scene_Menu::sDoAction(const Action& action) {
             m_selectedMenuIndex = (m_selectedMenuIndex + 1) % m_menuStrings.size();
         }
         else if (action.name() == "PLAY") {
-            m_game->changeScene("PLAY", std::make_shared<Scene_Play>(m_game, m_levelPaths[m_selectedMenuIndex]));
+            m_game->changeScene("PLAY", std::make_shared<AshuraLevel>(m_game, m_levelPaths[m_selectedMenuIndex]));
         }
         else if (action.name() == "QUIT") {
             onEnd();

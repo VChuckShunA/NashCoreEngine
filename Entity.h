@@ -44,6 +44,7 @@ public:
 
     template<class T, typename... TArgs>
     T& addComponent(TArgs &&... mArgs) {
+
         auto& component = getComponent<T>();
         component = T(std::forward<TArgs>(mArgs)...);
         component.has = true;

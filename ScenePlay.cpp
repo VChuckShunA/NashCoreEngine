@@ -6,7 +6,6 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <thread>
 Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
@@ -297,72 +296,7 @@ void Scene_Play::UpdatePossibleTiles(int currentX, int currentY)
         grid[currentX][currentY].possibleTiles.end()
     );
 
-    // Output possible tiles after update
-  //  std::cout << "UPDATED POSSIBLE TILES FOR " << currentX << " , " << currentY << ": ";
-  //  for (auto i : grid[currentX][currentY].possibleTiles) {
- //       std::cout << enumToString(i) << " ";
- //   }
-  //  std::cout << "\nTotal Possible Tiles: " << grid[currentX][currentY].possibleTiles.size() << std::endl;
-
- //   if (grid[currentX][currentY].possibleTiles.empty())
- //   {
- //       std::cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!ERROR! ERROR! ERROR! ERROR! ERROR! ERROR!" << std::endl;
-   //     std::cout << "ERROR IS AT " <<currentX<< " , "<< currentY << std::endl;
-
-//        std::cout << "Up Rules " << arrayToString(grid[currentX][currentY].sockets.up) << std::endl;
-//        std::cout << "Down Rules " << arrayToString(grid[currentX][currentY].sockets.down) << std::endl;
-//        std::cout << "Left Rules " << arrayToString(grid[currentX][currentY].sockets.left) << std::endl;
-//        std::cout << "Right Rules " << arrayToString(grid[currentX][currentY].sockets.right) << std::endl;
-
-//    }
-
-    /*
-    if (currentX < 0 || currentX >= 20 || currentY < 0 || currentY >= 12)
-    {
-        return;
-    }
-    std::array<int, 3> upToCheck, downToCheck, leftToCheck, rightToCheck = { 90, 90, 90 };
-
-   
-    if (currentX < 0 || currentX>=20 || currentY < 0 || currentY>=12)
-    {
-        return;
-    }
-
-  //  std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , "<<currentY << std::endl;
-
-    grid[currentX][currentY].possibleTiles.erase(
-        std::remove_if(
-            grid[currentX][currentY].possibleTiles.begin(),
-            grid[currentX][currentY].possibleTiles.end(),
-            [&](TileType tile) { // Lambda function to check each tile
-        // Check if tile exists in adjacencyRules
-        if (adjacencyRules.find(tile) == adjacencyRules.end()) {
-            return true; // Remove if no adjacency rules exist
-        }
-
-        bool matches = false;
-        for (const auto& [direction, values] : adjacencyRules[tile].adjacencyRules) {
-            if (values == grid[currentX][currentY].sockets.left ||
-                values == grid[currentX][currentY].sockets.right ||
-                values == grid[currentX][currentY].sockets.up ||
-                values == grid[currentX][currentY].sockets.down) {
-                matches = true; // Keep this tile
-                break;
-            }
-        }
-        return !matches; // Remove if no match is found
-    }),
-        grid[currentX][currentY].possibleTiles.end()
-    );
-
-
-    
-   //// std::cout << "UPDATED POSSIBLE TILES FOR"<< currentX<<" , "<< currentY << std::endl;
-   // for (auto i : grid[currentX][currentY].possibleTiles) {
-   //     std::cout << enumToString(i) << " ";
-   // }
-   // std::cout << grid[currentX][currentY].possibleTiles.size() << std::endl; */
+  
 }
 
 
@@ -392,13 +326,6 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     grid[x][y].sockets.right = adjacencyRules[randomTile].adjacencyRules["right"];
 
     UpdateNeighbourRules(x, y);
-  //  std::cout << "First Tile's Rules" << std::endl;
-  //  std::cout << "Up Rules " << arrayToString(grid[x][y].sockets.up) << std::endl;
- //   std::cout << "Down Rules " << arrayToString(grid[x][y].sockets.down) << std::endl;
- //   std::cout << "Left Rules " << arrayToString(grid[x][y].sockets.left) << std::endl;
-//    std::cout << "Right Rules " << arrayToString(grid[x][y].sockets.right) << std::endl;
-
- //   std::cout << "End of First Tile's Rules" << std::endl;
 
     UpdatePossibleTiles(startRow - 1, startCol);
     UpdatePossibleTiles(startRow + 1, startCol);
