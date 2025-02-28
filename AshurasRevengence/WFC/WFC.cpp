@@ -15,7 +15,7 @@ WFC::WFC(AshuraLevel& AshuralevelInstance):
 
 void WFC::RenderTile(Tile::TileType tileID, int* randomRow, int* randomCol)
 {
-    auto dec = levelInstance.m_entityManager.addEntity("tile");
+    auto dec = levelInstance.m_entityManager.addEntity("dec");
     
 
     tileInstance.grid[*randomRow][*randomCol].collapsed = true;
@@ -247,7 +247,7 @@ void WFC::ResetGrid()
             tileInstance.grid[x][y].currentTile = NULL;
         }
     }
-    for (const auto& entity : levelInstance.m_entityManager.getEntities("tile")) {
+    for (const auto& entity : levelInstance.m_entityManager.getEntities("dec")) {
 
         entity->destroy();
 

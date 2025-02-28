@@ -164,7 +164,7 @@ void Scene_Play::Collapse()
  //   }
 //    std::cout << "RANDOM TILE IS " << enumToString(randomTile) << std::endl;
     RenderTile(randomTile, &tileToCollapse.first, &tileToCollapse.second);
-    Collapse();
+    //Collapse();
        
    }
 
@@ -331,7 +331,7 @@ void Scene_Play::ImplementWFC(TileState(&grid)[20][12])
     UpdatePossibleTiles(startRow + 1, startCol);
     UpdatePossibleTiles(startRow, startCol - 1);
     UpdatePossibleTiles(startRow, startCol + 1);
-    Collapse();
+   // Collapse();
   
 }
 
