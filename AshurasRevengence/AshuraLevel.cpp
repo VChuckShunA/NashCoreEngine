@@ -7,6 +7,7 @@
 #include <fstream>
 #include <chrono>
 #include "WFC/WFC.h"
+#include <random>
 void AshuraLevel::init(const std::string& levelPath)
 {
     registerAction(sf::Keyboard::P, "PAUSE");
@@ -55,6 +56,8 @@ void AshuraLevel::loadLevel(const std::string& fileName)
 {  // reset the entity manager every time we load a level
     m_entityManager = EntityManager();
 
+    WFC wfc = WFC(*this);
+    SpawnEnemies();
     // read in the level file and add the appropriate entities
     // use the PlayerConfig struct m_playerConfig to store player properties
     // this struct is defined at the top of Scene_Play.h
@@ -118,19 +121,6 @@ void AshuraLevel::loadLevel(const std::string& fileName)
     }
 
 
-    //Implement WFC here
-    WFC wfc = WFC(*this);
-  //  std::cout << "Start WFC" << std::endl;
-
-
- //   std::pair<int, int> newLowest = FindLowestEntropy();
-
-  //  std::cout << "NEW LOWEST : "<<newLowest.first << " , " << newLowest.second << std::endl;
-
-   // ProcessTiles();
-    //ImplementWFC(grid);
-    //   std::cout << "End WFC" << std::endl;
-
        // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
        //       Components are now returned as references rather than pointers
        //       If you do not specify a reference variable type, it will COPY the component
@@ -146,7 +136,8 @@ void AshuraLevel::loadLevel(const std::string& fileName)
 }
 
 void AshuraLevel::spawnPlayer()
-{ // here is a sample player entity which you can use to construct other entities
+{
+    // here is a sample player entity which you can use to construct other entities
     m_player = m_entityManager.addEntity("player");
     m_player->addComponent<CAnimation>(m_game->assets().getAnimation("Stand"), true);
     m_player->addComponent<CTransform>(
@@ -161,6 +152,46 @@ void AshuraLevel::spawnPlayer()
     m_player->addComponent<CInput>();
     m_player->addComponent<CState>("stand");
     m_player->addComponent<CGravity>(m_playerConfig.GRAVITY);
+                m_player->getComponent<CInput>().canJump = true;
+                m_player->getComponent<CGravity>().gravity = 0;
+                m_player->getComponent<CTransform>().velocity.y = 0;
+                // collision resolution
+}
+
+void AshuraLevel::SpawnEnemies()
+{
+    auto enemy = m_entityManager.addEntity("enemy");
+
+    int randomX = generateRandomNumber(20, 23);
+    int randomy = generateRandomNumber(0, 12);
+    int randSpeed = generateRandomNumber(0, 1);
+    float dir = -1.0f;
+    enemy->addComponent<CAnimation>(m_game->assets().getAnimation("Brick"), true);
+    enemy->addComponent<CTransform>(
+        gridToMidPixel(randomX, randomy, enemy),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    enemy->addComponent<CBoundingBox>(m_gridSize);
+    enemy->addComponent<CTransform>(
+        enemy->getComponent<CTransform>().pos/* + vec2(30,-3) */,
+        Vec2(dir * randSpeed, 0),
+        // vec2(5 * entity->getComponent<CTransform>().scale.x, 0),
+        enemy->getComponent<CTransform>().scale,
+        0
+    );
+   
+}
+
+int AshuraLevel::generateRandomNumber(int min, int max)
+{
+    // Create a random device and a random engine
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Mersenne Twister engine
+    std::uniform_int_distribution<> dis(min, max);  // Uniform distribution in the range [min, max]
+
+    return dis(gen);  // Generate and return the random number
 }
 
 void AshuraLevel::spawnBullet(const std::shared_ptr<Entity>& entity)
@@ -182,31 +213,31 @@ void AshuraLevel::spawnBullet(const std::shared_ptr<Entity>& entity)
 }
 
 void AshuraLevel::sMovement()
-{  // Implement player movement/jumping based on its CInput component
-    // Implement gravity's effect on the player
-    // Implement the maximum player speed in both X and Y directions
-    // NOTE: Setting an entity's scale.x to -1/1 will make it face to the left/right
-    // reset player speed to zero
-    m_player->getComponent<CTransform>().velocity.x = 0;
+{
+    auto& transform = m_player->getComponent<CTransform>();
+    auto& input = m_player->getComponent<CInput>();
 
-    if (m_player->getComponent<CInput>().left) {
-        m_player->getComponent<CTransform>().velocity.x = -m_playerConfig.SPEED;
-        if (m_player->getComponent<CTransform>().scale.x > 0) {
-            m_player->getComponent<CTransform>().scale.x = -1;
+    transform.velocity.x = 0;
+
+    if (input.left) {
+        transform.velocity.x = -m_playerConfig.SPEED;
+        if (transform.scale.x > 0) {
+            transform.scale.x = -1;
         }
     }
-    else if (m_player->getComponent<CInput>().right) {
-        m_player->getComponent<CTransform>().velocity.x = m_playerConfig.SPEED;
-        if (m_player->getComponent<CTransform>().scale.x < 0) {
-            m_player->getComponent<CTransform>().scale.x = 1;
+    else if (input.right) {
+        transform.velocity.x = m_playerConfig.SPEED;
+        if (transform.scale.x < 0) {
+            transform.scale.x = 1;
         }
     }
 
-    if (m_player->getComponent<CInput>().up) {
-        if (m_player->getComponent<CInput>().canJump) {
-            m_player->getComponent<CInput>().canJump = false;
-            m_player->getComponent<CTransform>().velocity.y = -m_playerConfig.JUMP;
-        }
+    transform.velocity.y = 0;  // Reset y-velocity each frame
+    if (input.up) {
+        transform.velocity.y = -m_playerConfig.SPEED; // Move up
+    }
+    if (input.down) {
+        transform.velocity.y = m_playerConfig.SPEED;  // Move down
     }
     //    else if (m_player->getComponent<CTransform>().velocity.y <= 0) {
     //        m_player->getComponent<CTransform>().velocity.y = 0;
@@ -264,92 +295,67 @@ void AshuraLevel::sLifespan()
 }
 
 void AshuraLevel::sCollision()
-{ // REMEMBER: SFML's (0,0) position is in the TOP-LEFT corner
-    //           This means jumping will have a negative y-component
-    //           and gravity will have a positive y-component
-    //           Also, something BELOW something else will hava a y value GREATER than it
-    //           Also, something ABOVE something else will hava a y value LESS than it
+{ 
+    bool useQuadTrees = false;
+    if (!useQuadTrees)
+    {
+        for (const auto& bullet : m_entityManager.getEntities("bullet")) {
 
-    // Implement Physics::GetOverlap() function, use it inside this function
-
-    // Implement bullet/tile collisions
-    // Destroy the tile if it has a Brick animation
-    for (const auto& bullet : m_entityManager.getEntities("bullet")) {
-        for (const auto& tile : m_entityManager.getEntities("tile")) {
-            // check bullet and tile side collide
-            Vec2 overlap = Physics::GetOverlap(bullet, tile);
-            Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, tile);
-            if (0 < overlap.y && -m_gridSize.x < overlap.x) {
-                if (0 <= overlap.x && pOverlap.x <= 0) {
-                    if (tile->getComponent<CAnimation>().animation.getName() == "Brick") {
-                        spawnBrickDebris(tile);
+            for (const auto& enemy : m_entityManager.getEntities("enemy")) {
+                // check bullet and tile side collide
+                Vec2 overlap = Physics::GetOverlap(bullet, enemy);
+                Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, enemy);
+                if (0 < overlap.y && -m_gridSize.x < overlap.x) {
+                    if (0 <= overlap.x && pOverlap.x <= 0) {
+                        if (enemy->getComponent<CAnimation>().animation.getName() == "Brick") {
+                            spawnBrickDebris(enemy);
+                        }
+                        bullet->destroy();
                     }
-                    bullet->destroy();
                 }
             }
         }
-    }
 
-    // Implement player/tile collisions and resolutions
-    // Update the CState component of the player to store whether
-    // it is currently on the ground or in the air. This will be
-    // used by the Animation system
-    // reset gravity
-    m_player->getComponent<CGravity>().gravity = m_playerConfig.GRAVITY;
-    for (const auto& tile : m_entityManager.getEntities("tile")) {
-        Vec2 overlap = Physics::GetOverlap(m_player, tile);
-        Vec2 pOverlap = Physics::GetPreviousOverlap(m_player, tile);
-        // check if player is in air
-        // check tiles being below player
-        float dy = tile->getComponent<CTransform>().pos.y - m_player->getComponent<CTransform>().pos.y;
-        if (0 < overlap.x && -m_gridSize.y < overlap.y && dy > 0) {
-            if (0 <= overlap.y && pOverlap.y <= 0) {
-                // stand on tile
-                m_player->getComponent<CInput>().canJump = true;
-                m_player->getComponent<CGravity>().gravity = 0;
-                m_player->getComponent<CTransform>().velocity.y = 0;
-                // collision resolution
-                m_player->getComponent<CTransform>().pos.y -= overlap.y;
-            }
-        }
-        // check if player hits the tile from the bottom
-        if (0 < overlap.x && -m_gridSize.y < overlap.y && dy < 0) {
-            if (0 <= overlap.y && pOverlap.y <= 0) {
-                m_player->getComponent<CTransform>().pos.y += overlap.y;
-                m_player->getComponent<CTransform>().velocity.y = 0;
-                if (tile->getComponent<CAnimation>().animation.getName() == "Question") {
-                    tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("QuestionHit");
-                    spawnCoinSpin(tile);
-                }
-                if (tile->getComponent<CAnimation>().animation.getName() == "Brick") {
-                    spawnBrickDebris(tile);
-                }
-            }
-        }
-        // check player and tile side collide
-        float dx = tile->getComponent<CTransform>().pos.x - m_player->getComponent<CTransform>().pos.x;
-        if (0 < overlap.y && -m_gridSize.x < overlap.x) {
-            if (0 <= overlap.x && pOverlap.x <= 0) {
-                if (dx > 0) {
-                    // tile is right of player
-                    m_player->getComponent<CTransform>().pos.x -= overlap.x;
-                }
-                else {
-                    // tile is left of player
-                    m_player->getComponent<CTransform>().pos.x += overlap.x;
+        for (const auto& player : m_entityManager.getEntities("player")) {
+
+            for (const auto& enemy : m_entityManager.getEntities("enemy")) {
+                // check bullet and tile side collide
+                Vec2 overlap = Physics::GetOverlap(player, enemy);
+                Vec2 pOverlap = Physics::GetPreviousOverlap(player, enemy);
+                if (0 < overlap.y && -m_gridSize.x < overlap.x) {
+                    if (0 <= overlap.x && pOverlap.x <= 0) {
+                        if (enemy->getComponent<CAnimation>().animation.getName() == "Brick") {
+                            spawnBrickDebris(enemy);
+                        }
+                        player->destroy();
+                        //Return to Menu
+                    }
                 }
             }
         }
     }
+   
+   
 
     // Check to see if the player has fallen down a hole (y > height())
     if (m_player->getComponent<CTransform>().pos.y > height()) {
         m_player->getComponent<CTransform>().pos = gridToMidPixel(m_playerConfig.X, m_playerConfig.Y, m_player);
     }
 
-    // Don't let the player walk off the left side of the map
+    // Clamp map movement to map
     if (m_player->getComponent<CTransform>().pos.x < m_player->getComponent<CBoundingBox>().size.x / 2.0f) {
         m_player->getComponent<CTransform>().pos.x = m_player->getComponent<CBoundingBox>().size.x / 2.0f;
+    }
+    if (m_player->getComponent<CTransform>().pos.x > width() - m_player->getComponent<CBoundingBox>().size.x / 2.0f) {
+        m_player->getComponent<CTransform>().pos.x = width() - m_player->getComponent<CBoundingBox>().size.x / 2.0f;
+    }
+
+    if (m_player->getComponent<CTransform>().pos.y < m_player->getComponent<CBoundingBox>().size.y / 2.0f) {
+        m_player->getComponent<CTransform>().pos.y = m_player->getComponent<CBoundingBox>().size.y / 2.0f;
+    }
+
+    if (m_player->getComponent<CTransform>().pos.y > height() - m_player->getComponent<CBoundingBox>().size.y / 2.0f) {
+        m_player->getComponent<CTransform>().pos.y = height() - m_player->getComponent<CBoundingBox>().size.y / 2.0f;
     }
 }
 
@@ -361,9 +367,6 @@ void AshuraLevel::sAnimation()
         m_player->getComponent<CInput>().canJump = false;
         if (m_player->getComponent<CInput>().shoot) {
             changePlayerStateTo("airshoot");
-        }
-        else {
-            changePlayerStateTo("air");
         }
     }
     else {
@@ -431,12 +434,7 @@ void AshuraLevel::sRender()
         m_game->window().clear(sf::Color(50, 50, 150));
     }
 
-    // set the viewport of the window to be centered on the player if it's far enough right
-    auto& pPos = m_player->getComponent<CTransform>().pos;
-    float windowCenterX = std::max(float(m_game->window().getSize().x) / 2.0f, pPos.x);
-    sf::View view = m_game->window().getView();
-    view.setCenter(windowCenterX, float(m_game->window().getSize().y) - view.getCenter().y);
-    m_game->window().setView(view);
+  
 
     // draw all Entity textures / animations
     if (m_drawTextures) {
@@ -505,7 +503,8 @@ void AshuraLevel::sDoAction(const Action& action)
         //else if (action.name() == "WFC") { Collapse(); }
 
         else if (action.name() == "JUMP") {
-            if (m_player->getComponent<CInput>().canJump) { m_player->getComponent<CInput>().up = true; }
+            m_player->getComponent<CInput>().up = true;
+            //if (m_player->getComponent<CInput>().canJump) { m_player->getComponent<CInput>().up = true; }
         }
         else if (action.name() == "DOWN") {
             m_player->getComponent<CInput>().down = true;
@@ -517,9 +516,8 @@ void AshuraLevel::sDoAction(const Action& action)
             m_player->getComponent<CInput>().right = true;
         }
         else if (action.name() == "SHOOT") {
-            if (m_player->getComponent<CInput>().canShoot) {
                 m_player->getComponent<CInput>().shoot = true;
-            }
+          
         }
     }
     else if (action.type() == "END") {
@@ -596,6 +594,7 @@ void AshuraLevel::update()
 
     // implement pause functionality
     if (!m_paused) {
+        SpawnEnemies();
         sMovement();
         sLifespan();
         sCollision();

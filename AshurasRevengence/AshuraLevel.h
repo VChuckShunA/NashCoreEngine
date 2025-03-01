@@ -33,7 +33,8 @@ protected:
     void loadLevel(const std::string& fileName);
 
     void spawnPlayer();
-
+    void SpawnEnemies();
+    int generateRandomNumber(int min, int max);
     void spawnBullet(const std::shared_ptr<Entity>& entity);
 
     void sMovement();
