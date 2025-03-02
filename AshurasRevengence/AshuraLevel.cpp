@@ -8,6 +8,7 @@
 #include <chrono>
 #include "WFC/WFC.h"
 #include <random>
+#include "../Quadtrees/Quadtree.h"
 void AshuraLevel::init(const std::string& levelPath)
 {
     registerAction(sf::Keyboard::P, "PAUSE");
@@ -15,7 +16,6 @@ void AshuraLevel::init(const std::string& levelPath)
     registerAction(sf::Keyboard::T, "TOGGLE_TEXTURE");   // Toggle drawing (T)extures
     registerAction(sf::Keyboard::C, "TOGGLE_COLLISION"); // Toggle drawing (C)ollision Boxes
     registerAction(sf::Keyboard::G, "TOGGLE_GRID");      // Toggle drawing (G)rid
-    registerAction(sf::Keyboard::K, "WFC");
 
     // Register all other gameplay Actions
     registerAction(sf::Keyboard::W, "JUMP");
@@ -55,7 +55,7 @@ Vec2 AshuraLevel::gridToMidPixel(float gridX, float gridY, const std::shared_ptr
 void AshuraLevel::loadLevel(const std::string& fileName)
 {  // reset the entity manager every time we load a level
     m_entityManager = EntityManager();
-
+    quadtree= new Quadtree(sf::FloatRect(0, 0, width(), height()));
     WFC wfc = WFC(*this);
     SpawnEnemies();
     // read in the level file and add the appropriate entities
@@ -120,19 +120,6 @@ void AshuraLevel::loadLevel(const std::string& fileName)
 
     }
 
-
-       // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
-       //       Components are now returned as references rather than pointers
-       //       If you do not specify a reference variable type, it will COPY the component
-       //       Here is an example:
-       //
-       //       This will COPY the transform into the variable 'transform1' - it is INCORRECT
-       //       Any changes you make to transform1 will not be changed inside the entity
-       //       auto transform1 = entity->get<CTransform>()
-       //
-       //       This will REFERENCE the transform with the variable 'transform2' - it is CORRECT
-       //       Now any changes you make to transform2 will be changed inside the entity
-       //       auto& transform2 = entity->get<CTransform>()
 }
 
 void AshuraLevel::spawnPlayer()
@@ -152,10 +139,12 @@ void AshuraLevel::spawnPlayer()
     m_player->addComponent<CInput>();
     m_player->addComponent<CState>("stand");
     m_player->addComponent<CGravity>(m_playerConfig.GRAVITY);
-                m_player->getComponent<CInput>().canJump = true;
-                m_player->getComponent<CGravity>().gravity = 0;
-                m_player->getComponent<CTransform>().velocity.y = 0;
+    m_player->getComponent<CInput>().canJump = true;
+    m_player->getComponent<CGravity>().gravity = 0;
+    m_player->getComponent<CTransform>().velocity.y = 0;
                 // collision resolution
+
+   
 }
 
 void AshuraLevel::SpawnEnemies()
@@ -175,13 +164,13 @@ void AshuraLevel::SpawnEnemies()
     );
     enemy->addComponent<CBoundingBox>(m_gridSize);
     enemy->addComponent<CTransform>(
-        enemy->getComponent<CTransform>().pos/* + vec2(30,-3) */,
+        enemy->getComponent<CTransform>().pos,
         Vec2(dir * randSpeed, 0),
-        // vec2(5 * entity->getComponent<CTransform>().scale.x, 0),
         enemy->getComponent<CTransform>().scale,
         0
     );
-   
+    enemy->addComponent<CLifespan>(1600, m_currentFrame);
+    enemies.push_back(enemy.get());
 }
 
 int AshuraLevel::generateRandomNumber(int min, int max)
@@ -210,6 +199,7 @@ void AshuraLevel::spawnBullet(const std::shared_ptr<Entity>& entity)
     );
     bullet->addComponent<CLifespan>(90, m_currentFrame);
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
+    bullets.push_back(bullet.get());
 }
 
 void AshuraLevel::sMovement()
@@ -279,6 +269,20 @@ void AshuraLevel::sLifespan()
             else {
                 auto& eLife = entity->getComponent<CLifespan>();
                 if (m_currentFrame - eLife.frameCreated >= eLife.lifespan) {
+                    if (entity->tag() == "enemy")
+                    {
+                        auto it = std::find(enemies.begin(), enemies.end(), entity.get());
+                        if (it != enemies.end()) {
+                            enemies.erase(it);  
+                        }
+                    }
+                    else if (entity->tag() == "bullet")
+                    {
+                        auto it = std::find(bullets.begin(), bullets.end(), entity.get());
+                        if (it != bullets.end()) {
+                            bullets.erase(it);  
+                        }
+                    }
                     entity->destroy();
                 }
             }
@@ -288,7 +292,7 @@ void AshuraLevel::sLifespan()
     // control bullet quantity, be spawned every 10 frames
     for (const auto& entity : m_entityManager.getEntities("bullet")) {
         auto& bulletLife = entity->getComponent<CLifespan>();
-        if (m_currentFrame - bulletLife.frameCreated == 20) {
+        if (m_currentFrame - bulletLife.frameCreated == 5) {
             m_player->getComponent<CInput>().canShoot = true;
         }
     }
@@ -296,7 +300,7 @@ void AshuraLevel::sLifespan()
 
 void AshuraLevel::sCollision()
 { 
-    bool useQuadTrees = false;
+    bool useQuadTrees = true;
     if (!useQuadTrees)
     {
         for (const auto& bullet : m_entityManager.getEntities("bullet")) {
@@ -333,6 +337,74 @@ void AshuraLevel::sCollision()
                 }
             }
         }
+    }
+    else
+    {
+        quadtree->clear();
+        for (size_t i = 0; i < bullets.size(); ++i) {
+            auto& bullet = bullets[i]; // Access bullet
+            Point* p = new Point("Bullet", getGlobalBounds(bullet), i);
+            quadtree->insert(p);
+        }
+        for (size_t i = 0; i < enemies.size(); ++i) {
+            auto& enemy = enemies[i]; // Access enemy
+            Point* p = new Point("Enemy", getGlobalBounds(enemy), i);
+            quadtree->insert(p);
+        }
+        
+        Point* playerPoint = new Point("Player",
+            getGlobalBounds(m_player.get()),-1);
+        quadtree->insert(playerPoint);
+       
+        for (size_t i = 0; i < bullets.size(); ++i) {
+        
+            std::vector<Point*> points = quadtree->queryRange(getGlobalBounds(bullets[i]));
+            for (int j = 0; j < points.size(); j++)
+            {
+                if (points[j]->tag != "Bullet")
+                {
+                    std::cout << "HERE!" << points.size() << std::endl;
+                  
+                    if (points[j]->tag == "Enemy" && getGlobalBounds(enemies[points[j]->index]).intersects(getGlobalBounds(bullets[i])))
+                    {//
+                        std::cout << "ENEMY HIT ! ENEMY HIT!"<<std::endl;
+                        //bullets[i]->destroy();
+                    }
+
+                }
+            }
+            
+        }
+        //for (int i = 0; i < bullets.size(); i++) {
+        //    std::vector<Point*> points = quadTree.queryRange(bullets[i]->getGlobalBounds());
+        //    for (int j = 0; j < points.size(); j++) {
+        //        //We dont want collision detection with bullets and itself
+        //        if (points[j]->tag != "Bullet") {
+        //            if (points[j]->tag == "Enemy" && bullets[i]->playerShoot && enemies[points[j]->index]->getGlobalBounds().intersects(bullets[i]->getGlobalBounds())) {
+        //                enemies[points[j]->index]->TakeDamage(bullets[i]->damageAmount);
+        //                bullets[i]->toRemove = true;
+        //            }
+        //            else if (points[j]->tag == "Player" && !bullets[i]->playerShoot && player->getGlobalBounds().intersects(bullets[i]->getGlobalBounds())) {
+        //                player->TakeDamage(bullets[i]->damageAmount);
+        //                bullets[i]->toRemove = true;
+        //            }
+
+
+        //        }
+
+        //    }
+        //}
+        //for (int i = 0; i < bullets.size(); i++) {
+        //    if (bullets[i]->toRemove) {
+        //        bullets.erase(bullets.begin() + i);
+        //    }
+        //}
+        //for (int i = 0; i < enemies.size(); i++) {
+        //    if (enemies[i]->toRemove) {
+        //        enemies.erase(enemies.begin() + i);
+        //    }
+        //}
+
     }
    
    
@@ -500,7 +572,7 @@ void AshuraLevel::sDoAction(const Action& action)
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        //else if (action.name() == "WFC") { Collapse(); }
+        else if (action.name() == "QUADTREE") { quadtree->show(m_game->window()); }
 
         else if (action.name() == "JUMP") {
             m_player->getComponent<CInput>().up = true;
@@ -594,7 +666,13 @@ void AshuraLevel::update()
 
     // implement pause functionality
     if (!m_paused) {
-        SpawnEnemies();
+      //  for (int i = 0; i < 10; i++)
+       // {
+
+            SpawnEnemies();
+       // }
+        
+    
         sMovement();
         sLifespan();
         sCollision();
@@ -602,4 +680,11 @@ void AshuraLevel::update()
     }
     sAnimation();
     sRender();
+}
+
+sf::FloatRect AshuraLevel::getGlobalBounds(Entity* entity)
+{
+    return sf::FloatRect(entity->getComponent<CTransform>().pos.x - entity->getComponent<CBoundingBox>().halfSize.x,
+        entity->getComponent<CTransform>().pos.y - entity->getComponent<CBoundingBox>().halfSize.y,
+        entity->getComponent<CBoundingBox>().size.x, entity->getComponent<CBoundingBox>().size.y);
 }
