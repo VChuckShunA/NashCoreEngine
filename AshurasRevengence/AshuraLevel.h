@@ -64,6 +64,7 @@ public:
     AshuraLevel(GameEngine* gameEngine, const std::string& levelPath);
     Quadtree* quadtree=nullptr;
     void update() override;
+    bool q_drawQuadtrees = false;
     std::vector<Entity*> bullets;
     std::vector<Entity*> enemies;
     sf::FloatRect getGlobalBounds(Entity* entity);

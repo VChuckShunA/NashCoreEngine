@@ -363,18 +363,49 @@ void AshuraLevel::sCollision()
             {
                 if (points[j]->tag != "Bullet")
                 {
-                    std::cout << "HERE!" << points.size() << std::endl;
                   
                     if (points[j]->tag == "Enemy" && getGlobalBounds(enemies[points[j]->index]).intersects(getGlobalBounds(bullets[i])))
-                    {//
-                        std::cout << "ENEMY HIT ! ENEMY HIT!"<<std::endl;
-                        //bullets[i]->destroy();
-                    }
+                    {
+                        if (enemies[points[j]->index]->getComponent<CAnimation>().animation.getName() == "Brick") {
+                            //spawnBrickDebris(std::make_shared<Entity>(&enemies[points[j]->index]));
+                            enemies[points[j]->index]->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
+                            // tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BrickDebris");
+                            enemies[points[j]->index]->addComponent<CLifespan>(10, m_currentFrame);
+                            bullets[i]->destroy();
 
+                            auto it = std::find(bullets.begin(), bullets.end(), bullets[i]);
+                            if (it != bullets.end()) {
+                                bullets.erase(it);
+                            }
+                        }
+                       
+                    } 
                 }
+               
+                
             }
             
         }
+
+        for (size_t i = 0; i < enemies.size(); ++i) {
+
+            std::vector<Point*> points = quadtree->queryRange(getGlobalBounds(enemies[i]));
+            for (int j = 0; j < points.size(); j++)
+            {
+                if (points[j]->tag != "Enemy")
+                {
+                    if (points[j]->tag == "Player" && getGlobalBounds(m_player.get()).intersects(getGlobalBounds(enemies[i])))
+                    {
+                       
+                        m_player->destroy();
+                        //Return to Menu
+                    }
+                }
+               
+            }
+
+        }
+        
         //for (int i = 0; i < bullets.size(); i++) {
         //    std::vector<Point*> points = quadTree.queryRange(bullets[i]->getGlobalBounds());
         //    for (int j = 0; j < points.size(); j++) {
@@ -539,7 +570,8 @@ void AshuraLevel::sRender()
             }
         }
     }
-
+    if(q_drawQuadtrees)
+        quadtree->show(m_game->window());
     // draw the grid so that can easily debug
     if (m_drawGrid) {
         float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
@@ -572,7 +604,7 @@ void AshuraLevel::sDoAction(const Action& action)
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        else if (action.name() == "QUADTREE") { quadtree->show(m_game->window()); }
+        else if (action.name() == "QUADTREE") { q_drawQuadtrees = !q_drawQuadtrees; }
 
         else if (action.name() == "JUMP") {
             m_player->getComponent<CInput>().up = true;
@@ -666,11 +698,11 @@ void AshuraLevel::update()
 
     // implement pause functionality
     if (!m_paused) {
-      //  for (int i = 0; i < 10; i++)
-       // {
+   // for (int i = 0; i < 50; i++)
+   // {
 
             SpawnEnemies();
-       // }
+      //  }
         
     
         sMovement();

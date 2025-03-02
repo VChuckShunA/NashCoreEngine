@@ -77,13 +77,12 @@ void Quadtree::show(sf::RenderWindow& window)
 {
 	sf::RectangleShape shape(sf::Vector2f(boundary.width, boundary.height));
 	shape.setPosition(boundary.left, boundary.top);
-	shape.setFillColor(sf::Color::Red);
-	shape.setOutlineColor(sf::Color::Green);
-	shape.setOutlineThickness(9.f);
+	shape.setFillColor(sf::Color::Transparent);
+	shape.setOutlineColor(sf::Color::Red);
+	shape.setOutlineThickness(1.f);
 	window.draw(shape);
 
 	if (northWest != nullptr) {
-		std::cout << "NOT NULL!!!!!!!!!!" << std::endl;
 		northWest->show(window);
 		northEast->show(window);
 		southWest->show(window);
