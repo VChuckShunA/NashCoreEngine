@@ -1,1 +1,1 @@
-Player 1 1 64 64 5 15 20 1 Buster
+Player 1 1 120 120 5 15 20 1 Buster

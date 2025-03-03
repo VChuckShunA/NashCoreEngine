@@ -126,7 +126,7 @@ void AshuraLevel::spawnPlayer()
 {
     // here is a sample player entity which you can use to construct other entities
     m_player = m_entityManager.addEntity("player");
-    m_player->addComponent<CAnimation>(m_game->assets().getAnimation("Stand"), true);
+    m_player->addComponent<CAnimation>(m_game->assets().getAnimation("Ashura"), true);
     m_player->addComponent<CTransform>(
         gridToMidPixel(m_playerConfig.X, m_playerConfig.Y, m_player),
         Vec2(m_playerConfig.SPEED, 0),
@@ -137,7 +137,7 @@ void AshuraLevel::spawnPlayer()
 
     // be sure to add the remaining components to the player
     m_player->addComponent<CInput>();
-    m_player->addComponent<CState>("stand");
+   // m_player->addComponent<CState>("stand");
     m_player->addComponent<CGravity>(m_playerConfig.GRAVITY);
     m_player->getComponent<CInput>().canJump = true;
     m_player->getComponent<CGravity>().gravity = 0;
@@ -155,7 +155,7 @@ void AshuraLevel::SpawnEnemies()
     int randomy = generateRandomNumber(0, 12);
     int randSpeed = generateRandomNumber(0, 1);
     float dir = -1.0f;
-    enemy->addComponent<CAnimation>(m_game->assets().getAnimation("Brick"), true);
+    enemy->addComponent<CAnimation>(m_game->assets().getAnimation("Star"), true);
     enemy->addComponent<CTransform>(
         gridToMidPixel(randomX, randomy, enemy),
         Vec2(0, 0),
@@ -191,7 +191,7 @@ void AshuraLevel::spawnBullet(const std::shared_ptr<Entity>& entity)
     float dir = 1.0f;
     if (entity->getComponent<CTransform>().scale.x < 0) dir = -1.0;
     bullet->addComponent<CTransform>(
-        entity->getComponent<CTransform>().pos/* + vec2(30,-3) */,
+        entity->getComponent<CTransform>().pos + Vec2(45,-20) ,
         Vec2(dir * 2 * m_playerConfig.SPEED, 0),
         // vec2(5 * entity->getComponent<CTransform>().scale.x, 0),
         entity->getComponent<CTransform>().scale,
@@ -210,16 +210,10 @@ void AshuraLevel::sMovement()
     transform.velocity.x = 0;
 
     if (input.left) {
-        transform.velocity.x = -m_playerConfig.SPEED;
-        if (transform.scale.x > 0) {
-            transform.scale.x = -1;
-        }
+        transform.velocity.x = -m_playerConfig.SPEED;     
     }
     else if (input.right) {
-        transform.velocity.x = m_playerConfig.SPEED;
-        if (transform.scale.x < 0) {
-            transform.scale.x = 1;
-        }
+        transform.velocity.x = m_playerConfig.SPEED;   
     }
 
     transform.velocity.y = 0;  // Reset y-velocity each frame
@@ -311,7 +305,7 @@ void AshuraLevel::sCollision()
                 Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, enemy);
                 if (0 < overlap.y && -m_gridSize.x < overlap.x) {
                     if (0 <= overlap.x && pOverlap.x <= 0) {
-                        if (enemy->getComponent<CAnimation>().animation.getName() == "Brick") {
+                        if (enemy->getComponent<CAnimation>().animation.getName() == "Star") {
                             spawnBrickDebris(enemy);
                         }
                         bullet->destroy();
@@ -328,7 +322,7 @@ void AshuraLevel::sCollision()
                 Vec2 pOverlap = Physics::GetPreviousOverlap(player, enemy);
                 if (0 < overlap.y && -m_gridSize.x < overlap.x) {
                     if (0 <= overlap.x && pOverlap.x <= 0) {
-                        if (enemy->getComponent<CAnimation>().animation.getName() == "Brick") {
+                        if (enemy->getComponent<CAnimation>().animation.getName() == "Star") {
                             spawnBrickDebris(enemy);
                         }
                         player->destroy();
@@ -366,10 +360,8 @@ void AshuraLevel::sCollision()
                   
                     if (points[j]->tag == "Enemy" && getGlobalBounds(enemies[points[j]->index]).intersects(getGlobalBounds(bullets[i])))
                     {
-                        if (enemies[points[j]->index]->getComponent<CAnimation>().animation.getName() == "Brick") {
-                            //spawnBrickDebris(std::make_shared<Entity>(&enemies[points[j]->index]));
+                        if (enemies[points[j]->index]->getComponent<CAnimation>().animation.getName() == "Star") {
                             enemies[points[j]->index]->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
-                            // tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BrickDebris");
                             enemies[points[j]->index]->addComponent<CLifespan>(10, m_currentFrame);
                             bullets[i]->destroy();
 
@@ -466,7 +458,7 @@ void AshuraLevel::sAnimation()
 { // Complete the Animation class code first
     // Set the animation of the player based on its CState component
     // check player state
-    if (m_player->getComponent<CTransform>().velocity.y != 0) {
+   /* if (m_player->getComponent<CTransform>().velocity.y != 0) {
         m_player->getComponent<CInput>().canJump = false;
         if (m_player->getComponent<CInput>().shoot) {
             changePlayerStateTo("airshoot");
@@ -515,7 +507,7 @@ void AshuraLevel::sAnimation()
         // std::cout << "Ivan: getAnimation " << animationName << "\n";
         m_player->addComponent<CAnimation>(m_game->assets().getAnimation(animationName), true);
     }
-
+    */
     for (const auto& entity : m_entityManager.getEntities()) {
         if (entity->getComponent<CAnimation>().animation.hasEnded() && !entity->getComponent<CAnimation>().repeat) {
             entity->destroy();
@@ -708,6 +700,10 @@ void AshuraLevel::update()
         sMovement();
         sLifespan();
         sCollision();
+        for (const auto& enemy : m_entityManager.getEntities("enemy")) {
+            enemy->getComponent<CTransform>().angle++;
+            enemy->getComponent<CAnimation>().animation.getSprite().setRotation(enemy->getComponent<CTransform>().angle);
+        }
         m_currentFrame++;
     }
     sAnimation();
