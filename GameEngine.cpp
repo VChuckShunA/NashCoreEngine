@@ -1,7 +1,7 @@
 #include "Action.h"
 #include "GameEngine.h"
 #include "SceneMenu.h"
-
+#include "AshurasRevengence/AshuraMenu.h"
 #include <fstream>
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -16,7 +16,7 @@ void GameEngine::init(const std::string& path) {
     m_window.create(sf::VideoMode(1280, 768), "Nashcore Engine -  Ashura's Revengence");
     m_window.setFramerateLimit(60);
 
-    changeScene("MENU", std::make_shared<Scene_Menu>(this));
+    changeScene("MENU", std::make_shared<AshuraMenu>(this));
 }
 
 std::shared_ptr<Scene> GameEngine::currentScene() {

@@ -16,7 +16,7 @@ class AshuraLevel :public Scene
         float X, Y, CX, CY, SPEED, MAX_SPEED, JUMP, GRAVITY;
         std::string WEAPON;
     };
-
+    int Score=0;
 protected:
     std::shared_ptr<Entity> m_player;
     std::string m_levelPath;

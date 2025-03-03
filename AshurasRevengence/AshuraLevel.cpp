@@ -1,6 +1,6 @@
 #include "AshuraLevel.h"
 #include "../Action.h"
-#include "../SceneMenu.h"
+#include "AshuraMenu.h"
 #include "../Vec2.h"
 #include "../Physics.h"
 #include <iostream>
@@ -8,6 +8,7 @@
 #include <chrono>
 #include "WFC/WFC.h"
 #include <random>
+#include"AshuraScore.h"
 #include "../Quadtrees/Quadtree.h"
 void AshuraLevel::init(const std::string& levelPath)
 {
@@ -197,7 +198,7 @@ void AshuraLevel::spawnBullet(const std::shared_ptr<Entity>& entity)
         entity->getComponent<CTransform>().scale,
         0
     );
-    bullet->addComponent<CLifespan>(90, m_currentFrame);
+    bullet->addComponent<CLifespan>(100, m_currentFrame);
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
     bullets.push_back(bullet.get());
 }
@@ -326,6 +327,7 @@ void AshuraLevel::sCollision()
                             spawnBrickDebris(enemy);
                         }
                         player->destroy();
+                        m_game->changeScene("Score", std::make_shared<AshuraScore>(m_game,Score));
                         //Return to Menu
                     }
                 }
@@ -364,7 +366,7 @@ void AshuraLevel::sCollision()
                             enemies[points[j]->index]->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
                             enemies[points[j]->index]->addComponent<CLifespan>(10, m_currentFrame);
                             bullets[i]->destroy();
-
+                            Score++;
                             auto it = std::find(bullets.begin(), bullets.end(), bullets[i]);
                             if (it != bullets.end()) {
                                 bullets.erase(it);
@@ -390,6 +392,8 @@ void AshuraLevel::sCollision()
                     {
                        
                         m_player->destroy();
+
+                        m_game->changeScene("Score", std::make_shared<AshuraScore>(m_game, Score));
                         //Return to Menu
                     }
                 }
@@ -586,7 +590,17 @@ void AshuraLevel::sRender()
             }
         }
     }
+
+
+    sf::Text help("Score : "+ std::to_string(Score), m_game->assets().getFont("Mario"), 26);
+    help.setFillColor(sf::Color::White);
+    help.setPosition(
+        float(m_game->window().getSize().x) / 2.0f - float(26 * (help.getString().getSize() + 1)) / 2.0f,
+        float(m_game->window().getSize().y) - 30.0f * 2.0f
+    );
+    m_game->window().draw(help);
 }
+
 
 void AshuraLevel::sDoAction(const Action& action)
 {
@@ -638,7 +652,8 @@ void AshuraLevel::sDoAction(const Action& action)
 void AshuraLevel::onEnd()
 {  // when the scene ends, change back to the MENU scene
     // use m_game->changeScene(correct params);
-    m_game->changeScene("MENU", std::make_shared<Scene_Menu>(m_game));
+    m_game->changeScene("MENU", std::make_shared<AshuraMenu>(m_game));
+    
 }
 
 void AshuraLevel::changePlayerStateTo(const std::string& state)
@@ -678,6 +693,7 @@ void AshuraLevel::spawnBrickDebris(const std::shared_ptr<Entity>& tile)
     tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
     // tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BrickDebris");
     tile->addComponent<CLifespan>(10, m_currentFrame);
+    Score++;
 }
 
 AshuraLevel::AshuraLevel(GameEngine* gameEngine, const std::string& levelPath) : Scene(gameEngine), m_levelPath(levelPath) {

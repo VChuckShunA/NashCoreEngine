@@ -90,6 +90,12 @@
     <ClCompile Include="AshurasRevengence\WFC\Tile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AshurasRevengence\AshuraMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AshurasRevengence\AshuraScore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -171,6 +177,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AshurasRevengence\WFC\Tile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AshurasRevengence\AshuraMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AshurasRevengence\AshuraScore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
