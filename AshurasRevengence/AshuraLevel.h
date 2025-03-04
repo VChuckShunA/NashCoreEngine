@@ -54,8 +54,6 @@ protected:
 
     void changePlayerStateTo(const std::string& state);
 
-    void spawnCoinSpin(const std::shared_ptr<Entity>& tile);
-
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:

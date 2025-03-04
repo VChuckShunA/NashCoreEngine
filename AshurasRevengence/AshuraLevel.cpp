@@ -402,25 +402,7 @@ void AshuraLevel::sCollision()
 
         }
         
-        //for (int i = 0; i < bullets.size(); i++) {
-        //    std::vector<Point*> points = quadTree.queryRange(bullets[i]->getGlobalBounds());
-        //    for (int j = 0; j < points.size(); j++) {
-        //        //We dont want collision detection with bullets and itself
-        //        if (points[j]->tag != "Bullet") {
-        //            if (points[j]->tag == "Enemy" && bullets[i]->playerShoot && enemies[points[j]->index]->getGlobalBounds().intersects(bullets[i]->getGlobalBounds())) {
-        //                enemies[points[j]->index]->TakeDamage(bullets[i]->damageAmount);
-        //                bullets[i]->toRemove = true;
-        //            }
-        //            else if (points[j]->tag == "Player" && !bullets[i]->playerShoot && player->getGlobalBounds().intersects(bullets[i]->getGlobalBounds())) {
-        //                player->TakeDamage(bullets[i]->damageAmount);
-        //                bullets[i]->toRemove = true;
-        //            }
-
-
-        //        }
-
-        //    }
-        //}
+      
         //for (int i = 0; i < bullets.size(); i++) {
         //    if (bullets[i]->toRemove) {
         //        bullets.erase(bullets.begin() + i);
@@ -462,56 +444,7 @@ void AshuraLevel::sAnimation()
 { // Complete the Animation class code first
     // Set the animation of the player based on its CState component
     // check player state
-   /* if (m_player->getComponent<CTransform>().velocity.y != 0) {
-        m_player->getComponent<CInput>().canJump = false;
-        if (m_player->getComponent<CInput>().shoot) {
-            changePlayerStateTo("airshoot");
-        }
-    }
-    else {
-        if (m_player->getComponent<CTransform>().velocity.x != 0) {
-            if (m_player->getComponent<CInput>().shoot) {
-                changePlayerStateTo("runshoot");
-            }
-            else {
-                changePlayerStateTo("run");
-            }
-        }
-        else {
-            if (m_player->getComponent<CInput>().shoot) {
-                changePlayerStateTo("standshoot");
-            }
-            else {
-                changePlayerStateTo("stand");
-            }
-        }
-    }
-
-    // change player animation
-    if (m_player->getComponent<CState>().changeAnimation) {
-        std::string animationName;
-        if (m_player->getComponent<CState>().state == "stand") {
-            animationName = "Stand";
-        }
-        else if (m_player->getComponent<CState>().state == "air") {
-            animationName = "Jump";
-        }
-        else if (m_player->getComponent<CState>().state == "run") {
-            animationName = "Run";
-        }
-        else if (m_player->getComponent<CState>().state == "standshoot") {
-            animationName = "StandShoot";
-        }
-        else if (m_player->getComponent<CState>().state == "airshoot") {
-            animationName = "AirShoot";
-        }
-        else if (m_player->getComponent<CState>().state == "runshoot") {
-            animationName = "RunShoot";
-        }
-        // std::cout << "Ivan: getAnimation " << animationName << "\n";
-        m_player->addComponent<CAnimation>(m_game->assets().getAnimation(animationName), true);
-    }
-    */
+   
     for (const auto& entity : m_entityManager.getEntities()) {
         if (entity->getComponent<CAnimation>().animation.hasEnded() && !entity->getComponent<CAnimation>().repeat) {
             entity->destroy();
@@ -669,24 +602,7 @@ void AshuraLevel::changePlayerStateTo(const std::string& state)
     }
 }
 
-void AshuraLevel::spawnCoinSpin(const std::shared_ptr<Entity>& tile)
-{
-    auto coin = m_entityManager.addEntity("coinspin");
-    coin->addComponent<CAnimation>(
-        m_game->assets().getAnimation("CoinSpin"),
-        false
-    );
-    coin->addComponent<CTransform>(
-        Vec2(
-            tile->getComponent<CTransform>().pos.x,
-            tile->getComponent<CTransform>().pos.y - m_gridSize.y
-        ),
-        Vec2(0, 0),
-        tile->getComponent<CTransform>().scale,
-        0
-    );
-    coin->addComponent<CLifespan>(30, m_currentFrame);
-}
+
 
 void AshuraLevel::spawnBrickDebris(const std::shared_ptr<Entity>& tile)
 {

@@ -25,9 +25,9 @@ void Scene_Menu::init() {
         float(titleSize * 3)
     );
 
-    m_menuStrings.emplace_back("LEVEL 1");
-    m_menuStrings.emplace_back("LEVEL 2");
-    m_menuStrings.emplace_back("LEVEL 3");
+    m_menuStrings.emplace_back("Ashura's Revengence");
+   // m_menuStrings.emplace_back("LEVEL 2");
+   // m_menuStrings.emplace_back("LEVEL 3");
 
     for (int i = 0; i < m_menuStrings.size(); i++) {
         sf::Text text(m_menuStrings[i], m_game->assets().getFont("Mario"), 26);
