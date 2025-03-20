@@ -1,10 +1,10 @@
 #pragma once
+#include "../Action.h"
+#include "../Entity.h"
+#include "../EntityManager.h"
+#include "../Scene.h"
+class AIPlayroom :public Scene {
 
-#include "Action.h"
-#include "Entity.h"
-#include "EntityManager.h"
-#include "Scene.h"
-class Scene_Play : public Scene {
     struct PlayerConfig {
         float X, Y, CX, CY, SPEED, MAX_SPEED, JUMP, GRAVITY;
         std::string WEAPON;
@@ -24,19 +24,17 @@ protected:
 
     Vec2 gridToMidPixel(float, float, const std::shared_ptr<Entity>&);
 
-    void loadLevel(const std::string& fileName);
-
-    void spawnPlayer();
+   
 
     void spawnBullet(const std::shared_ptr<Entity>& entity);
 
-    void sMovement();
+  
 
     void sLifespan();
 
     void sCollision();
 
-    void sAnimation();
+
 
     void sRender() override;
 
@@ -51,7 +49,8 @@ protected:
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:
-    Scene_Play(GameEngine* gameEngine, const std::string& levelPath);
+    AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);
 
     void update() override;
 };
+

@@ -96,6 +96,18 @@
     <ClCompile Include="AshurasRevengence\AshuraScore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AshurasRevengence\WFC\WFCPlayroom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AI\BehaviourTrees\BehaviourTrees.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AI\Pathfinding\AStar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AI\AIPlayroom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -185,6 +197,18 @@
     <ClInclude Include="AshurasRevengence\AshuraScore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AshurasRevengence\WFC\WFCPlayroom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\BehaviourTrees\BehaviourTrees.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\Pathfinding\AStar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\AIPlayroom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="config(old).txt" />
@@ -196,6 +220,8 @@
   <ItemGroup>
     <Font Include="assets\fonts\Arial.ttf" />
     <Font Include="assets\fonts\joystix_monospace.otf" />
+    <Font Include="assets\fonts\mario.ttf" />
+    <Font Include="assets\fonts\tech.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\images\characters-sprite.gif">
@@ -207,5 +233,206 @@
     <Image Include="assets\images\world-sprite.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\images\misc\explosion96.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Ashura\Ashura.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Ashura\FlyingStar.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\bridge.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\component.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\connection.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\corner.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\dskew.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\skew.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\substrate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\t.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\track.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\transition.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\turn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\viad.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\vias.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Circuit\wire.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\bridge.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\component.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\connection.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\corner.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\dskew.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\skew.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\substrate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\t.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\track.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\transition.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\turn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\viad.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\vias.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform\wire.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\bridge.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\component.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\connection.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\corner.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\dskew.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\skew.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\substrate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\t.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\track.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\transition.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\turn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\viad.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\vias.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\Cuneiform2\wire.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\brick.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\brick_debris.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\bush.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\castle_small.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\coin.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\flower.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\ground.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\question.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\question_hit.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\mario\tree.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\air_shoot.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\buster.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\buster16.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\jump.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\run_192x64.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\run_shoot.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\stand_128x64.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\stand_shoot.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\megaman\stand64.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\misc\explosion64.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\images\Circuit\Circuit.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="assets\images\Circuit\data.xml" />
   </ItemGroup>
 </Project>

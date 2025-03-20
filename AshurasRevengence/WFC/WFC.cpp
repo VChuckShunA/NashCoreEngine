@@ -309,7 +309,7 @@ void WFC::ProcessTiles()
 
     }
     tileInstance.adjacencyRules.insert(newAdjacencyRules.begin(), newAdjacencyRules.end());
-    for (const auto& [tile, info] : tileInstance.adjacencyRules) {
+    /*for (const auto& [tile, info] : tileInstance.adjacencyRules) {
 
         std::cout << "TileType: " << static_cast<int>(tile)
             << " (" << info.textureName << "), Rotations: " << info.rotationCount << std::endl;
@@ -323,5 +323,5 @@ void WFC::ProcessTiles()
 
             std::cout << "]" << std::endl;
         }
-    }
+    }*/
 }

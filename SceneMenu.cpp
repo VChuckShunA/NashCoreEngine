@@ -2,7 +2,9 @@
 #include "SceneMenu.h"
 #include "ScenePlay.h"
 #include "AshurasRevengence/AshuraLevel.h"
-
+#include "AshurasRevengence/AshuraMenu.h"
+#include "AshurasRevengence/WFC/WFCPlayroom.h"
+#include "AI/AIPlayroom.h"
 Scene_Menu::Scene_Menu(GameEngine* gameEngine) : Scene(gameEngine) {
     init();
 }
@@ -25,9 +27,9 @@ void Scene_Menu::init() {
         float(titleSize * 3)
     );
 
+    m_menuStrings.emplace_back("Behaviour Trees");
     m_menuStrings.emplace_back("Ashura's Revengence");
-   // m_menuStrings.emplace_back("LEVEL 2");
-   // m_menuStrings.emplace_back("LEVEL 3");
+    m_menuStrings.emplace_back("WFC Playroom");
 
     for (int i = 0; i < m_menuStrings.size(); i++) {
         sf::Text text(m_menuStrings[i], m_game->assets().getFont("Mario"), 26);
@@ -41,6 +43,7 @@ void Scene_Menu::init() {
         m_menuItems.push_back(text);
     }
 
+    m_levelPaths.emplace_back("level1.txt");
     m_levelPaths.emplace_back("AshuraLevel.txt");
     m_levelPaths.emplace_back("level2.txt");
     m_levelPaths.emplace_back("level3.txt");
@@ -49,6 +52,7 @@ void Scene_Menu::init() {
 void Scene_Menu::update() {
     // m_entityManager.update();
     sRender();
+    std::cout << m_selectedMenuIndex << std::endl;
 }
 
 void Scene_Menu::onEnd() {
@@ -69,7 +73,19 @@ void Scene_Menu::sDoAction(const Action& action) {
             m_selectedMenuIndex = (m_selectedMenuIndex + 1) % m_menuStrings.size();
         }
         else if (action.name() == "PLAY") {
-            m_game->changeScene("PLAY", std::make_shared<AshuraLevel>(m_game, m_levelPaths[m_selectedMenuIndex]));
+
+            switch (m_selectedMenuIndex)
+            {
+            case 0: m_game->changeScene("PLAY", std::make_shared<AIPlayroom>(m_game, m_levelPaths[m_selectedMenuIndex]));
+                break;
+
+            case 1: m_game->changeScene("MENU", std::make_shared<AshuraMenu>(m_game));
+                break;
+
+            case 2: m_game->changeScene("PLAY", std::make_shared<WFCPlayroom>(m_game, m_levelPaths[1]));
+                break;
+            }
+           
         }
         else if (action.name() == "QUIT") {
             onEnd();
@@ -79,7 +95,7 @@ void Scene_Menu::sDoAction(const Action& action) {
 
 void Scene_Menu::sRender() {
     // set menu background
-    m_game->window().clear(sf::Color(100, 100, 255));
+    m_game->window().clear(sf::Color(158, 159, 128));
 
     // draw title
     m_game->window().draw(m_menuText);

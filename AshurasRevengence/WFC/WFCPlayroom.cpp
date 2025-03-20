@@ -1,25 +1,26 @@
-﻿#include "Action.h"
-#include "SceneMenu.h"
-#include "ScenePlay.h"
-#include "Vec2.h"
-#include "Physics.h"
+#include "WFCPlayroom.h"
+#include "../../Action.h"
+#include "../../SceneMenu.h"
+#include "../../Vec2.h"
+#include "../../Physics.h"
 #include <iostream>
 #include <fstream>
 #include <chrono>
-Scene_Play::Scene_Play(GameEngine* gameEngine, const std::string& levelPath)
+WFCPlayroom::WFCPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
 
 
-    
+
 }
 
-void Scene_Play::init(const std::string& levelPath) {
+void WFCPlayroom::init(const std::string& levelPath) {
     registerAction(sf::Keyboard::P, "PAUSE");
     registerAction(sf::Keyboard::Escape, "QUIT");
     registerAction(sf::Keyboard::T, "TOGGLE_TEXTURE");   // Toggle drawing (T)extures
     registerAction(sf::Keyboard::C, "TOGGLE_COLLISION"); // Toggle drawing (C)ollision Boxes
     registerAction(sf::Keyboard::G, "TOGGLE_GRID");      // Toggle drawing (G)rid
+    registerAction(sf::Keyboard::K, "WFC");
 
     // Register all other gameplay Actions
     registerAction(sf::Keyboard::W, "JUMP");
@@ -36,7 +37,7 @@ void Scene_Play::init(const std::string& levelPath) {
 
 }
 
-void Scene_Play::loadLevel(const std::string& fileName) {
+void WFCPlayroom::loadLevel(const std::string& fileName) {
     // reset the entity manager every time we load a level
     m_entityManager = EntityManager();
 
@@ -95,37 +96,387 @@ void Scene_Play::loadLevel(const std::string& fileName) {
         }
         else {
             std::cerr << "Unknown entity type " << entityType << "\n";
-             exit(-1);
+            // exit(-1);
         }
 
-        
+
     }
 
 
-  
+    //Implement WFC here
 
-    // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
-    //       Components are now returned as references rather than pointers
-    //       If you do not specify a reference variable type, it will COPY the component
-    //       Here is an example:
-    //
-    //       This will COPY the transform into the variable 'transform1' - it is INCORRECT
-    //       Any changes you make to transform1 will not be changed inside the entity
-    //       auto transform1 = entity->get<CTransform>()
-    //
-    //       This will REFERENCE the transform with the variable 'transform2' - it is CORRECT
-    //       Now any changes you make to transform2 will be changed inside the entity
-    //       auto& transform2 = entity->get<CTransform>()
+
+    ProcessTiles();
+    ImplementWFC(grid);
+    //   std::cout << "End WFC" << std::endl;
+
+       // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
+       //       Components are now returned as references rather than pointers
+       //       If you do not specify a reference variable type, it will COPY the component
+       //       Here is an example:
+       //
+       //       This will COPY the transform into the variable 'transform1' - it is INCORRECT
+       //       Any changes you make to transform1 will not be changed inside the entity
+       //       auto transform1 = entity->get<CTransform>()
+       //
+       //       This will REFERENCE the transform with the variable 'transform2' - it is CORRECT
+       //       Now any changes you make to transform2 will be changed inside the entity
+       //       auto& transform2 = entity->get<CTransform>()
+}
+
+void WFCPlayroom::Collapse()
+{
+
+    std::pair<int, int> tileToCollapse = FindLowestEntropy();
+    if (grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.empty()) {
+        if ((tileToCollapse.first >= 0) && (tileToCollapse.second >= 0))
+        {
+            ResetGrid();
+
+            return;
+        }
+        // std::cerr << "No possible tiles for the FOLLOWING " << tileToCollapse.first << ", " << tileToCollapse.second << "\n";
+        return;
+    }
+    if (tileToCollapse.first < 0 || tileToCollapse.first > 20 || tileToCollapse.second < 0 || tileToCollapse.second > 12)
+    {
+        return;
+    }
+
+    UpdatePossibleTiles(tileToCollapse.first, tileToCollapse.second);
+    int randomTileID = std::rand() % grid[tileToCollapse.first][tileToCollapse.second].possibleTiles.size();
+    TileType randomTile = grid[tileToCollapse.first][tileToCollapse.second].possibleTiles[randomTileID];
+    
+    RenderTile(randomTile, &tileToCollapse.first, &tileToCollapse.second);
+    //Collapse();
+
+}
+
+std::pair<int, int> WFCPlayroom::FindLowestEntropy()
+{
+    int minEntropy = INT_MAX;
+    std::vector<std::pair<int, int>> candidates;
+
+    for (int y = 0; y < 12; ++y) {  // Iterate over rows (height)
+        for (int x = 0; x < 20; ++x) {  // Iterate over columns (width)
+            TileState& cell = grid[x][y];
+
+            if (!cell.collapsed) {  // Only consider non-collapsed cells
+                int entropy = cell.possibleTiles.size();  // Count valid tile choices
+
+                if (entropy < minEntropy) {
+                    minEntropy = entropy;
+                    candidates.clear();
+                    candidates.emplace_back(x, y);
+                }
+                else if (entropy == minEntropy) {
+                    candidates.emplace_back(x, y);
+                }
+            }
+        }
+    }
+
+    if (candidates.empty()) {
+        return { -1, -1 };  // No available cell to collapse
+    }
+
+    // Randomly pick a tile from the candidates with the lowest entropy
+    return candidates[rand() % candidates.size()];
+
+   
+}
+
+void WFCPlayroom::UpdateNeighbourRules(int currentX, int currentY)
+{
+    if (grid[currentX][currentY].collapsed)
+    {
+
+        if (currentX > 0)
+            grid[currentX - 1][currentY].sockets.right = grid[currentX][currentY].sockets.left;
+        if (currentX < 19)
+            grid[currentX + 1][currentY].sockets.left = grid[currentX][currentY].sockets.right;
+        if (currentY > 0)
+            grid[currentX][currentY - 1].sockets.up = grid[currentX][currentY].sockets.down;
+        if (currentY < 11)
+            grid[currentX][currentY + 1].sockets.down = grid[currentX][currentY].sockets.up;
+
+    }
+}
+
+void WFCPlayroom::UpdatePossibleTiles(int currentX, int currentY)
+{
+    if (currentX < 0 || currentX >= 20 || currentY < 0 || currentY >= 12) {
+        return; // Prevent out-of-bounds access
+    }
+
+    // std::cout << "UPDATING POSSIBLE TILES FOR " << currentX << " , " << currentY << std::endl;
+
+     // Lambda function to determine whether a tile should be removed
+    auto tileFilter = [&](TileType tile) {
+        if (adjacencyRules.find(tile) == adjacencyRules.end()) {
+            return true; // Remove if no adjacency rules exist
+        }
+
+        bool matches = true; // Assume tile is valid until proven otherwise
+
+        // Check LEFT side
+        if (grid[currentX][currentY].sockets.left != std::array<int, 3>{90, 90, 90}) {
+            if (adjacencyRules[tile].adjacencyRules["left"] != grid[currentX][currentY].sockets.left) {
+                matches = false; // Invalidate if the left side doesn't match
+            }
+        }
+
+        // Check RIGHT side
+        if (grid[currentX][currentY].sockets.right != std::array<int, 3>{90, 90, 90}) {
+            if (adjacencyRules[tile].adjacencyRules["right"] != grid[currentX][currentY].sockets.right) {
+                matches = false;
+            }
+        }
+
+        // Check UP side
+        if (grid[currentX][currentY].sockets.up != std::array<int, 3>{90, 90, 90}) {
+            if (adjacencyRules[tile].adjacencyRules["up"] != grid[currentX][currentY].sockets.up) {
+                matches = false;
+            }
+        }
+
+        // Check DOWN side
+        if (grid[currentX][currentY].sockets.down != std::array<int, 3>{90, 90, 90}) {
+            if (adjacencyRules[tile].adjacencyRules["down"] != grid[currentX][currentY].sockets.down) {
+                matches = false;
+            }
+        }
+
+        return !matches; // Remove the tile if any direction doesn't match
+    };
+
+    // Use remove_if with the lambda function
+    grid[currentX][currentY].possibleTiles.erase(
+        std::remove_if(
+            grid[currentX][currentY].possibleTiles.begin(),
+            grid[currentX][currentY].possibleTiles.end(),
+            tileFilter
+        ),
+        grid[currentX][currentY].possibleTiles.end()
+    );
+
+
 }
 
 
-Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<Entity>& entity) {
+void WFCPlayroom::ImplementWFC(TileState(&grid)[20][12])
+{
+    const int N = 20; // Number of rows
+    const int M = 12; // Number of columns
+
+    // Seed for random number generation
+    std::srand(std::time(nullptr));
+
+    // Pick a random starting point
+    int startRow = std::rand() % N;
+    int startCol = std::rand() % M;
+    TileType randomTile = static_cast<TileType>(std::rand() % 14); // 14 because the enum has 14 values (0-13)
+    // std::cout << "Starting at (" << startRow << ", " << startCol << ")\n";
+    int startx = startRow, starty = startCol;
+    RenderTile(randomTile, &startx, &starty, false);
+
+
+    int x = startx;    // Current row
+    int y = starty;    // Current column
+
+    grid[x][y].sockets.up = adjacencyRules[randomTile].adjacencyRules["up"];
+    grid[x][y].sockets.down = adjacencyRules[randomTile].adjacencyRules["down"];
+    grid[x][y].sockets.left = adjacencyRules[randomTile].adjacencyRules["left"];
+    grid[x][y].sockets.right = adjacencyRules[randomTile].adjacencyRules["right"];
+
+    UpdateNeighbourRules(x, y);
+
+    UpdatePossibleTiles(startRow - 1, startCol);
+    UpdatePossibleTiles(startRow + 1, startCol);
+    UpdatePossibleTiles(startRow, startCol - 1);
+    UpdatePossibleTiles(startRow, startCol + 1);
+    // Collapse();
+
+}
+
+void WFCPlayroom::ResetGrid()
+{
+    for (int x = 0; x < 20; x++)
+    {
+        for (int y = 0; y < 12; y++)
+        {
+            grid[x][y].sockets.up = { 90, 90, 90 };
+            grid[x][y].sockets.down = { 90, 90, 90 };
+            grid[x][y].sockets.left = { 90, 90, 90 };
+            grid[x][y].sockets.right = { 90, 90, 90 };
+            grid[x][y].possibleTiles = {
+                BRIDGE, COMPONENT, CONNECTION, CORNER, DSKEW, SKEW, SUBSTRATE, T, TRACK, TRANSITION, TURN, VIAD, VIAS, WIRE,
+                    BRIDGE1, BRIDGE2, BRIDGE3,
+                    CONNECTION1, CONNECTION2, CONNECTION3,
+                    CORNER1, CORNER2, CORNER3,
+                    DSKEW1, DSKEW2, DSKEW3,
+                    SKEW1, SKEW2, SKEW3,
+                    T1, T2, T3,
+                    TRACK1, TRACK2, TRACK3,
+                    TRANSITION1, TRANSITION2, TRANSITION3,
+                    TURN1, TURN2, TURN3,
+                    VIAD1, VIAD2, VIAD3,
+                    VIAS1, VIAS2, VIAS3,
+                    WIRE1, WIRE2, WIRE3,
+            };
+            grid[x][y].collapsed = false;
+            grid[x][y].currentTile = NULL;
+        }
+    }
+    for (const auto& entity : m_entityManager.getEntities("tile")) {
+
+        entity->destroy();
+
+
+    }
+    ImplementWFC(grid);
+}
+
+
+
+void WFCPlayroom::RotateTileRules(std::array<int, 3>& upRules, std::array<int, 3>& downRules, std::array<int, 3>& leftRules, std::array<int, 3>& rightRules)
+{
+    std::array<int, 3> rotUpRules = upRules; //1 1 1
+    std::array<int, 3> rotdownRules = downRules; //9 1 1
+    std::array<int, 3> rotLeftRules = leftRules; //1 1 9
+    std::array<int, 3> rotRightRules = rightRules; //1 1 1
+    std::array<int, 3> tempRules = { NULL,NULL,NULL };
+
+    tempRules = rotUpRules; //1 1 1
+    reverse(rotLeftRules.begin(), rotLeftRules.end()); // 9 1 1
+    rotUpRules = rotLeftRules; // 9 1 1
+    rotLeftRules = rotdownRules; //9 1 1
+    reverse(rotRightRules.begin(), rotRightRules.end()); //  1 1 1
+    rotdownRules = rotRightRules; // 1 1 1
+    rotRightRules = tempRules; // 1 1 1
+
+    upRules = rotUpRules; // 9 1 1
+    downRules = rotdownRules; // 1 1 1
+    leftRules = rotLeftRules; // 9 1 1
+    rightRules = rotRightRules; // 1 1 1
+
+
+}
+
+std::string WFCPlayroom::arrayToString(const std::array<int, 3>& arr)
+{
+    std::ostringstream oss;
+    oss << "{";
+    for (size_t i = 0; i < arr.size(); ++i) {
+        oss << arr[i];
+        if (i < arr.size() - 1) {
+            oss << ", ";
+        }
+    }
+    oss << "}";
+    return oss.str();
+}
+
+void WFCPlayroom::ProcessTiles()
+{
+    TileInfo newTileInfo;
+    int newTile = 14;
+    std::unordered_map<TileType, TileInfo> newAdjacencyRules;
+    std::array<int, 3> newUpRules, newDownRules, newRightRules, newLeftRules;
+    for (const auto& [tile, info] : adjacencyRules) {
+        if (tile == COMPONENT || tile == SUBSTRATE) continue; // Skip these tile types
+
+        newUpRules = adjacencyRules[tile].adjacencyRules["up"];
+        newDownRules = adjacencyRules[tile].adjacencyRules["down"];
+        newLeftRules = adjacencyRules[tile].adjacencyRules["left"];
+        newRightRules = adjacencyRules[tile].adjacencyRules["right"];
+        newTileInfo.textureName = info.textureName;
+
+
+        for (int i = 1; i <= 3; i++) {
+            RotateTileRules(newUpRules, newDownRules, newLeftRules, newRightRules);
+            newTileInfo.rotationCount = i;
+            newTileInfo.adjacencyRules["up"] = newUpRules;
+            newTileInfo.adjacencyRules["down"] = newDownRules;
+            newTileInfo.adjacencyRules["left"] = newLeftRules;
+            newTileInfo.adjacencyRules["right"] = newRightRules;
+            newAdjacencyRules.insert({ static_cast<TileType>(newTile),newTileInfo });
+            newTile++;
+        }
+
+
+    }
+    adjacencyRules.insert(newAdjacencyRules.begin(), newAdjacencyRules.end());
+    for (const auto& [tile, info] : adjacencyRules) {
+
+        std::cout << "TileType: " << static_cast<int>(tile)
+            << " (" << info.textureName << "), Rotations: " << info.rotationCount << std::endl;
+
+        for (const auto& [direction, ruleSet] : info.adjacencyRules) {
+            std::cout << "  Direction: " << direction << " -> Rules: [ ";
+
+            for (int rule : ruleSet) {
+                std::cout << rule << " ";
+            }
+
+            std::cout << "]" << std::endl;
+        }
+    }
+}
+
+
+
+
+void WFCPlayroom::RenderTile(TileType tileID, int* randomRow, int* randomCol, int rotationCount)
+{
+    auto dec = m_entityManager.addEntity("tile");
+
+
+    grid[*randomRow][*randomCol].collapsed = true;
+    grid[*randomRow][*randomCol].currentTile = tileID;
+    TileType tile = tileID;
+
+
+    grid[*randomRow][*randomCol].sockets.up = adjacencyRules[tile].adjacencyRules["up"];
+    grid[*randomRow][*randomCol].sockets.down = adjacencyRules[tile].adjacencyRules["down"];
+    grid[*randomRow][*randomCol].sockets.left = adjacencyRules[tile].adjacencyRules["left"];
+    grid[*randomRow][*randomCol].sockets.right = adjacencyRules[tile].adjacencyRules["right"];
+
+
+
+    // std::cout << "Rendered tile " << tileID << "at " << *randomRow << " , " << *randomCol << std::endl;
+
+    dec->addComponent<CAnimation>(m_game->assets().getAnimation(adjacencyRules.at(tileID).textureName), true);
+
+
+    dec->addComponent<CTransform>(
+        gridToMidPixel(*randomRow, *randomCol, dec),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+
+    if (adjacencyRules.at(tileID).rotationCount > 0)
+    {
+        dec->getComponent<CTransform>().angle = dec->getComponent<CTransform>().angle + (90 * adjacencyRules.at(tileID).rotationCount);
+
+    }
+    // std::cout << "Rotated " << rotationCount << " times !" << std::endl;
+    UpdateNeighbourRules(*randomRow, *randomCol);
+    UpdatePossibleTiles(*randomRow - 1, *randomCol);
+    UpdatePossibleTiles(*randomRow + 1, *randomCol);
+    UpdatePossibleTiles(*randomRow, *randomCol - 1);
+    UpdatePossibleTiles(*randomRow, *randomCol + 1);
+
+}
+
+Vec2 WFCPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<Entity>& entity) {
     // This function takes in a grid (x,y) position and an Entity
     // Return a vec2 indicating where the CENTER position of the Entity should be
     // You must use the Entity's Animation size to position it correctly
     // The size of the grid width and height is stored in m_gridSize.x and m_gridSize.y
     // The bottom-left corner of the Animation should align with the bottom left of the grid cell
-    
+
     auto entitySize = entity->getComponent<CAnimation>().animation.getSize();
     // vec2 offset = m_gridSize - entitySize;
     return {
@@ -138,7 +489,7 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
     //    };
 }
 
-void Scene_Play::spawnPlayer() {
+void WFCPlayroom::spawnPlayer() {
     // here is a sample player entity which you can use to construct other entities
     m_player = m_entityManager.addEntity("player");
     m_player->addComponent<CAnimation>(m_game->assets().getAnimation("Stand"), true);
@@ -156,7 +507,7 @@ void Scene_Play::spawnPlayer() {
     m_player->addComponent<CGravity>(m_playerConfig.GRAVITY);
 }
 
-void Scene_Play::spawnBullet(const std::shared_ptr<Entity>& entity) {
+void WFCPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     // this should spawn a bullet at the given entity, going in the direction the entity is facing
     auto bullet = m_entityManager.addEntity("bullet");
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation(m_playerConfig.WEAPON), true);
@@ -174,7 +525,7 @@ void Scene_Play::spawnBullet(const std::shared_ptr<Entity>& entity) {
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
 }
 
-void Scene_Play::update() {
+void WFCPlayroom::update() {
     m_entityManager.update();
 
     // implement pause functionality
@@ -188,7 +539,7 @@ void Scene_Play::update() {
     sRender();
 }
 
-void Scene_Play::sMovement() {
+void WFCPlayroom::sMovement() {
     // Implement player movement/jumping based on its CInput component
     // Implement gravity's effect on the player
     // Implement the maximum player speed in both X and Y directions
@@ -243,7 +594,7 @@ void Scene_Play::sMovement() {
     }
 }
 
-void Scene_Play::sLifespan() {
+void WFCPlayroom::sLifespan() {
     // Check lifespan of entities that have them, and destroy them if they go over
     for (const auto& entity : m_entityManager.getEntities()) {
         if (entity->hasComponent<CLifespan>()) {
@@ -270,7 +621,7 @@ void Scene_Play::sLifespan() {
     }
 }
 
-void Scene_Play::sCollision() {
+void WFCPlayroom::sCollision() {
     // REMEMBER: SFML's (0,0) position is in the TOP-LEFT corner
     //           This means jumping will have a negative y-component
     //           and gravity will have a positive y-component
@@ -360,13 +711,14 @@ void Scene_Play::sCollision() {
     }
 }
 
-void Scene_Play::sDoAction(const Action& action) {
+void WFCPlayroom::sDoAction(const Action& action) {
     if (action.type() == "START") {
         if (action.name() == "TOGGLE_TEXTURE") { m_drawTextures = !m_drawTextures; }
         else if (action.name() == "TOGGLE_COLLISION") { m_drawCollision = !m_drawCollision; }
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
+        else if (action.name() == "WFC") { Collapse(); }
 
         else if (action.name() == "JUMP") {
             if (m_player->getComponent<CInput>().canJump) { m_player->getComponent<CInput>().up = true; }
@@ -405,7 +757,7 @@ void Scene_Play::sDoAction(const Action& action) {
     }
 }
 
-void Scene_Play::sAnimation() {
+void WFCPlayroom::sAnimation() {
     // Complete the Animation class code first
     // Set the animation of the player based on its CState component
     // check player state
@@ -474,13 +826,13 @@ void Scene_Play::sAnimation() {
     // if the animation is not repeated, and it has ended, destroy the entity
 }
 
-void Scene_Play::onEnd() {
+void WFCPlayroom::onEnd() {
     // when the scene ends, change back to the MENU scene
     // use m_game->changeScene(correct params);
     m_game->changeScene("MENU", std::make_shared<Scene_Menu>(m_game));
 }
 
-void Scene_Play::sRender() {
+void WFCPlayroom::sRender() {
     // color the background darker, so you know that the game is paused
     if (!m_paused) {
         m_game->window().clear(sf::Color(100, 100, 255));
@@ -552,7 +904,7 @@ void Scene_Play::sRender() {
     }
 }
 
-void Scene_Play::changePlayerStateTo(const std::string& state) {
+void WFCPlayroom::changePlayerStateTo(const std::string& state) {
     auto& prev = m_player->getComponent<CState>().previousState;
     if (prev != state) {
         prev = m_player->getComponent<CState>().state;
@@ -564,13 +916,13 @@ void Scene_Play::changePlayerStateTo(const std::string& state) {
     }
 }
 
-void Scene_Play::spawnBrickDebris(const std::shared_ptr<Entity>& tile) {
+void WFCPlayroom::spawnBrickDebris(const std::shared_ptr<Entity>& tile) {
     tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
     // tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BrickDebris");
     tile->addComponent<CLifespan>(10, m_currentFrame);
 }
 
-void Scene_Play::spawnCoinSpin(const std::shared_ptr<Entity>& tile) {
+void WFCPlayroom::spawnCoinSpin(const std::shared_ptr<Entity>& tile) {
     auto coin = m_entityManager.addEntity("coinspin");
     coin->addComponent<CAnimation>(
         m_game->assets().getAnimation("CoinSpin"),

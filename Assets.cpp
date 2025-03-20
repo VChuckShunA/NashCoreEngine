@@ -66,16 +66,16 @@ void Assets::addFont(const std::string& name, const std::string& path) {
 }
 
 const sf::Texture& Assets::getTexture(const std::string& name) const {
-    assert(m_textureMap.find(name) != m_textureMap.end());
+    //assert(m_textureMap.find(name) != m_textureMap.end());
     return m_textureMap.at(name);
 }
 
 const Animation& Assets::getAnimation(const std::string& name) const {
-    assert(m_animationMap.find(animation_types) != m_animationMap.end());
+   // assert(m_animationMap.find(animation_types) != m_animationMap.end());
     return m_animationMap.at(name);
 }
 
 const sf::Font& Assets::getFont(const std::string& name) const {
-    assert(m_fontMap.find(fontName) != m_fontMap.end());
+   // assert(m_fontMap.find(fontName) != m_fontMap.end());
     return m_fontMap.at(name);
 }

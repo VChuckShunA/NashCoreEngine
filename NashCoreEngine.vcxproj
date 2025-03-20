@@ -156,12 +156,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
+    <ClCompile Include="AI\AIPlayroom.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AshurasRevengence\AshuraMenu.cpp" />
     <ClCompile Include="AshurasRevengence\AshuraScore.cpp" />
     <ClCompile Include="AshurasRevengence\AshuraLevel.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Assignment1.cpp" />
+    <ClCompile Include="AI\BehaviourTrees\BehaviourTrees.cpp" />
+    <ClCompile Include="AI\Pathfinding\AStar.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -182,14 +185,18 @@
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="Vec2.cpp" />
     <ClCompile Include="AshurasRevengence\WFC\WFC.cpp" />
+    <ClCompile Include="AshurasRevengence\WFC\WFCPlayroom.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
+    <ClInclude Include="AI\AIPlayroom.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AshurasRevengence\AshuraMenu.h" />
     <ClInclude Include="AshurasRevengence\AshuraScore.h" />
     <ClInclude Include="AshurasRevengence\AshuraLevel.h" />
     <ClInclude Include="Assets.h" />
+    <ClInclude Include="AI\BehaviourTrees\BehaviourTrees.h" />
+    <ClInclude Include="AI\Pathfinding\AStar.h" />
     <ClInclude Include="Components.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
@@ -213,6 +220,7 @@
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="AshurasRevengence\WFC\WFC.h" />
+    <ClInclude Include="AshurasRevengence\WFC\WFCPlayroom.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="bin\assets.txt" />
@@ -224,11 +232,84 @@
   <ItemGroup>
     <Font Include="assets\fonts\Arial.ttf" />
     <Font Include="assets\fonts\joystix_monospace.otf" />
+    <Font Include="assets\fonts\mario.ttf" />
+    <Font Include="assets\fonts\tech.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\images\Ashura\Ashura.png" />
+    <Image Include="assets\images\Ashura\FlyingStar.png" />
     <Image Include="assets\images\characters-sprite.gif" />
     <Image Include="assets\images\characters-sprite.png" />
+    <Image Include="assets\images\Circuit\bridge.png" />
+    <Image Include="assets\images\Circuit\component.png" />
+    <Image Include="assets\images\Circuit\connection.png" />
+    <Image Include="assets\images\Circuit\corner.png" />
+    <Image Include="assets\images\Circuit\dskew.png" />
+    <Image Include="assets\images\Circuit\skew.png" />
+    <Image Include="assets\images\Circuit\substrate.png" />
+    <Image Include="assets\images\Circuit\t.png" />
+    <Image Include="assets\images\Circuit\track.png" />
+    <Image Include="assets\images\Circuit\transition.png" />
+    <Image Include="assets\images\Circuit\turn.png" />
+    <Image Include="assets\images\Circuit\viad.png" />
+    <Image Include="assets\images\Circuit\vias.png" />
+    <Image Include="assets\images\Circuit\wire.png" />
+    <Image Include="assets\images\Cuneiform2\bridge.png" />
+    <Image Include="assets\images\Cuneiform2\component.png" />
+    <Image Include="assets\images\Cuneiform2\connection.png" />
+    <Image Include="assets\images\Cuneiform2\corner.png" />
+    <Image Include="assets\images\Cuneiform2\dskew.png" />
+    <Image Include="assets\images\Cuneiform2\skew.png" />
+    <Image Include="assets\images\Cuneiform2\substrate.png" />
+    <Image Include="assets\images\Cuneiform2\t.png" />
+    <Image Include="assets\images\Cuneiform2\track.png" />
+    <Image Include="assets\images\Cuneiform2\transition.png" />
+    <Image Include="assets\images\Cuneiform2\turn.png" />
+    <Image Include="assets\images\Cuneiform2\viad.png" />
+    <Image Include="assets\images\Cuneiform2\vias.png" />
+    <Image Include="assets\images\Cuneiform2\wire.png" />
+    <Image Include="assets\images\Cuneiform\bridge.png" />
+    <Image Include="assets\images\Cuneiform\component.png" />
+    <Image Include="assets\images\Cuneiform\connection.png" />
+    <Image Include="assets\images\Cuneiform\corner.png" />
+    <Image Include="assets\images\Cuneiform\dskew.png" />
+    <Image Include="assets\images\Cuneiform\skew.png" />
+    <Image Include="assets\images\Cuneiform\substrate.png" />
+    <Image Include="assets\images\Cuneiform\t.png" />
+    <Image Include="assets\images\Cuneiform\track.png" />
+    <Image Include="assets\images\Cuneiform\transition.png" />
+    <Image Include="assets\images\Cuneiform\turn.png" />
+    <Image Include="assets\images\Cuneiform\viad.png" />
+    <Image Include="assets\images\Cuneiform\vias.png" />
+    <Image Include="assets\images\Cuneiform\wire.png" />
+    <Image Include="assets\images\mario\brick.png" />
+    <Image Include="assets\images\mario\brick_debris.png" />
+    <Image Include="assets\images\mario\bush.png" />
+    <Image Include="assets\images\mario\castle_small.png" />
+    <Image Include="assets\images\mario\coin.png" />
+    <Image Include="assets\images\mario\flower.png" />
+    <Image Include="assets\images\mario\ground.png" />
+    <Image Include="assets\images\mario\question.png" />
+    <Image Include="assets\images\mario\question_hit.png" />
+    <Image Include="assets\images\mario\tree.png" />
+    <Image Include="assets\images\megaman\air_shoot.png" />
+    <Image Include="assets\images\megaman\buster.png" />
+    <Image Include="assets\images\megaman\buster16.png" />
+    <Image Include="assets\images\megaman\jump.png" />
+    <Image Include="assets\images\megaman\run_192x64.png" />
+    <Image Include="assets\images\megaman\run_shoot.png" />
+    <Image Include="assets\images\megaman\stand64.png" />
+    <Image Include="assets\images\megaman\stand_128x64.png" />
+    <Image Include="assets\images\megaman\stand_shoot.png" />
+    <Image Include="assets\images\misc\explosion64.png" />
+    <Image Include="assets\images\misc\explosion96.png" />
     <Image Include="assets\images\world-sprite.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\images\Circuit\Circuit.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="assets\images\Circuit\data.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

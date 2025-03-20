@@ -16,7 +16,8 @@ void GameEngine::init(const std::string& path) {
     m_window.create(sf::VideoMode(1280, 768), "Nashcore Engine -  Ashura's Revengence");
     m_window.setFramerateLimit(60);
 
-    changeScene("MENU", std::make_shared<AshuraMenu>(this));
+   // changeScene("MENU", std::make_shared<AshuraMenu>(this));
+    changeScene("MENU", std::make_shared<Scene_Menu>(this));
 }
 
 std::shared_ptr<Scene> GameEngine::currentScene() {
