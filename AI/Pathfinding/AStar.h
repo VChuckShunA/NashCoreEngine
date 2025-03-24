@@ -2,6 +2,7 @@
 #include "../../vec2.h"
 #include <cstdlib>
 #include <vector>
+#include <SFML/Graphics.hpp>
 class AStar
 {
 public:
@@ -19,7 +20,7 @@ public:
 		}
 	};
 
-	const int NAVMESH_WIDTH = 20, NAVMESH_HEIGHT = 12;
+	const int NAVMESH_WIDTH = 100, NAVMESH_HEIGHT = 100;
 	std::vector<std::vector<Node>> navMesh;
 
 	void initializeNavMesh();
@@ -27,6 +28,6 @@ public:
 	void markObstacle(int x, int y);
 
 	std::vector<Vec2>FindPath(Vec2 startPos, Vec2 endPos);
-
+	void DrawPath(sf::RenderWindow& window);
 };
 

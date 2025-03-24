@@ -3,13 +3,13 @@
 #include <iostream>
 void AStar::initializeNavMesh()
 {
-	navMesh.resize(NAVMESH_HEIGHT, std::vector<Node>(NAVMESH_WIDTH, Node({ 0,0 }, true)));
+	navMesh.resize(NAVMESH_HEIGHT, std::vector<Node>(NAVMESH_WIDTH, Node({ Vec2(0,0)}, true)));
 
-	for (int x = 0; x < NAVMESH_WIDTH; x++)
+	for (int y = 0; y < NAVMESH_HEIGHT; y++)
 	{
-		for (int y = 0; y < NAVMESH_HEIGHT; y++)
+		for (int x = 0; x < NAVMESH_WIDTH; x++)
 		{
-			navMesh[x][y] = Node({ x,y }, true);
+			navMesh[y][x] = Node(Vec2(y, x), true); //assume all nodes are walkable by default
 		}
 	}
 
@@ -20,7 +20,7 @@ void AStar::initializeNavMesh()
 void AStar::markObstacles()
 {
 
-	markObstacle(5,1);
+	markObstacle(5,1);/*
 	markObstacle(5, 2);
 	markObstacle(5, 3);
 	markObstacle(5, 4);
@@ -29,11 +29,22 @@ void AStar::markObstacles()
 	markObstacle(5, 7);
 	markObstacle(5, 8);
 	markObstacle(5, 9);
+
+	markObstacle(5, 10);
+	markObstacle(5, 11);
+	markObstacle(5, 12);
+	markObstacle(5, 13);
+	markObstacle(5, 14);
+	markObstacle(5, 15);
+	markObstacle(5, 16);
+	markObstacle(5, 17);
+	markObstacle(5, 18);
+	markObstacle(5,19);*/
 }
 
 void AStar::markObstacle(int x, int y)
 {
-	navMesh[x][y].walkable = false;
+	navMesh[y][x].walkable = false;
 }
 
 std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
@@ -103,8 +114,20 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 		}
 
 	}
-
+	std::cout << "NO PATH FOUND" << std::endl;
 	//no path found
 	return {};
 	//std::vector<Vec2>();
+}
+
+void AStar::DrawPath(sf::RenderWindow& window)
+{
+	for (int y = 0; y < NAVMESH_HEIGHT; ++y) {
+		for (int x = 0; x < NAVMESH_WIDTH; ++x) {
+			sf::RectangleShape cell(sf::Vector2f(64, 64));
+			cell.setPosition(x * 64, y * 64);
+			cell.setFillColor(navMesh[y][x].walkable ? sf::Color::Black : sf::Color::Red);
+			window.draw(cell);
+		}
+	}
 }

@@ -3,6 +3,7 @@
 #include "../Entity.h"
 #include "../EntityManager.h"
 #include "../Scene.h"
+#include "Pathfinding/AStar.h"
 class AIPlayroom :public Scene {
 
     struct PlayerConfig {
@@ -51,6 +52,7 @@ protected:
 public:
     AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);
 
+    AStar navmesh;
     void update() override;
 };
 

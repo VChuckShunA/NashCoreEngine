@@ -33,7 +33,8 @@ void AIPlayroom::init(const std::string& levelPath) {
     // m_gridText.setFont(m_game->assets().getFont("Mario"));
     m_gridText.setFont(m_game->assets().getFont("Tech"));
 
-    
+    navmesh.initializeNavMesh();
+    navmesh.FindPath(Vec2(0,1),Vec2(6,6));
 
 }
 
@@ -269,6 +270,7 @@ void AIPlayroom::sRender() {
 
     // draw the grid so that can easily debug
     if (m_drawGrid) {
+        navmesh.DrawPath(m_game->window());
         float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
         float rightX = leftX + width() + m_gridSize.x;
         float nextGridX = leftX - float((int)leftX % (int)m_gridSize.x);
@@ -289,6 +291,9 @@ void AIPlayroom::sRender() {
             }
         }
     }
+
+
+    
 }
 
 void AIPlayroom::changePlayerStateTo(const std::string& state) {
