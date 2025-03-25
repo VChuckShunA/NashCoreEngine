@@ -7,9 +7,10 @@ void AStar::initializeNavMesh()
 
 	for (int y = 0; y < NAVMESH_HEIGHT; y++)
 	{
+		
 		for (int x = 0; x < NAVMESH_WIDTH; x++)
 		{
-			navMesh[y][x] = Node(Vec2(y, x), true); //assume all nodes are walkable by default
+			navMesh[x][y] = Node(Vec2(x, y), true); //assume all nodes are walkable by default
 		}
 	}
 
@@ -19,9 +20,8 @@ void AStar::initializeNavMesh()
 
 void AStar::markObstacles()
 {
-
-	markObstacle(5,1);/*
-	markObstacle(5, 2);
+	
+	markObstacle(5,2);
 	markObstacle(5, 3);
 	markObstacle(5, 4);
 	markObstacle(5, 5);
@@ -39,12 +39,12 @@ void AStar::markObstacles()
 	markObstacle(5, 16);
 	markObstacle(5, 17);
 	markObstacle(5, 18);
-	markObstacle(5,19);*/
+	markObstacle(5,19);
 }
 
 void AStar::markObstacle(int x, int y)
 {
-	navMesh[y][x].walkable = false;
+	navMesh[x][y].walkable = false;
 }
 
 std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
@@ -87,7 +87,8 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 		for (auto& dir : directions)
 		{
 			Vec2 neighbourPos = currentNode->position + dir;
-			if (neighbourPos.x < 0 || neighbourPos.y < 0 || neighbourPos.x >= NAVMESH_WIDTH || neighbourPos.y >= NAVMESH_HEIGHT)
+			if (neighbourPos.x < 0 || neighbourPos.y < 0 || 
+				neighbourPos.x >= NAVMESH_WIDTH || neighbourPos.y >= NAVMESH_HEIGHT)
 			{
 				continue;
 			}
@@ -121,12 +122,13 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 }
 
 void AStar::DrawPath(sf::RenderWindow& window)
-{
+{// Get the window height to flip the y-axis
+	Vec2 windowSize = Vec2(window.getSize().x, window.getSize().y);
 	for (int y = 0; y < NAVMESH_HEIGHT; ++y) {
 		for (int x = 0; x < NAVMESH_WIDTH; ++x) {
 			sf::RectangleShape cell(sf::Vector2f(64, 64));
-			cell.setPosition(x * 64, y * 64);
-			cell.setFillColor(navMesh[y][x].walkable ? sf::Color::Black : sf::Color::Red);
+			cell.setPosition(x * 64, windowSize.y - (y + 1) * 64);
+			cell.setFillColor(navMesh[x][y].walkable ? sf::Color::Black : sf::Color::Red);
 			window.draw(cell);
 		}
 	}

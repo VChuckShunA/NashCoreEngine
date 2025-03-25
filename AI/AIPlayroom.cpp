@@ -9,6 +9,7 @@
 #include <chrono>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
+
     init(levelPath);
 
 
@@ -34,7 +35,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     m_gridText.setFont(m_game->assets().getFont("Tech"));
 
     navmesh.initializeNavMesh();
-    navmesh.FindPath(Vec2(0,1),Vec2(6,6));
+    navmesh.FindPath(Vec2(4,6),Vec2(6,6));
 
 }
 
@@ -284,7 +285,7 @@ void AIPlayroom::sRender() {
 
             for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
                 std::string xCell = std::to_string((int)x / (int)m_gridSize.x);
-                std::string yCell = std::to_string((int)y / (int)m_gridSize.y);
+                std::string yCell = std::to_string(((int)y / (int)m_gridSize.y));
                 m_gridText.setString("(" + xCell + "," + yCell + ")");
                 m_gridText.setPosition(x + 3, height() - y - m_gridSize.y + 2);
                 m_game->window().draw(m_gridText);

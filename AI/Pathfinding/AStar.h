@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include <array>
 class AStar
 {
 public:
@@ -19,6 +20,8 @@ public:
 			fCost = gCost + hCost;
 		}
 	};
+
+
 
 	const int NAVMESH_WIDTH = 100, NAVMESH_HEIGHT = 100;
 	std::vector<std::vector<Node>> navMesh;
