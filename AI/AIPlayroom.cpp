@@ -29,13 +29,26 @@ void AIPlayroom::init(const std::string& levelPath) {
     registerAction(sf::Keyboard::A, "LEFT");
     registerAction(sf::Keyboard::D, "RIGHT");
     registerAction(sf::Keyboard::Space, "SHOOT");
+    registerAction(sf::Keyboard::K, "MoveAgent");
 
     m_gridText.setCharacterSize(12);
     // m_gridText.setFont(m_game->assets().getFont("Mario"));
     m_gridText.setFont(m_game->assets().getFont("Tech"));
 
     navmesh.initializeNavMesh();
-    navmesh.FindPath(Vec2(4,6),Vec2(6,6));
+    //Spawn AI
+    AIAgent = m_entityManager.addEntity("player");
+    AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("Stand"), true);
+    AIAgent->addComponent<CTransform>(
+        gridToMidPixel(4,9, AIAgent),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    AIAgent->addComponent<CBoundingBox>(Vec2(64, 64));
+    path = navmesh.FindPath(positionToGridCordinates(AIAgent), Vec2(6, 6));
+    
+   
 
 }
 
@@ -63,20 +76,20 @@ Vec2 AIPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     // this should spawn a bullet at the given entity, going in the direction the entity is facing
-    auto bullet = m_entityManager.addEntity("bullet");
+  /*  auto bullet = m_entityManager.addEntity("bullet");
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation(m_playerConfig.WEAPON), true);
     // vec2(30,-3) is a tweak so that bullet starts at the end of gun; it is determined experimentally
     float dir = 1.0f;
     if (entity->getComponent<CTransform>().scale.x < 0) dir = -1.0;
     bullet->addComponent<CTransform>(
-        entity->getComponent<CTransform>().pos/* + vec2(30,-3) */,
-        Vec2(dir * 2 * m_playerConfig.SPEED, 0),
+        entity->getComponent<CTransform>().pos/* + vec2(30,-3) *///,
+        /*      Vec2(dir * 2 * m_playerConfig.SPEED, 0),
         // vec2(5 * entity->getComponent<CTransform>().scale.x, 0),
         entity->getComponent<CTransform>().scale,
         0
     );
     bullet->addComponent<CLifespan>(90, m_currentFrame);
-    bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
+    bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize()); */
 }
 
 void AIPlayroom::update() {
@@ -86,9 +99,25 @@ void AIPlayroom::update() {
     if (!m_paused) {
         sLifespan();
         sCollision();
+       // MoveEntity(AIAgent, path);
         m_currentFrame++;
     }
     sRender();
+}
+
+Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
+{
+    return { (AIAgent->getComponent<CTransform>().pos.x / 64) ,
+        ((m_game->window().getSize().y - (AIAgent->getComponent<CTransform>().pos.y - 1)) / 64) };
+  
+}
+
+void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path)
+{
+    if (!path.empty()) {
+        entity->getComponent<CTransform>().pos = Vec2(gridToMidPixel(path.front().x,path.front().y,entity));
+        path.erase(path.begin());
+    }
 }
 
 
@@ -114,7 +143,7 @@ void AIPlayroom::sLifespan() {
     for (const auto& entity : m_entityManager.getEntities("bullet")) {
         auto& bulletLife = entity->getComponent<CLifespan>();
         if (m_currentFrame - bulletLife.frameCreated == 20) {
-            m_player->getComponent<CInput>().canShoot = true;
+           // AIAgent->getComponent<CInput>().canShoot = true;
         }
     }
 }
@@ -153,26 +182,26 @@ void AIPlayroom::sCollision() {
     // reset gravity
    // m_player->getComponent<CGravity>().gravity = m_playerConfig.GRAVITY;
     for (const auto& tile : m_entityManager.getEntities("tile")) {
-        Vec2 overlap = Physics::GetOverlap(m_player, tile);
-        Vec2 pOverlap = Physics::GetPreviousOverlap(m_player, tile);
+        Vec2 overlap = Physics::GetOverlap(AIAgent, tile);
+        Vec2 pOverlap = Physics::GetPreviousOverlap(AIAgent, tile);
         // check if player is in air
         // check tiles being below player
-        float dy = tile->getComponent<CTransform>().pos.y - m_player->getComponent<CTransform>().pos.y;
+        float dy = tile->getComponent<CTransform>().pos.y - AIAgent->getComponent<CTransform>().pos.y;
         if (0 < overlap.x && -m_gridSize.y < overlap.y && dy > 0) {
             if (0 <= overlap.y && pOverlap.y <= 0) {
                 // stand on tile
-                m_player->getComponent<CInput>().canJump = true;
-                m_player->getComponent<CGravity>().gravity = 0;
-                m_player->getComponent<CTransform>().velocity.y = 0;
+                AIAgent->getComponent<CInput>().canJump = true;
+                AIAgent->getComponent<CGravity>().gravity = 0;
+                AIAgent->getComponent<CTransform>().velocity.y = 0;
                 // collision resolution
-                m_player->getComponent<CTransform>().pos.y -= overlap.y;
+                AIAgent->getComponent<CTransform>().pos.y -= overlap.y;
             }
         }
         // check if player hits the tile from the bottom
         if (0 < overlap.x && -m_gridSize.y < overlap.y && dy < 0) {
             if (0 <= overlap.y && pOverlap.y <= 0) {
-                m_player->getComponent<CTransform>().pos.y += overlap.y;
-                m_player->getComponent<CTransform>().velocity.y = 0;
+                AIAgent->getComponent<CTransform>().pos.y += overlap.y;
+                AIAgent->getComponent<CTransform>().velocity.y = 0;
                 if (tile->getComponent<CAnimation>().animation.getName() == "Question") {
                     tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("QuestionHit");
                     spawnCoinSpin(tile);
@@ -183,16 +212,16 @@ void AIPlayroom::sCollision() {
             }
         }
         // check player and tile side collide
-        float dx = tile->getComponent<CTransform>().pos.x - m_player->getComponent<CTransform>().pos.x;
+        float dx = tile->getComponent<CTransform>().pos.x - AIAgent->getComponent<CTransform>().pos.x;
         if (0 < overlap.y && -m_gridSize.x < overlap.x) {
             if (0 <= overlap.x && pOverlap.x <= 0) {
                 if (dx > 0) {
                     // tile is right of player
-                    m_player->getComponent<CTransform>().pos.x -= overlap.x;
+                    AIAgent->getComponent<CTransform>().pos.x -= overlap.x;
                 }
                 else {
                     // tile is left of player
-                    m_player->getComponent<CTransform>().pos.x += overlap.x;
+                    AIAgent->getComponent<CTransform>().pos.x += overlap.x;
                 }
             }
         }
@@ -208,6 +237,7 @@ void AIPlayroom::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
+        else if (action.name() == "MoveAgent") {  }
 
       
     }
@@ -298,14 +328,14 @@ void AIPlayroom::sRender() {
 }
 
 void AIPlayroom::changePlayerStateTo(const std::string& state) {
-    auto& prev = m_player->getComponent<CState>().previousState;
+    auto& prev = AIAgent->getComponent<CState>().previousState;
     if (prev != state) {
-        prev = m_player->getComponent<CState>().state;
-        m_player->getComponent<CState>().state = state;
-        m_player->getComponent<CState>().changeAnimation = true;
+        prev = AIAgent->getComponent<CState>().state;
+        AIAgent->getComponent<CState>().state = state;
+        AIAgent->getComponent<CState>().changeAnimation = true;
     }
     else {
-        m_player->getComponent<CState>().changeAnimation = false;
+        AIAgent->getComponent<CState>().changeAnimation = false;
     }
 }
 

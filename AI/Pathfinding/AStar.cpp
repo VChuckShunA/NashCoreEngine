@@ -128,7 +128,7 @@ void AStar::DrawPath(sf::RenderWindow& window)
 		for (int x = 0; x < NAVMESH_WIDTH; ++x) {
 			sf::RectangleShape cell(sf::Vector2f(64, 64));
 			cell.setPosition(x * 64, windowSize.y - (y + 1) * 64);
-			cell.setFillColor(navMesh[x][y].walkable ? sf::Color::Black : sf::Color::Red);
+			cell.setFillColor(navMesh[x][y].walkable ? sf::Color::Transparent : sf::Color::Red);
 			window.draw(cell);
 		}
 	}

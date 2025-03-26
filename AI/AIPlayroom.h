@@ -12,12 +12,11 @@ class AIPlayroom :public Scene {
     };
 
 protected:
-    std::shared_ptr<Entity> m_player;
+    std::shared_ptr<Entity> AIAgent;
     std::string m_levelPath;
-    PlayerConfig m_playerConfig;
     bool m_drawTextures = true;
     bool m_drawCollision = false;
-    bool m_drawGrid = false;
+    bool m_drawGrid = true;
     const Vec2 m_gridSize = { 64, 64 };
     sf::Text m_gridText;
 
@@ -52,7 +51,11 @@ protected:
 public:
     AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);
 
-    AStar navmesh;
     void update() override;
+    //AI
+    AStar navmesh;
+    std::vector<Vec2> path;
+    Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
+    void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
 };
 
