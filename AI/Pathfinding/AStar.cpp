@@ -29,7 +29,6 @@ void AStar::markObstacles()
 	markObstacle(5, 7);
 	markObstacle(5, 8);
 	markObstacle(5, 9);
-
 	markObstacle(5, 10);
 	markObstacle(5, 11);
 	markObstacle(5, 12);
@@ -40,6 +39,27 @@ void AStar::markObstacles()
 	markObstacle(5, 17);
 	markObstacle(5, 18);
 	markObstacle(5,19);
+	markObstacle(5, 20);
+	markObstacle(5, 21);
+	markObstacle(5, 22);
+	markObstacle(5, 23);
+	markObstacle(5, 24);
+	markObstacle(5, 25);
+	markObstacle(5, 26);
+	markObstacle(5, 27);
+	markObstacle(5, 28);
+	markObstacle(5, 29);
+	markObstacle(5, 30);
+	markObstacle(5, 31);
+	markObstacle(5, 32);
+	markObstacle(5, 33);
+	markObstacle(5, 34);
+	markObstacle(5, 35);
+	markObstacle(5, 36);
+	markObstacle(5, 37);
+	markObstacle(5, 38);
+	markObstacle(5, 39);
+	markObstacle(5, 40);
 }
 
 void AStar::markObstacle(int x, int y)

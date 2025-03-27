@@ -40,13 +40,13 @@ void AIPlayroom::init(const std::string& levelPath) {
     AIAgent = m_entityManager.addEntity("player");
     AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("Stand"), true);
     AIAgent->addComponent<CTransform>(
-        gridToMidPixel(4,9, AIAgent),
+        gridToMidPixel(0,11, AIAgent),
         Vec2(3, 0),
         Vec2(1, 1),
         0
     );
     AIAgent->addComponent<CBoundingBox>(Vec2(64, 64));
-    path = navmesh.FindPath(positionToGridCordinates(AIAgent), Vec2(6, 6));
+    path = navmesh.FindPath(positionToGridCordinates(AIAgent), Vec2(19, 11));
     
    
 
@@ -99,7 +99,7 @@ void AIPlayroom::update() {
     if (!m_paused) {
         sLifespan();
         sCollision();
-       // MoveEntity(AIAgent, path);
+        MoveEntity(AIAgent, path);
         m_currentFrame++;
     }
     sRender();
@@ -114,9 +114,50 @@ Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
 
 void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path)
 {
+    int AISpeed = 4;
+    bool destinationReached = false;
+    std::cout << "Angle : " << entity->getComponent<CTransform>().angle << std::endl;
+    
     if (!path.empty()) {
-        entity->getComponent<CTransform>().pos = Vec2(gridToMidPixel(path.front().x,path.front().y,entity));
-        path.erase(path.begin());
+        if (!destinationReached)
+        {
+            if (entity->getComponent<CTransform>().pos == Vec2(gridToMidPixel(path.back().x, path.back().y, entity)))
+            {
+                destinationReached=true;
+            }
+           /* if (Vec2((int)positionToGridCordinates(entity).x, (int)positionToGridCordinates(entity).y) == Vec2(path.front().x, path.front().y))
+            {
+                path.erase(path.begin());
+            }*/
+            if (Vec2(entity->getComponent<CTransform>().pos.x, entity->getComponent<CTransform>().pos.y) == Vec2(gridToMidPixel(path.front().x,path.front().y,entity)))
+            {
+                path.erase(path.begin());
+            }
+            if (entity->getComponent<CTransform>().pos.x < gridToMidPixel(path.front().x, path.front().y, entity).x)
+            {
+                //move Left
+                entity->getComponent<CTransform>().pos.x= entity->getComponent<CTransform>().pos.x+AISpeed;
+               
+            }if (entity->getComponent<CTransform>().pos.x > gridToMidPixel(path.front().x, path.front().y, entity).x)
+            {
+                //move Right
+                entity->getComponent<CTransform>().pos.x=entity->getComponent<CTransform>().pos.x-AISpeed;
+                
+            }
+            if (entity->getComponent<CTransform>().pos.y < gridToMidPixel(path.front().x, path.front().y, entity).y)
+            {
+                //move Down
+                entity->getComponent<CTransform>().pos.y = entity->getComponent<CTransform>().pos.y+AISpeed;
+               
+            }if (entity->getComponent<CTransform>().pos.y > gridToMidPixel(path.front().x, path.front().y, entity).y)
+            {
+                //move Up
+                entity->getComponent<CTransform>().pos.y = entity->getComponent<CTransform>().pos.y-AISpeed;
+                
+            }
+        }
+        //entity->getComponent<CTransform>().pos = Vec2(gridToMidPixel(path.front().x,path.front().y,entity));
+       // path.erase(path.begin());
     }
 }
 
@@ -237,7 +278,7 @@ void AIPlayroom::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        else if (action.name() == "MoveAgent") {  }
+        else if (action.name() == "MoveAgent") { MoveEntity(AIAgent, path); }
 
       
     }
@@ -299,9 +340,9 @@ void AIPlayroom::sRender() {
         }
     }
 
+    navmesh.DrawPath(m_game->window());
     // draw the grid so that can easily debug
     if (m_drawGrid) {
-        navmesh.DrawPath(m_game->window());
         float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
         float rightX = leftX + width() + m_gridSize.x;
         float nextGridX = leftX - float((int)leftX % (int)m_gridSize.x);
