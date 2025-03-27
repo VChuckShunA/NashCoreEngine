@@ -103,7 +103,7 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 		}
 
 		//Process neighbors
-		std::vector<Vec2> directions = { {0,-1},{0,1},{-1,0},{1,0} };//Up,Down,Left,Right
+		std::vector<Vec2> directions = { {0,-1},{0,1},{-1,0},{1,0},{1,1},{-1,-1},{1,-1},{-1,1} };//Up,Down,Left,Right
 		for (auto& dir : directions)
 		{
 			Vec2 neighbourPos = currentNode->position + dir;

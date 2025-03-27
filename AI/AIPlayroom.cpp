@@ -114,13 +114,14 @@ Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
 
 void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path)
 {
-    int AISpeed = 4;
+    int AISpeed = 6;
     bool destinationReached = false;
     std::cout << "Angle : " << entity->getComponent<CTransform>().angle << std::endl;
-    
+    Vec2 distanceBetween;
     if (!path.empty()) {
         if (!destinationReached)
         {
+            distanceBetween = Vec2(abs(entity->getComponent<CTransform>().pos.x - gridToMidPixel(path.front().x, path.front().y, entity).x), abs(entity->getComponent<CTransform>().pos.y - gridToMidPixel(path.front().x, path.front().y, entity).y));
             if (entity->getComponent<CTransform>().pos == Vec2(gridToMidPixel(path.back().x, path.back().y, entity)))
             {
                 destinationReached=true;
@@ -129,7 +130,11 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
             {
                 path.erase(path.begin());
             }*/
-            if (Vec2(entity->getComponent<CTransform>().pos.x, entity->getComponent<CTransform>().pos.y) == Vec2(gridToMidPixel(path.front().x,path.front().y,entity)))
+            /*if (Vec2(entity->getComponent<CTransform>().pos.x, entity->getComponent<CTransform>().pos.y) == Vec2(gridToMidPixel(path.front().x,path.front().y,entity)))
+            {
+                path.erase(path.begin());
+            }*/
+            if (distanceBetween.x<5&&distanceBetween.y<5)
             {
                 path.erase(path.begin());
             }
