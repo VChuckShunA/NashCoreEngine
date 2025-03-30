@@ -182,6 +182,7 @@
     <ClCompile Include="SceneMenu.cpp" />
     <ClCompile Include="ScenePlay.cpp" />
     <ClCompile Include="AshurasRevengence\WFC\Tile.cpp" />
+    <ClCompile Include="AI\BehaviourTrees\Task.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="Vec2.cpp" />
     <ClCompile Include="AshurasRevengence\WFC\WFC.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="SceneMenu.h" />
     <ClInclude Include="ScenePlay.h" />
     <ClInclude Include="AshurasRevengence\WFC\Tile.h" />
+    <ClInclude Include="AI\BehaviourTrees\Task.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="AshurasRevengence\WFC\WFC.h" />

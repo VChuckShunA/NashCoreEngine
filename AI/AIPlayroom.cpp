@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <math.h>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
 
@@ -38,7 +39,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     navmesh.initializeNavMesh();
     //Spawn AI
     AIAgent = m_entityManager.addEntity("player");
-    AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("Stand"), true);
+    AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     AIAgent->addComponent<CTransform>(
         gridToMidPixel(0,11, AIAgent),
         Vec2(3, 0),
@@ -114,9 +115,14 @@ Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
 
 void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path)
 {
-    int AISpeed = 6;
+    int AISpeed = 3;
     bool destinationReached = false;
-    std::cout << "Angle : " << entity->getComponent<CTransform>().angle << std::endl;
+    bool up = false, down = false, left = false, right = false;
+    float angleToWaypoint;
+    Vec2 A = Vec2((int)positionToGridCordinates(entity).x, (int)positionToGridCordinates(entity).y);
+    Vec2 B= Vec2(path.front().x, path.front().y);
+ 
+     //0=right,90=down,180 =left, 270=up
     Vec2 distanceBetween;
     if (!path.empty()) {
         if (!destinationReached)
@@ -126,6 +132,7 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
             {
                 destinationReached=true;
             }
+            
            /* if (Vec2((int)positionToGridCordinates(entity).x, (int)positionToGridCordinates(entity).y) == Vec2(path.front().x, path.front().y))
             {
                 path.erase(path.begin());
@@ -142,23 +149,62 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
             {
                 //move Left
                 entity->getComponent<CTransform>().pos.x= entity->getComponent<CTransform>().pos.x+AISpeed;
-               
+                left = false;
+                right = true;
             }if (entity->getComponent<CTransform>().pos.x > gridToMidPixel(path.front().x, path.front().y, entity).x)
             {
                 //move Right
                 entity->getComponent<CTransform>().pos.x=entity->getComponent<CTransform>().pos.x-AISpeed;
-                
+                left = true;
+                right = false;
             }
             if (entity->getComponent<CTransform>().pos.y < gridToMidPixel(path.front().x, path.front().y, entity).y)
             {
                 //move Down
                 entity->getComponent<CTransform>().pos.y = entity->getComponent<CTransform>().pos.y+AISpeed;
+                down = true;
+                up = false;
                
             }if (entity->getComponent<CTransform>().pos.y > gridToMidPixel(path.front().x, path.front().y, entity).y)
             {
                 //move Up
                 entity->getComponent<CTransform>().pos.y = entity->getComponent<CTransform>().pos.y-AISpeed;
-                
+                up = true;
+                down = false;
+            }
+            //0=right,90=down,180 =left, 270=up
+
+            if (up && left)
+            {
+                entity->getComponent<CTransform>().angle = 225;
+            }
+            else if (up && right)
+            {
+                entity->getComponent<CTransform>().angle = 315;
+            }
+            else if (down && left)
+            {
+                entity->getComponent<CTransform>().angle = 135;
+            }
+            else if (down && right)
+            {
+                entity->getComponent<CTransform>().angle = 45;
+            }
+            else if (up)
+            {
+                entity->getComponent<CTransform>().angle = 270;
+            }
+            else if (down)
+            {
+                entity->getComponent<CTransform>().angle = 90;
+            }
+            else if (left)
+            {
+                entity->getComponent<CTransform>().angle = 180;
+            }
+            else if (right)
+            {
+                entity->getComponent<CTransform>().angle = 0;
             }
         }
         //entity->getComponent<CTransform>().pos = Vec2(gridToMidPixel(path.front().x,path.front().y,entity));
@@ -300,10 +346,10 @@ void AIPlayroom::onEnd() {
 void AIPlayroom::sRender() {
     // color the background darker, so you know that the game is paused
     if (!m_paused) {
-        m_game->window().clear(sf::Color(0, 0, 0));
+        m_game->window().clear(sf::Color(54, 54, 54));
     }
     else {
-        m_game->window().clear(sf::Color(0, 0, 0));
+        m_game->window().clear(sf::Color(4, 4, 4));
     }
 
     // set the viewport of the window to be centered on the player if it's far enough right

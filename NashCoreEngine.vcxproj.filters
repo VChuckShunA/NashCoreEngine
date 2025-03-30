@@ -108,6 +108,9 @@
     <ClCompile Include="AI\AIPlayroom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AI\BehaviourTrees\Task.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -207,6 +210,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AI\AIPlayroom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\BehaviourTrees\Task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
