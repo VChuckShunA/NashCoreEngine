@@ -88,3 +88,14 @@ public:
 
     explicit CState(std::string s) : state(std::move(s)) {}
 };
+
+class CVision : public Component {
+public:
+    float fovAngle;    // Field of View in degrees
+    float visionRange; // Max sight distance
+    bool seesPlayer;   // Detection flag
+
+    CVision(float fov = 90.0f, float range = 300.0f)
+        : fovAngle(fov), visionRange(range), seesPlayer(false) {
+    }
+};

@@ -23,6 +23,7 @@ public:
 
 	float dist(const Vec2& rhs) const;
 	float length() const;
+	float dot(Vec2 vector);
 	void normalize();
 };
 

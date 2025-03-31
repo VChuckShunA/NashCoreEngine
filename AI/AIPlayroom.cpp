@@ -38,7 +38,7 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    AIAgent = m_entityManager.addEntity("player");
+    AIAgent = m_entityManager.addEntity("agent");
     AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     AIAgent->addComponent<CTransform>(
         gridToMidPixel(0,11, AIAgent),
@@ -47,6 +47,7 @@ void AIPlayroom::init(const std::string& levelPath) {
         0
     );
     AIAgent->addComponent<CBoundingBox>(Vec2(64, 64));
+    AIAgent->addComponent<CVision>();
     path = navmesh.FindPath(positionToGridCordinates(AIAgent), Vec2(19, 11));
     
    
@@ -212,6 +213,77 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
     }
 }
 
+void AIPlayroom::sVisionCone()
+{
+    for (auto& enemy : m_entityManager.getEntities("agent")) {
+        if (!enemy->hasComponent<CVision>() || !enemy->hasComponent<CTransform>()) continue;
+
+        auto& vision = enemy->getComponent<CVision>();
+        auto& transform = enemy->getComponent<CTransform>();
+
+        auto& player = m_entityManager.getEntities("player")[0]; // Assuming single player entity
+        auto& playerTransform = player->getComponent<CTransform>();
+
+        Vec2 toPlayer = playerTransform.pos - transform.pos;
+        float distance = toPlayer.length();
+
+        // Check if player is within vision range
+        if (distance > vision.visionRange) {
+            vision.seesPlayer = false;
+            continue;
+        }
+
+        // Normalize vector to player
+        toPlayer.normalize();
+        Vec2 dirToPlayer = toPlayer;
+
+        // Get enemy forward direction (assuming enemy faces right initially)
+        Vec2 enemyForward = Vec2(cos(transform.angle), sin(transform.angle));
+
+        // Dot product to check FOV
+        float dot = enemyForward.dot(dirToPlayer);
+        float cosHalfFOV = cos(vision.fovAngle * 0.5f * ((22/7) / 180.0f));
+
+        if (dot < cosHalfFOV) {
+            vision.seesPlayer = false;
+            continue;
+        }
+
+        // Line of Sight (LOS) Check - ensure no obstacles block vision
+
+       
+        if (0 <= Physics::GetOverlap(enemy, player).x && Physics::GetOverlap(enemy, player).y <= 0) {
+            vision.seesPlayer = true;
+        }
+        else {
+            vision.seesPlayer = false;
+        }
+    }
+}
+
+void AIPlayroom::drawVisionCone()
+{
+   // if (!(AIAgent->getComponent<CVision>())) return;
+
+    auto& vision = AIAgent->getComponent<CVision>();
+    auto& transform = AIAgent->getComponent<CTransform>();
+
+    sf::VertexArray visionCone(sf::TrianglesFan, 12);
+    visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
+    visionCone[0].color = sf::Color(255, 255, 0, 100);
+
+    for (int i = 0; i <= 10; i++) {
+        float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
+        float rad = angle * ((22/7) / 180.0f);
+        Vec2 point = transform.pos + Vec2(cos(rad), sin(rad)) * vision.visionRange;
+
+        visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
+        visionCone[i + 1].color = sf::Color(255, 255, 0, 100);
+    }
+
+    m_game->window().draw(visionCone);
+}
+
 
 void AIPlayroom::sLifespan() {
     // Check lifespan of entities that have them, and destroy them if they go over
@@ -352,6 +424,7 @@ void AIPlayroom::sRender() {
         m_game->window().clear(sf::Color(4, 4, 4));
     }
 
+    drawVisionCone();
     // set the viewport of the window to be centered on the player if it's far enough right
    // auto& pPos = m_player->getComponent<CTransform>().pos;
    // float windowCenterX = std::max(float(m_game->window().getSize().x) / 2.0f, pPos.x);
