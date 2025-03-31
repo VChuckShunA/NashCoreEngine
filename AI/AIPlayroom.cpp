@@ -116,7 +116,7 @@ Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
 
 void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path)
 {
-    int AISpeed = 3;
+    int AISpeed = 1;
     bool destinationReached = false;
     bool up = false, down = false, left = false, right = false;
     float angleToWaypoint;
@@ -177,35 +177,43 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
 
             if (up && left)
             {
-                entity->getComponent<CTransform>().angle = 225;
+                //entity->getComponent<CTransform>().angle = 225;
+                steer(entity,225);
             }
             else if (up && right)
             {
-                entity->getComponent<CTransform>().angle = 315;
+                //entity->getComponent<CTransform>().angle = 315;
+                steer(entity, 315);
             }
             else if (down && left)
             {
-                entity->getComponent<CTransform>().angle = 135;
+               // entity->getComponent<CTransform>().angle = 135;
+                steer(entity, 135);
             }
             else if (down && right)
             {
-                entity->getComponent<CTransform>().angle = 45;
+               // entity->getComponent<CTransform>().angle = 45;
+                steer(entity, 45);
             }
             else if (up)
             {
-                entity->getComponent<CTransform>().angle = 270;
+                //entity->getComponent<CTransform>().angle = 270;
+                steer(entity, 270);
             }
             else if (down)
             {
-                entity->getComponent<CTransform>().angle = 90;
+                //entity->getComponent<CTransform>().angle = 90;
+                steer(entity, 90);
             }
             else if (left)
             {
-                entity->getComponent<CTransform>().angle = 180;
+               // entity->getComponent<CTransform>().angle = 180;
+                steer(entity, 180);
             }
             else if (right)
             {
-                entity->getComponent<CTransform>().angle = 0;
+               // entity->getComponent<CTransform>().angle = 0;
+                steer(entity, 0);
             }
         }
         //entity->getComponent<CTransform>().pos = Vec2(gridToMidPixel(path.front().x,path.front().y,entity));
@@ -282,6 +290,25 @@ void AIPlayroom::drawVisionCone()
     }
 
     m_game->window().draw(visionCone);
+}
+
+void AIPlayroom::steer(const std::shared_ptr<Entity>& entity, float targetAngle)
+{
+    if (entity->getComponent<CTransform>().angle==targetAngle) return;
+
+    float turnAngle = fmod(targetAngle - entity->getComponent<CTransform>().angle + 360, 360); // Normalize difference
+
+    if (turnAngle<180)
+    {
+        //clockwise
+        entity->getComponent<CTransform>().angle++;
+    }
+    if (turnAngle > 180)
+    {
+        //counter clock wise
+        entity->getComponent<CTransform>().angle--;
+    }
+    entity->getComponent<CTransform>().angle = fmod(entity->getComponent<CTransform>().angle + 360, 360);
 }
 
 
@@ -424,7 +451,6 @@ void AIPlayroom::sRender() {
         m_game->window().clear(sf::Color(4, 4, 4));
     }
 
-    drawVisionCone();
     // set the viewport of the window to be centered on the player if it's far enough right
    // auto& pPos = m_player->getComponent<CTransform>().pos;
    // float windowCenterX = std::max(float(m_game->window().getSize().x) / 2.0f, pPos.x);
@@ -465,6 +491,7 @@ void AIPlayroom::sRender() {
     }
 
     navmesh.DrawPath(m_game->window());
+    drawVisionCone();
     // draw the grid so that can easily debug
     if (m_drawGrid) {
         float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
