@@ -99,16 +99,13 @@
     <ClCompile Include="AshurasRevengence\WFC\WFCPlayroom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AI\BehaviourTrees\BehaviourTrees.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AI\Pathfinding\AStar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AI\AIPlayroom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AI\BehaviourTrees\Task.cpp">
+    <ClCompile Include="AI\Agents\GreenAgent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -203,7 +200,7 @@
     <ClInclude Include="AshurasRevengence\WFC\WFCPlayroom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BehaviourTrees\BehaviourTrees.h">
+    <ClInclude Include="AI\BehaviourTrees\Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AI\Pathfinding\AStar.h">
@@ -212,7 +209,13 @@
     <ClInclude Include="AI\AIPlayroom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BehaviourTrees\Task.h">
+    <ClInclude Include="AI\BehaviourTrees\Sequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\BehaviourTrees\Selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\Agents\GreenAgent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

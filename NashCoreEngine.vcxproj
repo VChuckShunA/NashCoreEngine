@@ -163,12 +163,12 @@
     <ClCompile Include="AshurasRevengence\AshuraLevel.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Assignment1.cpp" />
-    <ClCompile Include="AI\BehaviourTrees\BehaviourTrees.cpp" />
     <ClCompile Include="AI\Pathfinding\AStar.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="AI\Agents\GreenAgent.cpp" />
     <ClCompile Include="imgui\imgui-SFML.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -182,7 +182,6 @@
     <ClCompile Include="SceneMenu.cpp" />
     <ClCompile Include="ScenePlay.cpp" />
     <ClCompile Include="AshurasRevengence\WFC\Tile.cpp" />
-    <ClCompile Include="AI\BehaviourTrees\Task.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="Vec2.cpp" />
     <ClCompile Include="AshurasRevengence\WFC\WFC.cpp" />
@@ -191,18 +190,20 @@
   <ItemGroup>
     <ClInclude Include="Action.h" />
     <ClInclude Include="AI\AIPlayroom.h" />
+    <ClInclude Include="AI\BehaviourTrees\Selector.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AshurasRevengence\AshuraMenu.h" />
     <ClInclude Include="AshurasRevengence\AshuraScore.h" />
     <ClInclude Include="AshurasRevengence\AshuraLevel.h" />
     <ClInclude Include="Assets.h" />
-    <ClInclude Include="AI\BehaviourTrees\BehaviourTrees.h" />
+    <ClInclude Include="AI\BehaviourTrees\Node.h" />
     <ClInclude Include="AI\Pathfinding\AStar.h" />
     <ClInclude Include="Components.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="AI\Agents\GreenAgent.h" />
     <ClInclude Include="imgui\imconfig-SFML.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui-SFML.h" />
@@ -218,7 +219,7 @@
     <ClInclude Include="SceneMenu.h" />
     <ClInclude Include="ScenePlay.h" />
     <ClInclude Include="AshurasRevengence\WFC\Tile.h" />
-    <ClInclude Include="AI\BehaviourTrees\Task.h" />
+    <ClInclude Include="AI\BehaviourTrees\Sequence.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="AshurasRevengence\WFC\WFC.h" />

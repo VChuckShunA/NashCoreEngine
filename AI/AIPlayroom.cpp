@@ -1,5 +1,4 @@
 #include "AIPlayroom.h"
-
 #include "../Action.h"
 #include "../SceneMenu.h"
 #include "../Vec2.h"
@@ -50,8 +49,19 @@ void AIPlayroom::init(const std::string& levelPath) {
     AIAgent->addComponent<CVision>();
     path = navmesh.FindPath(positionToGridCordinates(AIAgent), Vec2(19, 11));
     
-   
+    std::shared_ptr<Entity> AIAgent2;
+    AIAgent2 = m_entityManager.addEntity("player");
+    AIAgent2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    AIAgent2->addComponent<CTransform>(
+        gridToMidPixel(2, 6, AIAgent2),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    AIAgent2->addComponent<CBoundingBox>(Vec2(64, 64));
 
+    greenAgent = new ai::GreenAgent;
+   
 }
 
 
@@ -101,7 +111,9 @@ void AIPlayroom::update() {
     if (!m_paused) {
         sLifespan();
         sCollision();
-        MoveEntity(AIAgent, path);
+       // MoveEntity(AIAgent, path);
+        RunBehaviourTrees();
+        sVisionCone();
         m_currentFrame++;
     }
     sRender();
@@ -146,6 +158,7 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
             {
                 path.erase(path.begin());
             }
+            //TODO: Find a cleaner a way to do this
             if (entity->getComponent<CTransform>().pos.x < gridToMidPixel(path.front().x, path.front().y, entity).x)
             {
                 //move Left
@@ -180,37 +193,37 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
                 //entity->getComponent<CTransform>().angle = 225;
                 steer(entity,225);
             }
-            else if (up && right)
+            if (up && right)
             {
                 //entity->getComponent<CTransform>().angle = 315;
                 steer(entity, 315);
             }
-            else if (down && left)
+            if (down && left)
             {
                // entity->getComponent<CTransform>().angle = 135;
                 steer(entity, 135);
             }
-            else if (down && right)
+            if (down && right)
             {
                // entity->getComponent<CTransform>().angle = 45;
                 steer(entity, 45);
             }
-            else if (up)
+            if (up)
             {
                 //entity->getComponent<CTransform>().angle = 270;
                 steer(entity, 270);
             }
-            else if (down)
+            if (down)
             {
                 //entity->getComponent<CTransform>().angle = 90;
                 steer(entity, 90);
             }
-            else if (left)
+            if (left)
             {
                // entity->getComponent<CTransform>().angle = 180;
                 steer(entity, 180);
             }
-            else if (right)
+            if (right)
             {
                // entity->getComponent<CTransform>().angle = 0;
                 steer(entity, 0);
@@ -259,9 +272,9 @@ void AIPlayroom::sVisionCone()
 
         // Line of Sight (LOS) Check - ensure no obstacles block vision
 
-       
         if (0 <= Physics::GetOverlap(enemy, player).x && Physics::GetOverlap(enemy, player).y <= 0) {
             vision.seesPlayer = true;
+            std::cout << "HERE" << std::endl;
         }
         else {
             vision.seesPlayer = false;
@@ -279,6 +292,7 @@ void AIPlayroom::drawVisionCone()
     sf::VertexArray visionCone(sf::TrianglesFan, 12);
     visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
     visionCone[0].color = sf::Color(255, 255, 0, 100);
+    if(vision.seesPlayer){ visionCone[0].color = sf::Color(255, 0, 0, 100); }
 
     for (int i = 0; i <= 10; i++) {
         float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
@@ -287,6 +301,7 @@ void AIPlayroom::drawVisionCone()
 
         visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
         visionCone[i + 1].color = sf::Color(255, 255, 0, 100);
+        if (vision.seesPlayer) { visionCone[i + 1].color = sf::Color(255, 0, 0, 100); }
     }
 
     m_game->window().draw(visionCone);
@@ -309,6 +324,82 @@ void AIPlayroom::steer(const std::shared_ptr<Entity>& entity, float targetAngle)
         entity->getComponent<CTransform>().angle--;
     }
     entity->getComponent<CTransform>().angle = fmod(entity->getComponent<CTransform>().angle + 360, 360);
+}
+
+void AIPlayroom::aimAndShoot(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target)
+{
+    bool up = false, down = false, left = false, right = false;
+    //TODO: Find a cleaner a way to do this
+    if (entity->getComponent<CTransform>().pos.x < target->getComponent<CTransform>().pos.x)
+    {
+        //move Left
+        left = false;
+        right = true;
+    }if (entity->getComponent<CTransform>().pos.x > target->getComponent<CTransform>().pos.x)
+    {
+        //move Right
+        left = true;
+        right = false;
+    }
+    if (entity->getComponent<CTransform>().pos.y < target->getComponent<CTransform>().pos.y)
+    {
+        //move Down
+        down = true;
+        up = false;
+
+    }if (entity->getComponent<CTransform>().pos.y > target->getComponent<CTransform>().pos.y)
+    {
+        //move Up
+        up = true;
+        down = false;
+    }
+    //0=right,90=down,180 =left, 270=up
+
+    if (up && left)
+    {
+        //entity->getComponent<CTransform>().angle = 225;
+        steer(entity, 225);
+    }
+    if (up && right)
+    {
+        //entity->getComponent<CTransform>().angle = 315;
+        steer(entity, 315);
+    }
+    if (down && left)
+    {
+        // entity->getComponent<CTransform>().angle = 135;
+        steer(entity, 135);
+    }
+    if (down && right)
+    {
+        // entity->getComponent<CTransform>().angle = 45;
+        steer(entity, 45);
+    }
+    if (up)
+    {
+        //entity->getComponent<CTransform>().angle = 270;
+        steer(entity, 270);
+    }
+    if (down)
+    {
+        //entity->getComponent<CTransform>().angle = 90;
+        steer(entity, 90);
+    }
+    if (left)
+    {
+        // entity->getComponent<CTransform>().angle = 180;
+        steer(entity, 180);
+    }
+    if (right)
+    {
+        // entity->getComponent<CTransform>().angle = 0;
+        steer(entity, 0);
+    }
+}
+
+void AIPlayroom::RunBehaviourTrees()
+{
+    greenAgent->BehaviourTree->tick();
 }
 
 

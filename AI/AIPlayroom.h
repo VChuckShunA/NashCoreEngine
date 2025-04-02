@@ -4,6 +4,7 @@
 #include "../EntityManager.h"
 #include "../Scene.h"
 #include "Pathfinding/AStar.h"
+#include "Agents/GreenAgent.h"
 class AIPlayroom :public Scene {
 
     struct PlayerConfig {
@@ -54,11 +55,14 @@ public:
     void update() override;
     //AI
     AStar navmesh;
+    ai::GreenAgent* greenAgent;
     std::vector<Vec2> path;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
     void drawVisionCone();
     void steer(const std::shared_ptr<Entity>& entity, float targetAngle);
+    void aimAndShoot(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
+    void RunBehaviourTrees();
 };
 
