@@ -59,8 +59,10 @@ void AIPlayroom::init(const std::string& levelPath) {
         0
     );
     AIAgent2->addComponent<CBoundingBox>(Vec2(64, 64));
+   
+   GreenAgent greenAgent(AIAgent, this);
+   agents.push_back(std::make_unique<GreenAgent>(AIAgent, this));
 
-    greenAgent = new ai::GreenAgent;
    
 }
 
@@ -399,7 +401,9 @@ void AIPlayroom::aimAndShoot(const std::shared_ptr<Entity>& entity, const std::s
 
 void AIPlayroom::RunBehaviourTrees()
 {
-    greenAgent->BehaviourTree->tick();
+    for (auto& agent : agents) {
+        agent->BehaviourTree->tick();
+    }
 }
 
 

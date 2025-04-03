@@ -3,16 +3,24 @@
 #include <iostream>
 #include "../BehaviourTrees/Node.h"
 #include "../BehaviourTrees/Selector.h"
+#include "../../EntityManager.h"
+#include "../AIPlayroom.h"
 
-namespace ai {
-
+class AIPlayroom;
     enum ItemType { FOOD, WEAPON };
     enum EnemyState { NONE, VISIBLE };
     enum AgentState { IDLE, SEARCHING, FIGHTING, FLEEING, HEALING };
     class GreenAgent
     {
+    private:
+        std::vector<Vec2> currentpath,path1, path2, path3;
     public:
-        GreenAgent();
+        GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
+        Vec2 Waypoint1 = Vec2(19, 11);
+        Vec2 Waypoint2 = Vec2(10, 0);
+        Vec2 Waypoint3 = Vec2(0, 11);
+        const std::shared_ptr<Entity>& agent;
+        AIPlayroom* room;
         Node* BehaviourTree;
         void update();
         bool hasWeapon = false;
@@ -31,6 +39,7 @@ namespace ai {
         void flee();
         void enterHouse();
         void searchHouse();
+        void steer(float targetAngle);
         void patrol();
     };
 
@@ -72,5 +81,5 @@ namespace ai {
             addChild(new Patrol(agent));     // If healing fails, patrol
         }
     };
-}
+
 
