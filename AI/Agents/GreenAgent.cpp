@@ -15,6 +15,12 @@ void GreenAgent::update()
    // std::cout << "Tick " << health << std::endl;
 }
 
+void GreenAgent::updateCurrentPath(Vec2 Destination)
+{
+    currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Destination);
+     
+}
+
 void GreenAgent::consumeFood()
 {
     if (hasFood) {
@@ -53,7 +59,6 @@ void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
     static float patrolCooldown = 0; // Timer for switching paths
     int AISpeed = 64;
     int pathcount = 1;
-    bool destinationReached = false;
     bool up = false, down = false, left = false, right = false;
     float angleToWaypoint;
     Vec2 A = Vec2((int)room->positionToGridCordinates(agent).x, (int)room->positionToGridCordinates(agent).y);
@@ -145,7 +150,7 @@ void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
         }
         if (currentpath.empty())
         {
-           currentpath=path2; 
+            destinationReached = true;
         }
     }
 }

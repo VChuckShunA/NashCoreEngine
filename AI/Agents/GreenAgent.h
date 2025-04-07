@@ -19,7 +19,7 @@ class AIPlayroom;
         std::vector< std::vector<Vec2>> paths = { path1,path2,path3 };
         Vec2 Waypoint1 = Vec2(19, 11);
         Vec2 Waypoint2 = Vec2(10, 0);
-        Vec2 Waypoint3 = Vec2(19, 11);
+        Vec2 Waypoint3 = Vec2(4, 11);
         const std::shared_ptr<Entity>& agent;
         AIPlayroom* room;
         Node* BehaviourTree;
@@ -32,7 +32,8 @@ class AIPlayroom;
         bool itemVisible = false;
         ItemType visibleItemType;
         EnemyState enemyState = NONE;
-     
+        void updateCurrentPath(Vec2 Destination);
+        bool destinationReached = false;
         void moveTo(const std::string& target);
         void pickUpItem(ItemType item);
         void consumeFood();
@@ -73,22 +74,39 @@ class AIPlayroom;
             
     class Patrol : public Node {
     public:
-        Patrol(GreenAgent& agent) : greenAgent(agent) {}
+        Patrol(GreenAgent& agent, Vec2& Destination) : greenAgent(agent), Destination(Destination) {
+            greenAgent.destinationReached = false;
+            greenAgent.updateCurrentPath(Destination);
+            std::cout << "Destination Reset to : " << Destination.x << " , " << Destination.y << std::endl;
+        }
 
         virtual Status update() override {
             greenAgent.patrol(greenAgent.currentpath);
+            std::cout << "Patrolling" << std::endl;
+            if (greenAgent.destinationReached)
+            {
+                std::cout << "Destination Reached" << std::endl;
+                Destination = greenAgent.Waypoint2;
+                greenAgent.updateCurrentPath(Destination);
+                std::cout << "Destination Reset to : "<< Destination.x<<" , "<< Destination.y << std::endl;
+                greenAgent.health = 1;
+                return BH_FAILURE; // Health is above 25, continue other tasks
+            }
             return BH_RUNNING; // Keeps running while patrolling
         }
 
     private:
         GreenAgent& greenAgent;
+        Vec2& Destination;
     };
 
     class SurvivalSelector : public Selector {
     public:
         SurvivalSelector(GreenAgent& agent) {
             addChild(new LowHealth(agent));  // First, try healing
-            addChild(new Patrol(agent));     // If healing fails, patrol
+            addChild(new Patrol(agent, agent.Waypoint1));     // If healing fails, patrol
+           // addChild(new Patrol(agent, agent.Waypoint2));     // If healing fails, patrol
+           // addChild(new Patrol(agent, agent.Waypoint3));     // If healing fails, patrol
         }
     };
 
