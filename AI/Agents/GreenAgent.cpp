@@ -12,7 +12,7 @@ GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playro
 void GreenAgent::update()
 {
     BehaviourTree->tick(); // Runs the tree
-    std::cout << "Tick " << health << std::endl;
+   // std::cout << "Tick " << health << std::endl;
 }
 
 void GreenAgent::consumeFood()
@@ -48,10 +48,10 @@ void GreenAgent::steer(float targetAngle)
     agent->getComponent<CTransform>().angle = fmod(agent->getComponent<CTransform>().angle + 360, 360);
 }
 
-void GreenAgent::patrol()
+void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
 {
     static float patrolCooldown = 0; // Timer for switching paths
-    int AISpeed = 3;
+    int AISpeed = 64;
     int pathcount = 1;
     bool destinationReached = false;
     bool up = false, down = false, left = false, right = false;
@@ -61,11 +61,12 @@ void GreenAgent::patrol()
 
     //0=right,90=down,180 =left, 270=up
     Vec2 distanceBetween;
-    if (!currentpath.empty()) {
-        if (!destinationReached)
-        {
+    if (!destinationReached)
+    {
+
+        if (!currentpath.empty()) {
             distanceBetween = Vec2(abs(agent->getComponent<CTransform>().pos.x - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x), abs(agent->getComponent<CTransform>().pos.y - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y));
-           
+
             if (distanceBetween.x < 5 && distanceBetween.y < 5)
             {
                 currentpath.erase(currentpath.begin());
@@ -141,37 +142,11 @@ void GreenAgent::patrol()
                 steer(0);
             }
 
-            
-
         }
-        //entity->getComponent<CTransform>().pos = Vec2(gridToMidPixel(path.front().x,path.front().y,entity));
-       // path.erase(path.begin());
-    }
-    else if (currentpath.empty())
-    {
-        
-         
-            if (pathcount == 3)
-            {
-
-                destinationReached = true;
-            }
-
-            //TODO:: wait for a few minutes
-
-            pathcount++;
-            std::cout << "path count " << pathcount << std::endl;
-            if (patrolCooldown > 0) return; // Wait before switching paths
-
-            switch (pathcount) {
-            case 0: currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint2); break;
-            case 1: currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint3); break;
-            case 2: currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint1); break;
-            }
-
-            pathcount = (pathcount + 1) % 3;
-            patrolCooldown = 3.0f; // Reset cooldown (3 seconds)
-
+        if (currentpath.empty())
+        {
+           currentpath=path2; 
+        }
     }
 }
 

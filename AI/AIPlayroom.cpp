@@ -47,7 +47,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     AIAgent->addComponent<CBoundingBox>(Vec2(64, 64));
     AIAgent->addComponent<CVision>();
-    path = navmesh.FindPath(positionToGridCordinates(AIAgent), Vec2(19, 11));
+    
     
     std::shared_ptr<Entity> AIAgent2;
     AIAgent2 = m_entityManager.addEntity("player");
@@ -402,7 +402,7 @@ void AIPlayroom::aimAndShoot(const std::shared_ptr<Entity>& entity, const std::s
 void AIPlayroom::RunBehaviourTrees()
 {
     for (auto& agent : agents) {
-        agent->BehaviourTree->tick();
+        agent->update();
     }
 }
 

@@ -14,7 +14,8 @@ public:
     virtual void onInitialize() {}
     virtual void onTerminate(Status) {}
 
-    Status tick() {
+    Status tick() 
+    {
         if (m_eStatus != BH_RUNNING)
             onInitialize();
         m_eStatus = update();

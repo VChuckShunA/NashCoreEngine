@@ -13,19 +13,20 @@ class AIPlayroom;
     class GreenAgent
     {
     private:
-        std::vector<Vec2> currentpath,path1, path2, path3;
+        
     public:
-        GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
+        GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom); std::vector<Vec2> currentpath, path1, path2, path3;
+        std::vector< std::vector<Vec2>> paths = { path1,path2,path3 };
         Vec2 Waypoint1 = Vec2(19, 11);
         Vec2 Waypoint2 = Vec2(10, 0);
-        Vec2 Waypoint3 = Vec2(0, 11);
+        Vec2 Waypoint3 = Vec2(19, 11);
         const std::shared_ptr<Entity>& agent;
         AIPlayroom* room;
         Node* BehaviourTree;
         void update();
         bool hasWeapon = false;
         bool hasFood = true;
-        int health = 100;
+        int health = 1;
         int maxHealth = 100;
         bool houseVisible = false;
         bool itemVisible = false;
@@ -40,7 +41,7 @@ class AIPlayroom;
         void enterHouse();
         void searchHouse();
         void steer(float targetAngle);
-        void patrol();
+        void patrol(std::vector<Vec2> pathToFollow);
     };
 
     class LowHealth : public Node
@@ -50,13 +51,22 @@ class AIPlayroom;
     private:
         GreenAgent& greenAgent;
         virtual Status update() override {
+            if (greenAgent.health <= 0)
+            {
+                //dead
+                return BH_SUCCESS;
+            }
             if (greenAgent.health < 25) {
                 if (greenAgent.hasFood) {
                     greenAgent.consumeFood();
+                    greenAgent.hasFood = !greenAgent.hasFood;
+                    std::cout << "Successfully healed" << std::endl;
                     return BH_SUCCESS; // Successfully healed
                 }
+                std::cout << "No food, can't heal" << std::endl;
                 return BH_FAILURE; // No food, can't heal
             }
+            std::cout << "Health is above 25, continue other tasks" << std::endl;
             return BH_FAILURE; // Health is above 25, continue other tasks
         }
     };
@@ -66,7 +76,7 @@ class AIPlayroom;
         Patrol(GreenAgent& agent) : greenAgent(agent) {}
 
         virtual Status update() override {
-            greenAgent.patrol();
+            greenAgent.patrol(greenAgent.currentpath);
             return BH_RUNNING; // Keeps running while patrolling
         }
 
