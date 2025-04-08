@@ -75,15 +75,11 @@ Vec2 AIPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
     // The bottom-left corner of the Animation should align with the bottom left of the grid cell
 
     auto entitySize = entity->getComponent<CAnimation>().animation.getSize();
-    // vec2 offset = m_gridSize - entitySize;
+ 
     return {
             gridX * m_gridSize.x + entitySize.x / 2.0f,
             height() - gridY * m_gridSize.y - entitySize.y / 2.0f
     };
-    //    return {
-    //            gridX * m_gridSize.x + m_gridSize.x / 2.0f - offset.x,
-    //            height() - gridY * m_gridSize.y - m_gridSize.y / 2.0f + offset.y
-    //    };
 }
 
 

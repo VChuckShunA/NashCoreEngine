@@ -3,22 +3,32 @@
 
 GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) :agent(entity),room(playroom)
 {
-
+    std::cout << "GreenAgent 6"  << std::endl;
     BehaviourTree = new SurvivalSelector(*this);
-    path1 = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint1);
-    currentpath = path1;
+    //currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint1);
+   //currentpath = path1;
 }
 
 void GreenAgent::update()
 {
+    std::cout << "GreenAgent 14" << std::endl;
     BehaviourTree->tick(); // Runs the tree
    // std::cout << "Tick " << health << std::endl;
 }
 
-void GreenAgent::updateCurrentPath(Vec2 Destination)
+void GreenAgent::updateCurrentPath(const Vec2& Destination)
 {
-    currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Destination);
-     
+    std::cout << "GreenAgent 21" << std::endl;
+    currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Vec2(Destination.x,Destination.y));
+    destinationReached = false;
+}
+
+void GreenAgent::initializeMoveToPoint(const Vec2& Destination)
+{
+    std::cout << "GreenAgent 28" << std::endl;
+    std::cout << "Destination is: " << Destination.x << " , "<< Destination.y << std::endl;
+    updateCurrentPath(Destination);
+    destinationReached = false;
 }
 
 void GreenAgent::consumeFood()
@@ -54,21 +64,17 @@ void GreenAgent::steer(float targetAngle)
     agent->getComponent<CTransform>().angle = fmod(agent->getComponent<CTransform>().angle + 360, 360);
 }
 
-void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
+void GreenAgent::MoveToPoint(const Vec2& Waypoint)
 {
-    static float patrolCooldown = 0; // Timer for switching paths
-    int AISpeed = 64;
-    int pathcount = 1;
+    
+    int AISpeed = 1;
     bool up = false, down = false, left = false, right = false;
-    float angleToWaypoint;
-    Vec2 A = Vec2((int)room->positionToGridCordinates(agent).x, (int)room->positionToGridCordinates(agent).y);
-    Vec2 B = Vec2(currentpath.front().x, currentpath.front().y);
-
     //0=right,90=down,180 =left, 270=up
     Vec2 distanceBetween;
     if (!destinationReached)
     {
 
+        std::cout << "GreenAgent 77" << std::endl;
         if (!currentpath.empty()) {
             distanceBetween = Vec2(abs(agent->getComponent<CTransform>().pos.x - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x), abs(agent->getComponent<CTransform>().pos.y - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y));
 
@@ -79,13 +85,15 @@ void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
             //TODO: Find a cleaner a way to do this
             if (agent->getComponent<CTransform>().pos.x < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
-                //move Left
+                //move right
+                std::cout << "Movin Right" << std::endl;
                 agent->getComponent<CTransform>().pos.x = agent->getComponent<CTransform>().pos.x + AISpeed;
                 left = false;
                 right = true;
             }if (agent->getComponent<CTransform>().pos.x > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
-                //move Right
+                //move left
+                std::cout << "Movin Left" << std::endl;
                 agent->getComponent<CTransform>().pos.x = agent->getComponent<CTransform>().pos.x - AISpeed;
                 left = true;
                 right = false;
@@ -93,6 +101,7 @@ void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
             if (agent->getComponent<CTransform>().pos.y < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y)
             {
                 //move Down
+                std::cout << "Movin Down" << std::endl;
                 agent->getComponent<CTransform>().pos.y = agent->getComponent<CTransform>().pos.y + AISpeed;
                 down = true;
                 up = false;
@@ -100,6 +109,8 @@ void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
             }if (agent->getComponent<CTransform>().pos.y > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y)
             {
                 //move Up
+
+                std::cout << "Movin Up" << std::endl;
                 agent->getComponent<CTransform>().pos.y = agent->getComponent<CTransform>().pos.y - AISpeed;
                 up = true;
                 down = false;
@@ -150,6 +161,7 @@ void GreenAgent::patrol(std::vector<Vec2> pathToFollow)
         }
         if (currentpath.empty())
         {
+            std::cout << "GreenAgent 164" << std::endl;
             destinationReached = true;
         }
     }
