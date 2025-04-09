@@ -3,7 +3,7 @@
 
 GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) :agent(entity),room(playroom)
 {
-    std::cout << "GreenAgent 6"  << std::endl;
+    //std::cout << "GreenAgent 6"  << std::endl;
     BehaviourTree = new SurvivalSelector(*this);
     //currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint1);
    //currentpath = path1;
@@ -11,21 +11,21 @@ GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playro
 
 void GreenAgent::update()
 {
-    std::cout << "GreenAgent 14" << std::endl;
+   // std::cout << "GreenAgent 14" << std::endl;
     BehaviourTree->tick(); // Runs the tree
    // std::cout << "Tick " << health << std::endl;
 }
 
 void GreenAgent::updateCurrentPath(const Vec2& Destination)
 {
-    std::cout << "GreenAgent 21" << std::endl;
+   // std::cout << "GreenAgent 21" << std::endl;
     currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Vec2(Destination.x,Destination.y));
     destinationReached = false;
 }
 
 void GreenAgent::initializeMoveToPoint(const Vec2& Destination)
 {
-    std::cout << "GreenAgent 28" << std::endl;
+    //std::cout << "GreenAgent 28" << std::endl;
     std::cout << "Destination is: " << Destination.x << " , "<< Destination.y << std::endl;
     updateCurrentPath(Destination);
     destinationReached = false;
@@ -36,7 +36,7 @@ void GreenAgent::consumeFood()
     if (hasFood) {
         health = std::min(maxHealth, health + 50);
         hasFood = false;
-        std::cout << "Consumed food. Health: " << health << std::endl;
+      //  std::cout << "Consumed food. Health: " << health << std::endl;
     }
 }
 
@@ -67,51 +67,52 @@ void GreenAgent::steer(float targetAngle)
 void GreenAgent::MoveToPoint(const Vec2& Waypoint)
 {
     
-    int AISpeed = 1;
+    int AISpeed = 6;
+    Vec2& AgentCTransform = agent->getComponent<CTransform>().pos;
     bool up = false, down = false, left = false, right = false;
     //0=right,90=down,180 =left, 270=up
     Vec2 distanceBetween;
     if (!destinationReached)
     {
 
-        std::cout << "GreenAgent 77" << std::endl;
+      //  std::cout << "GreenAgent 77" << std::endl;
         if (!currentpath.empty()) {
-            distanceBetween = Vec2(abs(agent->getComponent<CTransform>().pos.x - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x), abs(agent->getComponent<CTransform>().pos.y - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y));
+            distanceBetween = Vec2(abs(AgentCTransform.x - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x), abs(AgentCTransform.y - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y));
 
             if (distanceBetween.x < 5 && distanceBetween.y < 5)
             {
                 currentpath.erase(currentpath.begin());
             }
             //TODO: Find a cleaner a way to do this
-            if (agent->getComponent<CTransform>().pos.x < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
+            if (AgentCTransform.x < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
                 //move right
-                std::cout << "Movin Right" << std::endl;
-                agent->getComponent<CTransform>().pos.x = agent->getComponent<CTransform>().pos.x + AISpeed;
+               
+                AgentCTransform.x = AgentCTransform.x + AISpeed;
                 left = false;
                 right = true;
-            }if (agent->getComponent<CTransform>().pos.x > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
+            }if (AgentCTransform.x > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
                 //move left
-                std::cout << "Movin Left" << std::endl;
-                agent->getComponent<CTransform>().pos.x = agent->getComponent<CTransform>().pos.x - AISpeed;
+              
+                AgentCTransform.x = AgentCTransform.x - AISpeed;
                 left = true;
                 right = false;
             }
-            if (agent->getComponent<CTransform>().pos.y < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y)
+            if (AgentCTransform.y < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y)
             {
                 //move Down
-                std::cout << "Movin Down" << std::endl;
-                agent->getComponent<CTransform>().pos.y = agent->getComponent<CTransform>().pos.y + AISpeed;
+              
+                AgentCTransform.y = AgentCTransform.y + AISpeed;
                 down = true;
                 up = false;
 
-            }if (agent->getComponent<CTransform>().pos.y > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y)
+            }if (AgentCTransform.y > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y)
             {
                 //move Up
 
-                std::cout << "Movin Up" << std::endl;
-                agent->getComponent<CTransform>().pos.y = agent->getComponent<CTransform>().pos.y - AISpeed;
+              
+                AgentCTransform.y = AgentCTransform.y - AISpeed;
                 up = true;
                 down = false;
             }
@@ -161,7 +162,7 @@ void GreenAgent::MoveToPoint(const Vec2& Waypoint)
         }
         if (currentpath.empty())
         {
-            std::cout << "GreenAgent 164" << std::endl;
+       //     std::cout << "GreenAgent 164" << std::endl;
             destinationReached = true;
         }
     }

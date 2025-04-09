@@ -62,13 +62,13 @@ class AIPlayroom;
                 if (greenAgent.hasFood) {
                     greenAgent.consumeFood();
                     greenAgent.hasFood = !greenAgent.hasFood;
-                    std::cout << "Successfully healed" << std::endl;
+                    //std::cout << "Successfully healed" << std::endl;
                     return BH_SUCCESS; // Successfully healed
                 }
-                std::cout << "No food, can't heal" << std::endl;
+                ///std::cout << "No food, can't heal" << std::endl;
                 return BH_FAILURE; // No food, can't heal
             }
-            std::cout << "Health is above 25, continue other tasks" << std::endl;
+           // std::cout << "Health is above 25, continue other tasks" << std::endl;
             return BH_FAILURE; // Health is above 25, continue other tasks
         }
     };
@@ -107,22 +107,28 @@ class AIPlayroom;
     {
     public:
         MoveToPoint(GreenAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
-            greenAgent.initializeMoveToPoint(Waypoint);
-            std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
+            
+           // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
         }
     private:
         GreenAgent& greenAgent;
         Vec2& Waypoint;
-        virtual Status update() override {
+
+        virtual void onInitialize() override {
            
+                greenAgent.initializeMoveToPoint(Waypoint);
+            
+        }
+        
+        virtual Status update() override {
+            
             if (!greenAgent.destinationReached)
             {
                 greenAgent.MoveToPoint(Waypoint);
-                return BH_RUNNING; //Reached Destination 
+                return BH_RUNNING; //Not reached destination 
             }
-            else if (greenAgent.destinationReached)
-            {
-                return BH_FAILURE; //Reached Destination 
+            else if (greenAgent.destinationReached) {
+                return BH_SUCCESS; // Reached the point = success
             }
                
         }
@@ -138,16 +144,16 @@ class AIPlayroom;
         float time = 60;
         virtual Status update() override {
 
-            std::cout << "Wait For Seconds" << waitTime << std::endl;
+           // std::cout << "Wait For Seconds" << waitTime << std::endl;
             if (time > 0)
             {
                 time=time- waitTime;
-                std::cout << "Wait For Seconds" << time << std::endl;
+               // std::cout << "Wait For Seconds" << time << std::endl;
                 return BH_RUNNING;
             }
             else {
 
-                return BH_SUCCESS; 
+                return BH_FAILURE;
             }
         }
     };
@@ -159,11 +165,11 @@ class AIPlayroom;
         float time3 = 0.7;
         Patrol(GreenAgent& agent) {
             addChild(new MoveToPoint(agent, agent.Waypoint1));    
-            addChild(new WaitForSeconds(agent, time1));   
+            //addChild(new WaitForSeconds(agent, time1));   
             addChild(new MoveToPoint(agent, agent.Waypoint2));    
-            addChild(new WaitForSeconds(agent, time2));   
+           // addChild(new WaitForSeconds(agent, time2));   
             addChild(new MoveToPoint(agent, agent.Waypoint3));    
-            addChild(new WaitForSeconds(agent, time3));   
+           // addChild(new WaitForSeconds(agent, time3));   
 
         }
     };
@@ -172,10 +178,10 @@ class AIPlayroom;
     public:
         SurvivalSelector(GreenAgent& agent) {
             addChild(new LowHealth(agent));  // First, try healing
-            addChild(new Patrol(agent));
-            //addChild(new Patrol(agent, agent.Waypoint1));     // If healing fails, patrol
-           // addChild(new Patrol(agent, agent.Waypoint2));     // If healing fails, patrol
-           // addChild(new Patrol(agent, agent.Waypoint3));     // If healing fails, patrol
+
+            addChild(new Patrol(agent ));     // If healing fails, patrol
+            addChild(new Patrol(agent));    // If healing fails, patrol
+           addChild(new Patrol(agent));    // If healing fails, patrol
         }
     };
 

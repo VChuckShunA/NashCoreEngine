@@ -218,6 +218,9 @@
     <ClInclude Include="AI\Agents\GreenAgent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AI\BehaviourTrees\StatefulSequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="config(old).txt" />

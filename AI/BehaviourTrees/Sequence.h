@@ -15,6 +15,10 @@ public:
         }
         return BH_SUCCESS;
     }
+    ~Sequence() {
+        for (Node* child : m_Children)
+            delete child;
+    }
 private:
     std::vector<Node*> m_Children;
 };

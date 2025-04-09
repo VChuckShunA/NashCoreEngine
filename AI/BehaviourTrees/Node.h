@@ -13,7 +13,7 @@ public:
     virtual Status update() = 0;
     virtual void onInitialize() {}
     virtual void onTerminate(Status) {}
-
+    virtual void reset() { m_eStatus = BH_INVALID; }
     Status tick() 
     {
         if (m_eStatus != BH_RUNNING)
