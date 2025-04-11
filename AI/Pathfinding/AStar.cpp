@@ -87,18 +87,28 @@ void AStar::markObstacle(int x, int y)
 	navMesh[x][y].walkable = false;
 }
 
-std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
-{
+std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos, std::vector<Vec2>& outPath)
+{   // Reset all nodes in the navMesh
+	for (int x = 0; x < NAVMESH_WIDTH; ++x) {
+		for (int y = 0; y < NAVMESH_HEIGHT; ++y) {
+			Node& node = navMesh[x][y];
+			node.parent = nullptr;
+			node.gCost = std::numeric_limits<int>::max();
+			node.fCost = std::numeric_limits<int>::max();
+		}
+	}
+	outPath.clear();
 	Node* startNode = &navMesh[startPos.x][startPos.y];
 	Node* endNode = &navMesh[endPos.x][endPos.y];
 
 	std::vector<Node*>openList;
 	std::unordered_set<Node*> closedList;
-	
+
 	openList.push_back(startNode);
 
 	while (!openList.empty())
 	{
+		std::cout << "A Star 103" << std::endl;
 		//Find the node with the lowest FCost
 		auto currentNode = *std::min_element(openList.begin(), openList.end(), [](Node* a, Node* b) {return a->fCost < b->fCost; });
 
@@ -106,20 +116,28 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 		openList.erase(std::remove(openList.begin(), openList.end(), currentNode), openList.end());
 		closedList.insert(currentNode);
 
+		std::cout << "A Star 110" << std::endl;
 		//If we've reached the end node, reconstruct the path
 		if (currentNode == endNode)
 		{
-			std::vector<Vec2> path;
+
+			std::cout << "A Star 116" << std::endl;
 			while (currentNode)
 			{
-				path.push_back(currentNode->position);
+				std::cout << "A Star 119" << currentNode << std::endl;
+				outPath.push_back(currentNode->position);
 				currentNode = currentNode->parent;
 			}
-			std::reverse(path.begin(), path.end());
-			for (Vec2 pathNode : path) {
+			std::reverse(outPath.begin(), outPath.end());
+			for (Vec2 pathNode : outPath) {
 				std::cout << pathNode.x << " , " << pathNode.y<<std::endl;
 			}
-			return path;
+			currentNode = NULL;
+			endNode = NULL;
+			delete currentNode;
+			delete endNode;
+			std::cout << "A Star 127" << std::endl;
+			return outPath;
 		}
 
 		//Process neighbors

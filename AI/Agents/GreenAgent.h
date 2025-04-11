@@ -4,6 +4,7 @@
 #include "../BehaviourTrees/Node.h"
 #include "../BehaviourTrees/Selector.h"
 #include "../BehaviourTrees/Sequence.h"
+#include "../BehaviourTrees/StatefulSequence.h"
 #include "../../EntityManager.h"
 #include "../AIPlayroom.h"
 
@@ -21,6 +22,7 @@ class AIPlayroom;
         Vec2 Waypoint1 = Vec2(19, 11);
         Vec2 Waypoint2 = Vec2(10, 0);
         Vec2 Waypoint3 = Vec2(4, 10);
+        std::vector<Vec2> Waypoints = { Waypoint1,Waypoint2,Waypoint3 };
         const std::shared_ptr<Entity>& agent;
         AIPlayroom* room;
         Node* BehaviourTree;
@@ -158,7 +160,7 @@ class AIPlayroom;
         }
     };
 
-    class Patrol : public Sequence {
+    class Patrol : public StatefulSequence {
     public:
         float time1 = 0.3;
         float time2 = 0.5;
@@ -170,7 +172,7 @@ class AIPlayroom;
            // addChild(new WaitForSeconds(agent, time2));   
             addChild(new MoveToPoint(agent, agent.Waypoint3));    
            // addChild(new WaitForSeconds(agent, time3));   
-
+      
         }
     };
 
@@ -178,10 +180,14 @@ class AIPlayroom;
     public:
         SurvivalSelector(GreenAgent& agent) {
             addChild(new LowHealth(agent));  // First, try healing
-
-            addChild(new Patrol(agent ));     // If healing fails, patrol
-            addChild(new Patrol(agent));    // If healing fails, patrol
-           addChild(new Patrol(agent));    // If healing fails, patrol
+            /*StatefulSequence* patrolSequence = new StatefulSequence();
+            
+                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint1));
+                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint2));
+                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint3));
+           
+            addChild(patrolSequence);*/
+            addChild(new Patrol(agent));     // If healing fails, patrol
         }
     };
 

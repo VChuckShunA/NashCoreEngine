@@ -18,9 +18,12 @@ void GreenAgent::update()
 
 void GreenAgent::updateCurrentPath(const Vec2& Destination)
 {
-   // std::cout << "GreenAgent 21" << std::endl;
-    currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Vec2(Destination.x,Destination.y));
+    std::cout << "GreenAgent 21" << std::endl;
+
+    room->navmesh.FindPath(room->positionToGridCordinates(agent), Vec2(Destination.x, Destination.y), currentpath);
     destinationReached = false;
+    std::cout << "GreenAgent 25" << std::endl;
+   
 }
 
 void GreenAgent::initializeMoveToPoint(const Vec2& Destination)
@@ -29,6 +32,7 @@ void GreenAgent::initializeMoveToPoint(const Vec2& Destination)
     std::cout << "Destination is: " << Destination.x << " , "<< Destination.y << std::endl;
     updateCurrentPath(Destination);
     destinationReached = false;
+    std::cout << "Path Updated: " << Destination.x << " , " << Destination.y << std::endl;
 }
 
 void GreenAgent::consumeFood()
@@ -67,7 +71,7 @@ void GreenAgent::steer(float targetAngle)
 void GreenAgent::MoveToPoint(const Vec2& Waypoint)
 {
     
-    int AISpeed = 6;
+    int AISpeed = 1;
     Vec2& AgentCTransform = agent->getComponent<CTransform>().pos;
     bool up = false, down = false, left = false, right = false;
     //0=right,90=down,180 =left, 270=up
