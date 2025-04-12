@@ -13,6 +13,7 @@ public:
         for (auto child : m_Children) {
             child->reset();
         }
+        m_eStatus = BH_INVALID;
     }
 
     // The stateful update function remembers which child to tick next.

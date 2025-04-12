@@ -190,6 +190,7 @@
   <ItemGroup>
     <ClInclude Include="Action.h" />
     <ClInclude Include="AI\AIPlayroom.h" />
+    <ClInclude Include="AI\BehaviourTrees\Loop.h" />
     <ClInclude Include="AI\BehaviourTrees\Selector.h" />
     <ClInclude Include="AI\BehaviourTrees\StatefulSequence.h" />
     <ClInclude Include="Animation.h" />

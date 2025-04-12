@@ -30,7 +30,7 @@ public:
 	void markObstacles();
 	void markObstacle(int x, int y);
 
-	std::vector<Vec2>FindPath(Vec2 startPos, Vec2 endPos, std::vector<Vec2>& outPath);
+	std::vector<Vec2>FindPath(Vec2 startPos, Vec2 endPos);
 	void DrawPath(sf::RenderWindow& window);
 };
 

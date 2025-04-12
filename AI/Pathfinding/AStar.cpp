@@ -87,7 +87,7 @@ void AStar::markObstacle(int x, int y)
 	navMesh[x][y].walkable = false;
 }
 
-std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos, std::vector<Vec2>& outPath)
+std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 {   // Reset all nodes in the navMesh
 	for (int x = 0; x < NAVMESH_WIDTH; ++x) {
 		for (int y = 0; y < NAVMESH_HEIGHT; ++y) {
@@ -97,7 +97,6 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos, std::vector<Vec2>&
 			node.fCost = std::numeric_limits<int>::max();
 		}
 	}
-	outPath.clear();
 	Node* startNode = &navMesh[startPos.x][startPos.y];
 	Node* endNode = &navMesh[endPos.x][endPos.y];
 
@@ -120,16 +119,17 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos, std::vector<Vec2>&
 		//If we've reached the end node, reconstruct the path
 		if (currentNode == endNode)
 		{
+			std::vector<Vec2> path;
 
 			std::cout << "A Star 116" << std::endl;
 			while (currentNode)
 			{
 				std::cout << "A Star 119" << currentNode << std::endl;
-				outPath.push_back(currentNode->position);
+				path.push_back(currentNode->position);
 				currentNode = currentNode->parent;
 			}
-			std::reverse(outPath.begin(), outPath.end());
-			for (Vec2 pathNode : outPath) {
+			std::reverse(path.begin(), path.end());
+			for (Vec2 pathNode : path) {
 				std::cout << pathNode.x << " , " << pathNode.y<<std::endl;
 			}
 			currentNode = NULL;
@@ -137,7 +137,7 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos, std::vector<Vec2>&
 			delete currentNode;
 			delete endNode;
 			std::cout << "A Star 127" << std::endl;
-			return outPath;
+			return path;
 		}
 
 		//Process neighbors
