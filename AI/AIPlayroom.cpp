@@ -269,7 +269,7 @@ void AIPlayroom::sVisionCone()
         float cosHalfFOV = cos(vision.fovAngle * 0.5f * (std::numbers::pi / 180.0f));
 
         if (dot < cosHalfFOV) {
-            vision.seesPlayer = false;
+           // vision.seesPlayer = false;
             vision.Target = nullptr;
             continue;
         }
