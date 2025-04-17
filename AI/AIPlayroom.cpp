@@ -7,6 +7,7 @@
 #include <fstream>
 #include <chrono>
 #include <math.h>
+#include<numbers>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
 
@@ -109,7 +110,7 @@ void AIPlayroom::update() {
     if (!m_paused) {
         sLifespan();
         sCollision();
-       // MoveEntity(AIAgent, path);
+        sVisionCone();
         RunBehaviourTrees();
         sVisionCone();
         m_currentFrame++;
@@ -119,8 +120,8 @@ void AIPlayroom::update() {
 
 Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
 {
-    return { (AIAgent->getComponent<CTransform>().pos.x / 64) ,
-        ((m_game->window().getSize().y - (AIAgent->getComponent<CTransform>().pos.y - 1)) / 64) };
+    return { (entity->getComponent<CTransform>().pos.x / 64) ,
+        ((m_game->window().getSize().y - (entity->getComponent<CTransform>().pos.y - 1)) / 64) };
   
 }
 
@@ -245,10 +246,14 @@ void AIPlayroom::sVisionCone()
 
         Vec2 toPlayer = playerTransform.pos - transform.pos;
         float distance = toPlayer.length();
+        Vec2  eye = transform.pos;
+        float rad = transform.angle * (std::numbers::pi / 180.0f);
+        Vec2  dir = { std::cos(rad), std::sin(rad) };
 
         // Check if player is within vision range
         if (distance > vision.visionRange) {
             vision.seesPlayer = false;
+            vision.Target = nullptr;
             continue;
         }
 
@@ -261,21 +266,25 @@ void AIPlayroom::sVisionCone()
 
         // Dot product to check FOV
         float dot = enemyForward.dot(dirToPlayer);
-        float cosHalfFOV = cos(vision.fovAngle * 0.5f * ((22/7) / 180.0f));
+        float cosHalfFOV = cos(vision.fovAngle * 0.5f * (std::numbers::pi / 180.0f));
 
         if (dot < cosHalfFOV) {
             vision.seesPlayer = false;
+            vision.Target = nullptr;
             continue;
         }
 
-        // Line of Sight (LOS) Check - ensure no obstacles block vision
-
-        if (0 <= Physics::GetOverlap(enemy, player).x && Physics::GetOverlap(enemy, player).y <= 0) {
+        
+        
+        if (vision.IsTargetInFOV(eye,dir,playerTransform.pos)) {
             vision.seesPlayer = true;
-            std::cout << "HERE" << std::endl;
+            vision.Target = enemy;
+            std::cout << "SAW THE PLAYER" << std::endl;
         }
-        else {
+        else if (!vision.IsTargetInFOV(eye, dir, playerTransform.pos)) {
             vision.seesPlayer = false;
+            vision.Target = nullptr;
+            std::cout << "NO PLAYER" << std::endl;
         }
     }
 }
@@ -294,7 +303,7 @@ void AIPlayroom::drawVisionCone()
 
     for (int i = 0; i <= 10; i++) {
         float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
-        float rad = angle * ((22/7) / 180.0f);
+        float rad = angle * (std::numbers::pi / 180.0f);
         Vec2 point = transform.pos + Vec2(cos(rad), sin(rad)) * vision.visionRange;
 
         visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
@@ -583,7 +592,7 @@ void AIPlayroom::sRender() {
 
     navmesh.DrawPath(m_game->window());
     drawVisionCone();
-    // draw the grid so that can easily debug
+    // draw the grid 
     if (m_drawGrid) {
         float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
         float rightX = leftX + width() + m_gridSize.x;

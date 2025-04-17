@@ -7,7 +7,7 @@
 #include "../BehaviourTrees/StatefulSequence.h"
 #include "../BehaviourTrees/Loop.h"
 #include "../../EntityManager.h"
-#include "../AIPlayroom.h"
+
 #include <SFML/System.hpp>
 
 class AIPlayroom;
@@ -79,18 +79,11 @@ class AIPlayroom;
    
     class IsEnemyVisible : public Node {
     public:
-        IsEnemyVisible(GreenAgent& agent) : agent(agent) {}
-        virtual Status update() override {
-            //agent.agent->getComponent<CVision>().seesPlayer
-            if (agent.enemyState == VISIBLE) {
-                std::cout << "[Combat] Enemy detected.\n";
-                return BH_SUCCESS;
-            }
-            std::cout << "[Combat] Enemy NOT detected.\n";
-            return BH_FAILURE;
-        }
+        IsEnemyVisible(GreenAgent& agent);
+        virtual Status update() override;
     private:
         GreenAgent& agent;
+        Vec2 TargetPosition;
     };
 
     class EngageCombat : public Node {
@@ -235,8 +228,8 @@ private:
     public:
         SurvivalSelector(GreenAgent& agent) {
             float time1 = 3;
-            float time2 = 5;
-            float time3 = 7;
+            float time2 = 3;
+            float time3 = 3;
             addChild(new LowHealth(agent));  // First, try healing
             addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
           //  addChild(new Patrol(agent));     // patrol the way points

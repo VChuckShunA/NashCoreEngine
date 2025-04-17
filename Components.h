@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Animation.h"
 #include "Vec2.h"
 #include <SFML/Graphics.hpp>
-
+#include<numbers>
+class Entity;
 class Component {
 public:
     bool has = false;
@@ -94,8 +95,24 @@ public:
     float fovAngle;    // Field of View in degrees
     float visionRange; // Max sight distance
     bool seesPlayer;   // Detection flag
-
+    std::shared_ptr<Entity> Target;
     CVision(float fov = 90.0f, float range = 300.0f)
         : fovAngle(fov), visionRange(range), seesPlayer(false) {
+    }
+
+    bool IsTargetInFOV(const Vec2& eyePos,
+        Vec2& lookDir,      // must be normalized!
+        const Vec2& targetPos) const
+    {
+        Vec2 toTarget = targetPos - eyePos;
+        float dist = toTarget.length();
+        if (dist > visionRange)
+            return false;
+        toTarget.normalize();
+        Vec2 dir = toTarget;
+        float cosHalf = std::cos((fovAngle * 0.5f) * (std::numbers::pi / 180.0f));
+       
+        float dp = lookDir.dot(dir);;
+        return dp >= cosHalf;
     }
 };

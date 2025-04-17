@@ -1,5 +1,9 @@
 #include "GreenAgent.h"
 #include <iostream>
+#include "../AIPlayroom.h"
+#include "../BehaviourTrees/Node.h"
+
+
 
 GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) :agent(entity),room(playroom)
 {
@@ -71,7 +75,7 @@ void GreenAgent::steer(float targetAngle)
 void GreenAgent::MoveToPoint(const Vec2& Waypoint)
 {
     
-    int AISpeed = 64;
+    int AISpeed = 2;
     Vec2& AgentCTransform = agent->getComponent<CTransform>().pos;
     bool up = false, down = false, left = false, right = false;
     //0=right,90=down,180 =left, 270=up
@@ -172,4 +176,21 @@ void GreenAgent::MoveToPoint(const Vec2& Waypoint)
     }
 }
 
+IsEnemyVisible::IsEnemyVisible(GreenAgent& agent): agent(agent)
+{
+}
 
+Node::Status IsEnemyVisible::update()
+{
+    //agent.enemyState == VISIBLE
+    //agent.agent->getComponent<CVision>().seesPlayer
+    if (agent.enemyState == VISIBLE) {
+        TargetPosition = agent.room->positionToGridCordinates(agent.agent->getComponent<CVision>().Target);
+        std::cout << "[Combat] Enemy detected.\n";
+
+        std::cout << "enemy is at " << TargetPosition.x << " , " << TargetPosition.y << std::endl;
+        return Status::BH_SUCCESS;
+    }
+  //  std::cout << "[Combat] Enemy NOT detected.\n";
+    return Status::BH_FAILURE;
+}
