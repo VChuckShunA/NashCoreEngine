@@ -29,11 +29,12 @@ protected:
 
    
 
-    void spawnBullet(const std::shared_ptr<Entity>& entity);
+  
 
   
 
     void sLifespan();
+    void sMovement();
 
     void sCollision();
 
@@ -51,7 +52,8 @@ protected:
 
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
-public:
+public:  
+    void spawnBullet(const std::shared_ptr<Entity>& entity);
     AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);
     Vec2 gridToMidPixel(float, float, const std::shared_ptr<Entity>&);
     void update() override;

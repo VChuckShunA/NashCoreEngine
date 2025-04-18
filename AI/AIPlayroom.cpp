@@ -1,4 +1,4 @@
-#include "AIPlayroom.h"
+﻿#include "AIPlayroom.h"
 #include "../Action.h"
 #include "../SceneMenu.h"
 #include "../Vec2.h"
@@ -87,20 +87,27 @@ Vec2 AIPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     // this should spawn a bullet at the given entity, going in the direction the entity is facing
-  /*  auto bullet = m_entityManager.addEntity("bullet");
-    bullet->addComponent<CAnimation>(m_game->assets().getAnimation(m_playerConfig.WEAPON), true);
+    auto bullet = m_entityManager.addEntity("bullet");
+    bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
     // vec2(30,-3) is a tweak so that bullet starts at the end of gun; it is determined experimentally
     float dir = 1.0f;
     if (entity->getComponent<CTransform>().scale.x < 0) dir = -1.0;
     bullet->addComponent<CTransform>(
-        entity->getComponent<CTransform>().pos/* + vec2(30,-3) *///,
-        /*      Vec2(dir * 2 * m_playerConfig.SPEED, 0),
+        entity->getComponent<CTransform>().pos ,
+              Vec2(dir * 2 * 4, 0),
         // vec2(5 * entity->getComponent<CTransform>().scale.x, 0),
         entity->getComponent<CTransform>().scale,
         0
     );
+    float angleInDegrees = 270;
+    float angleInRadians = angleInDegrees * (std::numbers::pi / 180.0f);
+    float dx = cos(angleInRadians);
+    float dy = sin(angleInRadians);
+    int ix = static_cast<int>(std::round(dx));  // dx≈0.7 → 1, dx≈–0.7 → –1, dx≈0.2 → 0
+    int iy = static_cast<int>(std::round(dy));
+    bullet->getComponent<CTransform>().velocity = Vec2{ static_cast<float>(ix), static_cast<float>(iy)};
     bullet->addComponent<CLifespan>(90, m_currentFrame);
-    bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize()); */
+    bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize()); 
 }
 
 void AIPlayroom::update() {
@@ -108,6 +115,7 @@ void AIPlayroom::update() {
 
     // implement pause functionality
     if (!m_paused) {
+        sMovement();
         sLifespan();
         sCollision();
         sVisionCone();
@@ -436,6 +444,17 @@ void AIPlayroom::sLifespan() {
         if (m_currentFrame - bulletLife.frameCreated == 20) {
            // AIAgent->getComponent<CInput>().canShoot = true;
         }
+    }
+}
+
+void AIPlayroom::sMovement()
+{
+
+    // update all entities positions
+    for (const auto& entity : m_entityManager.getEntities("bullet")) {
+        entity->getComponent<CTransform>().prevPos = entity->getComponent<CTransform>().pos;
+        entity->getComponent<CTransform>().pos.x += entity->getComponent<CTransform>().velocity.x;
+       
     }
 }
 
