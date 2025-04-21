@@ -86,28 +86,43 @@ Vec2 AIPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
 
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
-    // this should spawn a bullet at the given entity, going in the direction the entity is facing
+    //spawning bullet
     auto bullet = m_entityManager.addEntity("bullet");
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
-    // vec2(30,-3) is a tweak so that bullet starts at the end of gun; it is determined experimentally
-    float dir = 1.0f;
-    if (entity->getComponent<CTransform>().scale.x < 0) dir = -1.0;
+
+    //Setting bullet transforms
     bullet->addComponent<CTransform>(
-        entity->getComponent<CTransform>().pos ,
-              Vec2(dir * 2 * 4, 0),
-        // vec2(5 * entity->getComponent<CTransform>().scale.x, 0),
-        entity->getComponent<CTransform>().scale,
-        0
-    );
-    float angleInDegrees = 270;
-    float angleInRadians = angleInDegrees * (std::numbers::pi / 180.0f);
-    float dx = cos(angleInRadians);
-    float dy = sin(angleInRadians);
-    int ix = static_cast<int>(std::round(dx));  // dx≈0.7 → 1, dx≈–0.7 → –1, dx≈0.2 → 0
-    int iy = static_cast<int>(std::round(dy));
-    bullet->getComponent<CTransform>().velocity = Vec2{ static_cast<float>(ix), static_cast<float>(iy)};
+                entity->getComponent<CTransform>().pos ,    //position
+                Vec2(0, 0),                                 //previous position
+                Vec2{1.0,1.0},                              //scale
+                entity->getComponent<CTransform>().angle    //angle
+    ); 
+  //  float angle = 90 * (std::numbers::pi / 180.0f);
+     // Retrieve the position and angle from the entity
+    auto& target = m_entityManager.getEntities("player").at(0).get()->getComponent<CTransform>();
+
+    // shoot straight (at your own angle)
+    auto& entityTransform = entity->getComponent<CTransform>();
+    Vec2 position = entityTransform.pos;
+    float angleDegrees = entityTransform.angle;
+    float angleRadians = angleDegrees * (std::numbers::pi / 180.0f);
+
+
+    //Turn towards Target
+   // float deltaX = target.pos.x - entity->getComponent<CTransform>().pos.x;
+    //float deltaY = target.pos.y - entity->getComponent<CTransform>().pos.y;
+    //float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
+    //float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
+
+    // Convert angle from degrees to radians
+   // float angleRadians = 90 * (std::numbers::pi / 180.0f);
+
+    // Define bullet speed
+    float speed = 2.0f;
+    bullet->getComponent<CTransform>().velocity.x = cos(angleRadians) * speed;
+    bullet->getComponent<CTransform>().velocity.y = sin(angleRadians) * speed;
     bullet->addComponent<CLifespan>(90, m_currentFrame);
-    bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize()); 
+    bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
 }
 
 void AIPlayroom::update() {
@@ -451,11 +466,12 @@ void AIPlayroom::sMovement()
 {
 
     // update all entities positions
-    for (const auto& entity : m_entityManager.getEntities("bullet")) {
-        entity->getComponent<CTransform>().prevPos = entity->getComponent<CTransform>().pos;
-        entity->getComponent<CTransform>().pos.x += entity->getComponent<CTransform>().velocity.x;
-       
-    }
+  for (const auto& entity : m_entityManager.getEntities("bullet")) {
+    auto& transform = entity->getComponent<CTransform>();
+    transform.prevPos = transform.pos;
+    transform.pos.x += transform.velocity.x;
+    transform.pos.y += transform.velocity.y;
+}
 }
 
 void AIPlayroom::sCollision() {
