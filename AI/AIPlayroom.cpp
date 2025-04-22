@@ -102,18 +102,19 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     auto& target = m_entityManager.getEntities("player").at(0).get()->getComponent<CTransform>();
 
     // shoot straight (at your own angle)
-    auto& entityTransform = entity->getComponent<CTransform>();
-    Vec2 position = entityTransform.pos;
-    float angleDegrees = entityTransform.angle;
-    float angleRadians = angleDegrees * (std::numbers::pi / 180.0f);
+   // auto& entityTransform = entity->getComponent<CTransform>();
+   // Vec2 position = entityTransform.pos;
+   // float angleDegrees = entityTransform.angle;
+  //  float angleRadians = angleDegrees * (std::numbers::pi / 180.0f);
 
 
     //Turn towards Target
-   // float deltaX = target.pos.x - entity->getComponent<CTransform>().pos.x;
-    //float deltaY = target.pos.y - entity->getComponent<CTransform>().pos.y;
-    //float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
-    //float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
+    float deltaX = target.pos.x - entity->getComponent<CTransform>().pos.x;
+    float deltaY = target.pos.y - entity->getComponent<CTransform>().pos.y;
+    float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
+    float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
 
+  //  steer(entity, angleRadians);
     // Convert angle from degrees to radians
    // float angleRadians = 90 * (std::numbers::pi / 180.0f);
 
@@ -258,57 +259,31 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
 
 void AIPlayroom::sVisionCone()
 {
-    for (auto& enemy : m_entityManager.getEntities("agent")) {
-        if (!enemy->hasComponent<CVision>() || !enemy->hasComponent<CTransform>()) continue;
+    auto& players = m_entityManager.getEntities("player");
+    if (players.empty()) return;
+    Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
 
+    for (auto& enemy : m_entityManager.getEntities("agent")) {
         auto& vision = enemy->getComponent<CVision>();
         auto& transform = enemy->getComponent<CTransform>();
-
-        auto& player = m_entityManager.getEntities("player")[0]; // Assuming single player entity
-        auto& playerTransform = player->getComponent<CTransform>();
-
-        Vec2 toPlayer = playerTransform.pos - transform.pos;
-        float distance = toPlayer.length();
         Vec2  eye = transform.pos;
-        float rad = transform.angle * (std::numbers::pi / 180.0f);
-        Vec2  dir = { std::cos(rad), std::sin(rad) };
 
-        // Check if player is within vision range
-        if (distance > vision.visionRange) {
+        // 1. Convert degrees → radians and build forward vector
+        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
+
+        // 2. Single FOV + range check
+        if (!vision.IsTargetInFOV(eye, lookDir, playerPos)) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
             continue;
         }
 
-        // Normalize vector to player
-        toPlayer.normalize();
-        Vec2 dirToPlayer = toPlayer;
+        // 3. (Optional) Occlusion test via raycast or AABB clipping here
 
-        // Get enemy forward direction (assuming enemy faces right initially)
-        Vec2 enemyForward = Vec2(cos(transform.angle), sin(transform.angle));
-
-        // Dot product to check FOV
-        float dot = enemyForward.dot(dirToPlayer);
-        float cosHalfFOV = cos(vision.fovAngle * 0.5f * (std::numbers::pi / 180.0f));
-
-        if (dot < cosHalfFOV) {
-           // vision.seesPlayer = false;
-            vision.Target = nullptr;
-            continue;
-        }
-
-        
-        
-        if (vision.IsTargetInFOV(eye,dir,playerTransform.pos)) {
-            vision.seesPlayer = true;
-            vision.Target = enemy;
-            std::cout << "SAW THE PLAYER" << std::endl;
-        }
-        else if (!vision.IsTargetInFOV(eye, dir, playerTransform.pos)) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-            std::cout << "NO PLAYER" << std::endl;
-        }
+        vision.seesPlayer = true;
+        vision.Target = players[0];
+        std::cout << "SAW THE PLAYER\n";
     }
 }
 
@@ -425,6 +400,44 @@ void AIPlayroom::aimAndShoot(const std::shared_ptr<Entity>& entity, const std::s
         // entity->getComponent<CTransform>().angle = 0;
         steer(entity, 0);
     }
+}
+
+float AIPlayroom::GetTurnAngle(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& Target)
+{
+    //Turn towards Target
+    float deltaX = Target->getComponent<CTransform>().pos.x - entity->getComponent<CTransform>().pos.x;
+    float deltaY = Target->getComponent<CTransform>().pos.y - entity->getComponent<CTransform>().pos.y;
+    float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
+    float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
+    return angleDegrees;
+}
+
+float AIPlayroom::GetTurnAngle(const Vec2& entity, const Vec2& Target)
+{
+    float deltaX = Target.x - entity.x;
+    float deltaY = Target.y - entity.y;
+    float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
+    float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
+    return angleDegrees;;
+}
+
+void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target)
+{  
+
+    // 1) Retrieve positions
+    const Vec2& shooterPos = entity->getComponent<CTransform>().pos;
+    const Vec2& targetPos = Target->getComponent<CTransform>().pos;
+
+    // 2) Compute angle in radians
+    float deltaX = targetPos.x - shooterPos.x;
+    float deltaY = targetPos.y - shooterPos.y;
+    float angleRadians = std::atan2(deltaY, deltaX);  // correct quadrant :contentReference[oaicite:2]{index=2}
+
+    // 3) Convert to degrees
+    float angleDegrees = angleRadians * (180.0f / std::numbers::pi);
+
+    // 4) Assign to the transform’s angle
+    entity->getComponent<CTransform>().angle = angleDegrees;
 }
 
 void AIPlayroom::RunBehaviourTrees()

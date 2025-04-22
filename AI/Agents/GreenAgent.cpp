@@ -185,9 +185,11 @@ Node::Status IsEnemyVisible::update()
     //agent.enemyState == VISIBLE
     //agent.agent->getComponent<CVision>().seesPlayer
     if (agent.agent->getComponent<CVision>().seesPlayer) {
-        TargetPosition = agent.room->positionToGridCordinates(agent.agent->getComponent<CVision>().Target);
+        //TargetPosition = agent.room->positionToGridCordinates(agent.agent->getComponent<CVision>().Target);
+
         std::cout << "[Combat] Enemy detected.\n";
         agent.room->spawnBullet(agent.agent);
+        agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target);
         std::cout << "enemy is at " << TargetPosition.x << " , " << TargetPosition.y << std::endl;
         return Status::BH_SUCCESS;
     }

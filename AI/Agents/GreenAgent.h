@@ -136,27 +136,7 @@ private:
         }
     };
 
-    //class WaitForSeconds : public Node
-    //{
-    //public:
-    //    WaitForSeconds(GreenAgent& agent, float& Seconds) :greenAgent(agent), waitTime(Seconds) {}
-    //private:
-    //    GreenAgent& greenAgent;
-    //    float& waitTime; float duration = waitTime; // seconds
-    //    float timeElapsed = 0;
-    //    float time = 60;
-    //    virtual void onInitialize() override {
-    //        time = 60; // Reset timer at the start of evaluation
-    //    }
-    //    virtual Status update() override {
-    //        timeElapsed += greenAgent.room->clock.getElapsedTime().asSeconds(); // You must track this in your game engine
-    //        if (timeElapsed < duration) {
-    //            return BH_RUNNING;
-    //        }
-    //        return BH_SUCCESS;
-    //    }
-
-    //};
+   
 
     class WaitForSeconds : public Node {
     public:
@@ -227,19 +207,16 @@ private:
     class SurvivalSelector : public Selector {
     public:
         SurvivalSelector(GreenAgent& agent) {
-            float time1 = 3;
-            float time2 = 3;
-            float time3 = 3;
             addChild(new LowHealth(agent));  // First, try healing
             addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
           //  addChild(new Patrol(agent));     // patrol the way points
             StatefulSequence* patrolSequence = new StatefulSequence();
             patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint1));
-            patrolSequence->addChild(new WaitForSeconds(agent, time1));
+            patrolSequence->addChild(new WaitForSeconds(agent, 3));
             patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint2));
-            patrolSequence->addChild(new WaitForSeconds(agent, time2));
+            patrolSequence->addChild(new WaitForSeconds(agent, 3));
             patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint3));
-            patrolSequence->addChild(new WaitForSeconds(agent, time3));
+            patrolSequence->addChild(new WaitForSeconds(agent, 3));
             addChild(new Loop(patrolSequence));
         }
     };
