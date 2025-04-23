@@ -88,19 +88,8 @@ class AIPlayroom;
 
     class EngageCombat : public Node {
 public:
-    EngageCombat(GreenAgent& agent) : agent(agent) {}
-    virtual Status update() override {
-        // Execute combat actions (e.g., shoot enemy)
-        agent.shootEnemy();
-        // Here you might return BH_RUNNING until the enemy is neutralized,
-        // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
-        if (agent.hasWeapon) 
-        {
-            std::cout << "[Combat] Enemy neutralized or lost.\n";
-            return BH_SUCCESS;
-        }
-        return BH_RUNNING;
-    }
+    EngageCombat(GreenAgent& agent);
+    virtual Status update() override;
 private:
     GreenAgent& agent;
 };
@@ -194,12 +183,17 @@ private:
         }
     };
 
-    class CombatSequence : public Sequence
+    class CombatSequence : public StatefulSequence
     {
     public:
         CombatSequence(GreenAgent& agent) {
             addChild(new IsEnemyVisible(agent));
             addChild(new EngageCombat(agent));
+            addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new EngageCombat(agent));
+            addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new EngageCombat(agent));
+            addChild(new WaitForSeconds(agent, 0.5));
         }
     };
 
@@ -209,15 +203,22 @@ private:
         SurvivalSelector(GreenAgent& agent) {
             addChild(new LowHealth(agent));  // First, try healing
             addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
-          //  addChild(new Patrol(agent));     // patrol the way points
+
+            /*
+            StatefulSequence* combatSequence = new StatefulSequence();
+            combatSequence->addChild(new IsEnemyVisible(agent));
+            combatSequence->addChild(new EngageCombat(agent));
+            combatSequence->addChild(new WaitForSeconds(agent, 3));
+            addChild(new Loop(combatSequence));
+            */
             StatefulSequence* patrolSequence = new StatefulSequence();
-            patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint1));
-            patrolSequence->addChild(new WaitForSeconds(agent, 3));
-            patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint2));
-            patrolSequence->addChild(new WaitForSeconds(agent, 3));
-            patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint3));
-            patrolSequence->addChild(new WaitForSeconds(agent, 3));
-            addChild(new Loop(patrolSequence));
+                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint1));
+                patrolSequence->addChild(new WaitForSeconds(agent, 3));
+                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint2));
+                patrolSequence->addChild(new WaitForSeconds(agent, 3));
+                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint3));
+                patrolSequence->addChild(new WaitForSeconds(agent, 3));
+                addChild(new Loop(patrolSequence));
         }
     };
 

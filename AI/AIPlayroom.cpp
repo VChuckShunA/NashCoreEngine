@@ -122,7 +122,7 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     float speed = 2.0f;
     bullet->getComponent<CTransform>().velocity.x = cos(angleRadians) * speed;
     bullet->getComponent<CTransform>().velocity.y = sin(angleRadians) * speed;
-    bullet->addComponent<CLifespan>(90, m_currentFrame);
+    bullet->addComponent<CLifespan>(120, m_currentFrame);
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
 }
 
@@ -477,13 +477,13 @@ void AIPlayroom::sLifespan() {
 
 void AIPlayroom::sMovement()
 {
-
+    float bulletSpeed=2;
     // update all entities positions
   for (const auto& entity : m_entityManager.getEntities("bullet")) {
     auto& transform = entity->getComponent<CTransform>();
     transform.prevPos = transform.pos;
-    transform.pos.x += transform.velocity.x;
-    transform.pos.y += transform.velocity.y;
+    transform.pos.x += transform.velocity.x* bulletSpeed;
+    transform.pos.y += transform.velocity.y* bulletSpeed;
 }
 }
 

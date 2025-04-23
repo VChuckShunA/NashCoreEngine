@@ -20,7 +20,9 @@ public:
     virtual Status update() override {
         // If we've finished all children, return success.
         if (currentIndex >= m_Children.size()) {
-            return BH_SUCCESS;
+            reset();
+            return BH_RUNNING;
+            //NOTE: This used to return running, and Reset wasn't called here
         }
 
         // Tick the current child.
@@ -48,8 +50,8 @@ public:
     }
 
     ~StatefulSequence() {
-        for (Node* child : m_Children)
-            delete child;
+        for (Node* child : m_Children) delete child;
+        
     }
 private:
     std::vector<Node*> m_Children;
