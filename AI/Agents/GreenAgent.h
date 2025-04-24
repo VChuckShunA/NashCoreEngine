@@ -18,25 +18,11 @@
     public:
         GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom); 
        
-        Node* BehaviourTree;
-        void update();
-        bool hasWeapon = true;
-        bool hasFood = false;
-        int health = 100;
-        int maxHealth = 100;
-        bool houseVisible = false;
-        bool itemVisible = false;
-        void updateCurrentPath(const Vec2& Destination);
-        bool destinationReached = false;
-        void initializeMoveToPoint(const Vec2& Destination);
+        void update() override;
+       
+        
 
         void consumeFood();
-        void shootEnemy();
-        void flee();
-        void enterHouse();
-        void searchHouse();
-        void steer(float targetAngle);
-        void MoveToPoint(const Vec2& Waypoint);
     };
 
     class LowHealth : public Node

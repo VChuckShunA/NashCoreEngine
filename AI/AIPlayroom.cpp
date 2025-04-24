@@ -48,7 +48,17 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     AIAgent->addComponent<CBoundingBox>(Vec2(64, 64));
     AIAgent->addComponent<CVision>();
-    
+
+    AIAgent3 = m_entityManager.addEntity("agent");
+    AIAgent3->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    AIAgent3->addComponent<CTransform>(
+        gridToMidPixel(4, 0, AIAgent3),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    AIAgent3->addComponent<CBoundingBox>(Vec2(64, 64));
+    AIAgent3->addComponent<CVision>();
     
     std::shared_ptr<Entity> AIAgent2;
     AIAgent2 = m_entityManager.addEntity("player");
@@ -62,7 +72,9 @@ void AIPlayroom::init(const std::string& levelPath) {
     AIAgent2->addComponent<CBoundingBox>(Vec2(64, 64));
    
    GreenAgent greenAgent(AIAgent, this);
+   GreenAgent green2Agent(AIAgent, this);
    agents.push_back(std::make_unique<GreenAgent>(AIAgent, this));
+   agents.push_back(std::make_unique<GreenAgent>(AIAgent3, this));
 
    
 }
@@ -290,26 +302,27 @@ void AIPlayroom::sVisionCone()
 void AIPlayroom::drawVisionCone()
 {
    // if (!(AIAgent->getComponent<CVision>())) return;
+    for (auto& enemy : m_entityManager.getEntities("agent")) {
+        auto& vision = enemy->getComponent<CVision>();
+        auto& transform = enemy->getComponent<CTransform>();
 
-    auto& vision = AIAgent->getComponent<CVision>();
-    auto& transform = AIAgent->getComponent<CTransform>();
+        sf::VertexArray visionCone(sf::TrianglesFan, 12);
+        visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
+        visionCone[0].color = sf::Color(255, 255, 0, 100);
+        if (vision.seesPlayer) { visionCone[0].color = sf::Color(255, 0, 0, 100); }
 
-    sf::VertexArray visionCone(sf::TrianglesFan, 12);
-    visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
-    visionCone[0].color = sf::Color(255, 255, 0, 100);
-    if(vision.seesPlayer){ visionCone[0].color = sf::Color(255, 0, 0, 100); }
+        for (int i = 0; i <= 10; i++) {
+            float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
+            float rad = angle * (std::numbers::pi / 180.0f);
+            Vec2 point = transform.pos + Vec2(cos(rad), sin(rad)) * vision.visionRange;
 
-    for (int i = 0; i <= 10; i++) {
-        float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
-        float rad = angle * (std::numbers::pi / 180.0f);
-        Vec2 point = transform.pos + Vec2(cos(rad), sin(rad)) * vision.visionRange;
+            visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
+            visionCone[i + 1].color = sf::Color(255, 255, 0, 100);
+            if (vision.seesPlayer) { visionCone[i + 1].color = sf::Color(255, 0, 0, 100); }
+        }
 
-        visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
-        visionCone[i + 1].color = sf::Color(255, 255, 0, 100);
-        if (vision.seesPlayer) { visionCone[i + 1].color = sf::Color(255, 0, 0, 100); }
+        m_game->window().draw(visionCone);
     }
-
-    m_game->window().draw(visionCone);
 }
 
 void AIPlayroom::steer(const std::shared_ptr<Entity>& entity, float targetAngle)

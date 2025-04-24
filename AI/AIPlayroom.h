@@ -16,6 +16,7 @@ class AIPlayroom :public Scene {
 
 protected:
     std::shared_ptr<Entity> AIAgent;
+    std::shared_ptr<Entity> AIAgent3;
     std::string m_levelPath;
     bool m_drawTextures = true;
     bool m_drawCollision = false;
@@ -24,14 +25,6 @@ protected:
     sf::Text m_gridText;
 
     void init(const std::string& levelPath);
-
-   
-
-   
-
-  
-
-  
 
     void sLifespan();
     void sMovement();
