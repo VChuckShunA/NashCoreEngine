@@ -17,6 +17,15 @@ void BaseAIAgent::updateCurrentPath(const Vec2& Destination)
     std::cout << "GreenAgent 25" << std::endl;
 }
 
+void BaseAIAgent::consumeFood()
+{
+    if (hasFood) {
+        health = std::min(maxHealth, health + 50);
+        hasFood = false;
+        //  std::cout << "Consumed food. Health: " << health << std::endl;
+    }
+}
+
 void BaseAIAgent::initializeMoveToPoint(const Vec2& Destination)
 { //std::cout << "GreenAgent 28" << std::endl;
     std::cout << "Destination is: " << Destination.x << " , " << Destination.y << std::endl;
@@ -146,4 +155,38 @@ void BaseAIAgent::steer(float targetAngle)
         agent->getComponent<CTransform>().angle--;
     }
     agent->getComponent<CTransform>().angle = fmod(agent->getComponent<CTransform>().angle + 360, 360);
+}
+
+
+
+
+IsEnemyVisible::IsEnemyVisible(BaseAIAgent& agent) : agent(agent)
+{
+
+}
+
+Node::Status IsEnemyVisible::update()
+{
+
+    //agent.enemyState == VISIBLE
+    //agent.agent->getComponent<CVision>().seesPlayer
+    if (agent.agent->getComponent<CVision>().seesPlayer) {
+        return Status::BH_SUCCESS;
+    }
+    return Status::BH_FAILURE;
+}
+
+EngageCombat::EngageCombat(BaseAIAgent& agent) : agent(agent) {}
+
+Node::Status EngageCombat::update()
+{
+    // Here you might return BH_RUNNING until the enemy is neutralized,
+    // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
+    if (agent.hasWeapon)
+    {
+        agent.room->spawnBullet(agent.agent);
+        agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target);
+        return BH_SUCCESS;
+    }
+    return BH_RUNNING;
 }

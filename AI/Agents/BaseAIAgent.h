@@ -16,7 +16,7 @@ class BaseAIAgent
 private:
 public:
 	BaseAIAgent();//Default Concstructor
-	Node* BehaviourTree; 
+	std::unique_ptr<Node> BehaviourTree;
 	bool hasWeapon = true;
 	bool hasFood = false;
 	int health = 100;
@@ -39,16 +39,177 @@ public:
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
+
+	void pickUpItem(ItemType item);
+	void shootEnemy();
+	void flee();
+	void enterHouse();
+	void searchHouse();
+	void consumeFood();
 	void initializeMoveToPoint(const Vec2& Destination);
 	void MoveToPoint(const Vec2& Waypoint);
 	void steer(float targetAngle);
 protected:
-	void pickUpItem(ItemType item);
-	void shootEnemy();
-	//void flee();
-	void enterHouse();
-	void searchHouse();
 
 
+};
+
+
+class LowHealth : public Node
+{
+public:
+	LowHealth(BaseAIAgent& agent) :greenAgent(agent) {}
+private:
+	BaseAIAgent& greenAgent;
+	virtual Status update() override {
+		if (greenAgent.health <= 0)
+		{
+			//dead
+			return BH_SUCCESS;
+		}
+		if (greenAgent.health < 25) {
+			if (greenAgent.hasFood) {
+				greenAgent.consumeFood();
+				greenAgent.hasFood = !greenAgent.hasFood;
+				std::cout << "Successfully healed" << std::endl;
+				return BH_SUCCESS; // Successfully healed
+			}
+			std::cout << "No food, can't heal" << std::endl;
+			return BH_FAILURE; // No food, can't heal
+		}
+		std::cout << "Health is above 25, continue other tasks" << std::endl;
+		return BH_FAILURE; // Health is above 25, continue other tasks
+	}
+};
+
+
+class IsEnemyVisible : public Node {
+public:
+    IsEnemyVisible(BaseAIAgent& agent);
+    virtual Status update() override;
+private:
+    BaseAIAgent& agent;
+    Vec2 TargetPosition;
+};
+
+class EngageCombat : public Node {
+public:
+    EngageCombat(BaseAIAgent& agent);
+    virtual Status update() override;
+private:
+    BaseAIAgent& agent;
+};
+
+class MoveToPoint : public Node
+{
+public:
+    MoveToPoint(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
+
+        // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
+    }
+private:
+    BaseAIAgent& greenAgent;
+    Vec2& Waypoint;
+
+    virtual void onInitialize() override {
+
+        greenAgent.initializeMoveToPoint(Waypoint);
+
+    }
+
+    virtual Status update() override {
+
+        if (!greenAgent.destinationReached)
+        {
+            greenAgent.MoveToPoint(Waypoint);
+            return BH_RUNNING; //Not reached destination 
+        }
+        else if (greenAgent.destinationReached) {
+            return BH_SUCCESS; // Reached the point = success
+        }
+
+    }
+};
+
+
+
+class WaitForSeconds : public Node {
+public:
+    // duration: number of seconds to wait.
+    WaitForSeconds(BaseAIAgent& agent, float durationSeconds)
+        : agent(agent), duration(durationSeconds), elapsed(0.0f)
+    {
+    }
+
+    // When starting, reset the elapsed time and restart the clock.
+    virtual void onInitialize() override {
+        elapsed = 0.0f;
+        clock.restart();
+    }
+
+    virtual Status update() override {
+        // Get the elapsed time since the last tick.
+        float dt = clock.restart().asSeconds();
+        elapsed += dt;
+        std::cout << "[WaitForSeconds] Waiting... elapsed: " << elapsed
+            << " / " << duration << " seconds" << std::endl;
+
+        // If the elapsed time is less than the duration, still waiting.
+        if (elapsed < duration)
+            return BH_RUNNING;
+        else
+            return BH_SUCCESS;
+    }
+
+    virtual void reset() override {
+        elapsed = 0.0f;
+        m_eStatus = BH_INVALID;
+    }
+
+public:
+    BaseAIAgent& agent;
+    float duration;   // How many seconds to wait.
+    float elapsed;    // Accumulated time.
+    sf::Clock clock;  // Clock to measure delta time.
+};
+
+class Patrol : public StatefulSequence {
+public:
+    float time1 = 0.3;
+    float time2 = 0.5;
+    float time3 = 0.7;
+    Patrol(BaseAIAgent& agent) {
+        addChild(new MoveToPoint(agent, agent.Waypoint1));
+        addChild(new WaitForSeconds(agent, time1));
+        addChild(new MoveToPoint(agent, agent.Waypoint2));
+        addChild(new WaitForSeconds(agent, time2));
+        addChild(new MoveToPoint(agent, agent.Waypoint3));
+        addChild(new WaitForSeconds(agent, time3));
+
+    }
+};
+
+class CombatSequence : public StatefulSequence
+{
+public:
+    CombatSequence(BaseAIAgent& agent) {
+        addChild(new IsEnemyVisible(agent));
+        addChild(new EngageCombat(agent));
+        addChild(new WaitForSeconds(agent, 0.5));
+        addChild(new EngageCombat(agent));
+        addChild(new WaitForSeconds(agent, 0.5));
+        addChild(new EngageCombat(agent));
+        addChild(new WaitForSeconds(agent, 0.5));
+    }
+};
+
+
+class SurvivalSelector : public Selector {
+public:
+    SurvivalSelector(BaseAIAgent& agent) {
+        addChild(new LowHealth(agent));  // First, try healing
+        addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
+        addChild(new Patrol(agent)); //Patrol
+    }
 };
 

@@ -1,38 +1,11 @@
-/*#include "BlueAgent.h"
-#include <iostream>
-#include "../AIPlayroom.h"
-#include "../BehaviourTrees/Node.h"
+#include "BlueAgent.h"
 
-BlueAgent::BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) :agent(entity), room(playroom)
+BlueAgent::BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) : BaseAIAgent(std::move(entity), playroom)
 {
+	BehaviourTree = std::make_unique<SurvivalSelector>(*this);
 }
 
 void BlueAgent::update()
 {
+	BehaviourTree->tick(); // Runs the tree
 }
-
-void BlueAgent::updateCurrentPath(const Vec2& Destination)
-{
-}
-
-void BlueAgent::initializeMoveToPoint(const Vec2& Destination)
-{
-}
-
-void BlueAgent::consumeFood()
-{
-}
-
-void BlueAgent::shootEnemy()
-{
-}
-
-void BlueAgent::steer(float targetAngle)
-{
-}
-
-void BlueAgent::MoveToPoint(const Vec2& Waypoint)
-{
-}
-
-*/
