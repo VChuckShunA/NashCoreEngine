@@ -5,19 +5,18 @@
 
 
 
-GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) :agent(entity),room(playroom)
+
+GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) : BaseAIAgent(std::move(entity), playroom)
 {
-    //std::cout << "GreenAgent 6"  << std::endl;
+    
+    agent = entity;
+    room = playroom;
     BehaviourTree = new SurvivalSelector(*this);
-    //currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Waypoint1);
-   //currentpath = path1;
 }
 
 void GreenAgent::update()
 {
-   // std::cout << "GreenAgent 14" << std::endl;
     BehaviourTree->tick(); // Runs the tree
-   // std::cout << "Tick " << health << std::endl;
 }
 
 void GreenAgent::updateCurrentPath(const Vec2& Destination)
@@ -178,22 +177,19 @@ void GreenAgent::MoveToPoint(const Vec2& Waypoint)
 
 IsEnemyVisible::IsEnemyVisible(GreenAgent& agent): agent(agent)
 {
-    std::cout << "IsEnemyVisible(GreenAgent& agent): agent(agent)\n";
+  
 }
+
+
 
 Node::Status IsEnemyVisible::update()
 {
-    //TargetPosition = agent.room->positionToGridCordinates(agent.agent->getComponent<CVision>().Target);
 
-    std::cout << "[Combat] Enemy detected.\n";
-
-    std::cout << "enemy is at " << TargetPosition.x << " , " << TargetPosition.y << std::endl;
     //agent.enemyState == VISIBLE
     //agent.agent->getComponent<CVision>().seesPlayer
-    if (agent.enemyState == VISIBLE) {
+    if (agent.enemyState == BaseAIAgent::VISIBLE) {
         return Status::BH_SUCCESS;
     }
-  //  std::cout << "[Combat] Enemy NOT detected.\n";
     return Status::BH_FAILURE;
 }
 
@@ -201,8 +197,6 @@ EngageCombat::EngageCombat(GreenAgent& agent) : agent(agent) {}
 
 Node::Status EngageCombat::update()
 {
-    std::cout << "[EngageCombat] Update.\n";
-    // Execute combat actions (e.g., shoot enemy)
     agent.shootEnemy();
     // Here you might return BH_RUNNING until the enemy is neutralized,
     // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).

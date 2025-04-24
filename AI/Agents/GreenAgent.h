@@ -7,39 +7,29 @@
 #include "../BehaviourTrees/StatefulSequence.h"
 #include "../BehaviourTrees/Loop.h"
 #include "../../EntityManager.h"
-
+#include "BaseAIAgent.h"
 #include <SFML/System.hpp>
 
-class AIPlayroom;
-    enum ItemType { FOOD, WEAPON };
-    enum EnemyState { NONE, VISIBLE };
-    enum AgentState { IDLE, SEARCHING, FIGHTING, FLEEING, HEALING };
-    class GreenAgent
+
+  
+    class GreenAgent : public BaseAIAgent
     {
-    private:
         
     public:
         GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom); 
-        std::vector<Vec2> currentpath;
-        Vec2 Waypoint1 = Vec2(19, 11);
-        Vec2 Waypoint2 = Vec2(4, 6);
-        Vec2 Waypoint3 = Vec2(0, 11);
-        const std::shared_ptr<Entity>& agent;
-        AIPlayroom* room;
+       
         Node* BehaviourTree;
         void update();
         bool hasWeapon = true;
-        bool hasFood = true;
-        int health = 199;
+        bool hasFood = false;
+        int health = 100;
         int maxHealth = 100;
         bool houseVisible = false;
         bool itemVisible = false;
-        ItemType visibleItemType;
-        EnemyState enemyState = NONE;
         void updateCurrentPath(const Vec2& Destination);
         bool destinationReached = false;
         void initializeMoveToPoint(const Vec2& Destination);
-        void pickUpItem(ItemType item);
+
         void consumeFood();
         void shootEnemy();
         void flee();
@@ -203,22 +193,7 @@ private:
         SurvivalSelector(GreenAgent& agent) {
             addChild(new LowHealth(agent));  // First, try healing
             addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
-
-            /*
-            StatefulSequence* combatSequence = new StatefulSequence();
-            combatSequence->addChild(new IsEnemyVisible(agent));
-            combatSequence->addChild(new EngageCombat(agent));
-            combatSequence->addChild(new WaitForSeconds(agent, 3));
-            addChild(new Loop(combatSequence));
-            */
-            StatefulSequence* patrolSequence = new StatefulSequence();
-                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint1));
-                patrolSequence->addChild(new WaitForSeconds(agent, 3));
-                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint2));
-                patrolSequence->addChild(new WaitForSeconds(agent, 3));
-                patrolSequence->addChild(new MoveToPoint(agent, agent.Waypoint3));
-                patrolSequence->addChild(new WaitForSeconds(agent, 3));
-                addChild(new Loop(patrolSequence));
+            addChild(new Patrol(agent)); //Patrol
         }
     };
 

@@ -1,0 +1,210 @@
+/*#pragma once
+#include <vector>
+#include <iostream>
+#include "../BehaviourTrees/Node.h"
+#include "../BehaviourTrees/Selector.h"
+#include "../BehaviourTrees/Sequence.h"
+#include "../BehaviourTrees/StatefulSequence.h"
+#include "../BehaviourTrees/Loop.h"
+#include "../../EntityManager.h"
+
+#include <SFML/System.hpp>
+
+class AIPlayroom;
+enum ItemType { FOOD, WEAPON };
+enum EnemyState { NONE, VISIBLE };
+enum AgentState { IDLE, SEARCHING, FIGHTING, FLEEING, HEALING };
+class BlueAgent
+{
+private:
+
+public:
+    BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
+    std::vector<Vec2> currentpath;
+    Vec2 Waypoint1 = Vec2(19, 11);
+    Vec2 Waypoint2 = Vec2(4, 6);
+    Vec2 Waypoint3 = Vec2(0, 11);
+    const std::shared_ptr<Entity>& agent;
+    AIPlayroom* room;
+    Node* BehaviourTree;
+    void update();
+    bool hasWeapon = true;
+    bool hasFood = false;
+    int health = 100;
+    int maxHealth = 100;
+    bool houseVisible = false;
+    bool itemVisible = false;
+    ItemType visibleItemType;
+    EnemyState enemyState = NONE;
+    void updateCurrentPath(const Vec2& Destination);
+    bool destinationReached = false;
+    void initializeMoveToPoint(const Vec2& Destination);
+    void pickUpItem(ItemType item);
+    void consumeFood();
+    void shootEnemy();
+    void flee();
+    void enterHouse();
+    void searchHouse();
+    void steer(float targetAngle);
+    void MoveToPoint(const Vec2& Waypoint);
+};
+
+class LowHealth : public Node
+{
+public:
+    LowHealth(BlueAgent& agent) :blueAgent(agent) {}
+private:
+    BlueAgent& blueAgent;
+    virtual Status update() override {
+        if (blueAgent.health <= 0)
+        {
+            //dead
+            return BH_SUCCESS;
+        }
+        if (blueAgent.health < 25) {
+            if (blueAgent.hasFood) {
+                blueAgent.consumeFood();
+                blueAgent.hasFood = !blueAgent.hasFood;
+                std::cout << "Successfully healed" << std::endl;
+                return BH_SUCCESS; // Successfully healed
+            }
+            std::cout << "No food, can't heal" << std::endl;
+            return BH_FAILURE; // No food, can't heal
+        }
+        std::cout << "Health is above 25, continue other tasks" << std::endl;
+        return BH_FAILURE; // Health is above 25, continue other tasks
+    }
+};
+
+
+class IsEnemyVisible : public Node {
+public:
+    IsEnemyVisible(BlueAgent& agent);
+    virtual Status update() override;
+private:
+    BlueAgent& agent;
+    Vec2 TargetPosition;
+};
+
+class EngageCombat : public Node {
+public:
+    EngageCombat(BlueAgent& agent);
+    virtual Status update() override;
+private:
+    BlueAgent& agent;
+};
+
+class MoveToPoint : public Node
+{
+public:
+    MoveToPoint(BlueAgent& agent, Vec2& point) :blueAgent(agent), Waypoint(point) {
+
+        // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
+    }
+private:
+    BlueAgent& blueAgent;
+    Vec2& Waypoint;
+
+    virtual void onInitialize() override {
+
+        blueAgent.initializeMoveToPoint(Waypoint);
+
+    }
+
+    virtual Status update() override {
+
+        if (!blueAgent.destinationReached)
+        {
+            blueAgent.MoveToPoint(Waypoint);
+            return BH_RUNNING; //Not reached destination 
+        }
+        else if (blueAgent.destinationReached) {
+            return BH_SUCCESS; // Reached the point = success
+        }
+
+    }
+};
+
+
+
+class WaitForSeconds : public Node {
+public:
+    // duration: number of seconds to wait.
+    WaitForSeconds(BlueAgent& agent, float durationSeconds)
+        : agent(agent), duration(durationSeconds), elapsed(0.0f)
+    {
+    }
+
+    // When starting, reset the elapsed time and restart the clock.
+    virtual void onInitialize() override {
+        elapsed = 0.0f;
+        clock.restart();
+    }
+
+    virtual Status update() override {
+        // Get the elapsed time since the last tick.
+        float dt = clock.restart().asSeconds();
+        elapsed += dt;
+        std::cout << "[WaitForSeconds] Waiting... elapsed: " << elapsed
+            << " / " << duration << " seconds" << std::endl;
+
+        // If the elapsed time is less than the duration, still waiting.
+        if (elapsed < duration)
+            return BH_RUNNING;
+        else
+            return BH_SUCCESS;
+    }
+
+    virtual void reset() override {
+        elapsed = 0.0f;
+        m_eStatus = BH_INVALID;
+    }
+
+public:
+    BlueAgent& agent;
+    float duration;   // How many seconds to wait.
+    float elapsed;    // Accumulated time.
+    sf::Clock clock;  // Clock to measure delta time.
+};
+
+class Patrol : public StatefulSequence {
+public:
+    float time1 = 0.3;
+    float time2 = 0.5;
+    float time3 = 0.7;
+    Patrol(BlueAgent& agent) {
+        addChild(new MoveToPoint(agent, agent.Waypoint1));
+        addChild(new WaitForSeconds(agent, time1));
+        addChild(new MoveToPoint(agent, agent.Waypoint2));
+        addChild(new WaitForSeconds(agent, time2));
+        addChild(new MoveToPoint(agent, agent.Waypoint3));
+        addChild(new WaitForSeconds(agent, time3));
+
+    }
+};
+
+class CombatSequence : public StatefulSequence
+{
+public:
+    CombatSequence(BlueAgent& agent) {
+        addChild(new IsEnemyVisible(agent));
+        addChild(new EngageCombat(agent));
+        addChild(new WaitForSeconds(agent, 0.5));
+        addChild(new EngageCombat(agent));
+        addChild(new WaitForSeconds(agent, 0.5));
+        addChild(new EngageCombat(agent));
+        addChild(new WaitForSeconds(agent, 0.5));
+    }
+};
+
+
+class SurvivalSelector : public Selector {
+public:
+    SurvivalSelector(BlueAgent& agent) {
+        addChild(new LowHealth(agent));  // First, try healing
+        addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
+        addChild(new Patrol(agent)); //Patrol
+    }
+};
+
+*/

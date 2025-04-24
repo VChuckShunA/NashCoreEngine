@@ -164,6 +164,8 @@
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Assignment1.cpp" />
     <ClCompile Include="AI\Pathfinding\AStar.cpp" />
+    <ClCompile Include="AI\Agents\BlueAgent.cpp" />
+    <ClCompile Include="AI\Agents\BaseAIAgent.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -200,6 +202,8 @@
     <ClInclude Include="Assets.h" />
     <ClInclude Include="AI\BehaviourTrees\Node.h" />
     <ClInclude Include="AI\Pathfinding\AStar.h" />
+    <ClInclude Include="AI\Agents\BlueAgent.h" />
+    <ClInclude Include="AI\Agents\BaseAIAgent.h" />
     <ClInclude Include="Components.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
