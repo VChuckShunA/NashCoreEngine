@@ -32,3 +32,36 @@ Vec2 Physics::GetPreviousOverlap(const std::shared_ptr<Entity>& a, const std::sh
     //    return {overlapX, overlapY};
     return halfSizeA + halfSizeB - delta;
 }
+
+bool Physics::AABBCOllision(const std::shared_ptr<Entity>& a, const std::shared_ptr<Entity>& b)
+{
+    bool AisToTheRightOfB = getLeft(a) > getRight(b);
+    bool AisToTheLeftOfB = getRight(a) > getLeft(b);
+    bool AisAboveB = getBottom(a) < getTop(b);
+    bool AisBelowB = getTop(a) > getBottom(b);
+    return !(AisToTheRightOfB
+        || AisToTheLeftOfB
+        || AisAboveB
+        || AisBelowB);
+}
+
+float Physics::getLeft(const std::shared_ptr<Entity>& entity)
+{
+   return entity->getComponent<CTransform>().pos.x  - entity->getComponent<CBoundingBox>().halfSize.x;
+}
+
+float Physics::getRight(const std::shared_ptr<Entity>& entity)
+{
+    return entity->getComponent<CTransform>().pos.x + entity->getComponent<CBoundingBox>().halfSize.x;
+}
+
+float Physics::getTop(const std::shared_ptr<Entity>& entity)
+{
+    return entity->getComponent<CTransform>().pos.y + entity->getComponent<CBoundingBox>().halfSize.y;
+}
+
+float Physics::getBottom(const std::shared_ptr<Entity>& entity)
+{
+    return entity->getComponent<CTransform>().pos.y - entity->getComponent<CBoundingBox>().halfSize.y;
+}
+

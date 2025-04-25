@@ -8,7 +8,7 @@
 
 GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) : BaseAIAgent(std::move(entity), playroom)
 {
-    BehaviourTree = std::make_unique<SurvivalSelector>(*this);
+    BehaviourTree = std::make_unique<PatrolSelector>(*this);
 }
 
 void GreenAgent::update()

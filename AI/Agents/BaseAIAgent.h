@@ -39,7 +39,7 @@ public:
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
-
+    void TakeDamage(int damageAmount=35);
 	void pickUpItem(ItemType item);
 	void shootEnemy();
 	void flee();
@@ -77,7 +77,7 @@ private:
 			std::cout << "No food, can't heal" << std::endl;
 			return BH_FAILURE; // No food, can't heal
 		}
-		std::cout << "Health is above 25, continue other tasks" << std::endl;
+	//	std::cout << "Health is above 25, continue other tasks" << std::endl;
 		return BH_FAILURE; // Health is above 25, continue other tasks
 	}
 };
@@ -151,8 +151,8 @@ public:
         // Get the elapsed time since the last tick.
         float dt = clock.restart().asSeconds();
         elapsed += dt;
-        std::cout << "[WaitForSeconds] Waiting... elapsed: " << elapsed
-            << " / " << duration << " seconds" << std::endl;
+       // std::cout << "[WaitForSeconds] Waiting... elapsed: " << elapsed
+      //      << " / " << duration << " seconds" << std::endl;
 
         // If the elapsed time is less than the duration, still waiting.
         if (elapsed < duration)
@@ -204,6 +204,14 @@ public:
 };
 
 
+class PatrolSelector : public Selector {
+public:
+    PatrolSelector(BaseAIAgent& agent) {
+        addChild(new LowHealth(agent));  // First, try healing
+        addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
+        addChild(new Patrol(agent)); //Patrol
+    }
+};
 class SurvivalSelector : public Selector {
 public:
     SurvivalSelector(BaseAIAgent& agent) {
@@ -212,4 +220,3 @@ public:
         addChild(new Patrol(agent)); //Patrol
     }
 };
-

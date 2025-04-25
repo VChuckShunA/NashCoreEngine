@@ -107,7 +107,6 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 
 	while (!openList.empty())
 	{
-		std::cout << "A Star 103" << std::endl;
 		//Find the node with the lowest FCost
 		auto currentNode = *std::min_element(openList.begin(), openList.end(), [](Node* a, Node* b) {return a->fCost < b->fCost; });
 
@@ -115,28 +114,26 @@ std::vector<Vec2> AStar::FindPath(Vec2 startPos, Vec2 endPos)
 		openList.erase(std::remove(openList.begin(), openList.end(), currentNode), openList.end());
 		closedList.insert(currentNode);
 
-		std::cout << "A Star 110" << std::endl;
 		//If we've reached the end node, reconstruct the path
 		if (currentNode == endNode)
 		{
 			std::vector<Vec2> path;
 
-			std::cout << "A Star 116" << std::endl;
 			while (currentNode)
 			{
-				std::cout << "A Star 119" << currentNode << std::endl;
+				
 				path.push_back(currentNode->position);
 				currentNode = currentNode->parent;
 			}
 			std::reverse(path.begin(), path.end());
 			for (Vec2 pathNode : path) {
-				std::cout << pathNode.x << " , " << pathNode.y<<std::endl;
+				//std::cout << pathNode.x << " , " << pathNode.y<<std::endl;
 			}
 			currentNode = NULL;
 			endNode = NULL;
 			delete currentNode;
 			delete endNode;
-			std::cout << "A Star 127" << std::endl;
+			
 			return path;
 		}
 

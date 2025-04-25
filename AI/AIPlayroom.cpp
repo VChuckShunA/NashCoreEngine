@@ -8,6 +8,8 @@
 #include <chrono>
 #include <math.h>
 #include<numbers>
+#include "Agents/GreenAgent.h"
+#include "Agents/BlueAgent.h"
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
 
@@ -72,9 +74,11 @@ void AIPlayroom::init(const std::string& levelPath) {
     AIAgent2->addComponent<CBoundingBox>(Vec2(64, 64));
    
    GreenAgent greenAgent(AIAgent, this);
-   GreenAgent green2Agent(AIAgent, this);
+   GreenAgent green2Agent(AIAgent3, this);
+   BlueAgent playerAgent(AIAgent2, this);
    agents.push_back(std::make_unique<GreenAgent>(AIAgent, this));
    agents.push_back(std::make_unique<GreenAgent>(AIAgent3, this));
+   agents.push_back(std::make_unique<BlueAgent>(AIAgent2, this));
 
    
 }
@@ -511,6 +515,66 @@ void AIPlayroom::sCollision() {
 
     // Implement bullet/tile collisions
     // Destroy the tile if it has a Brick animation
+
+
+    for (const auto& bullet : m_entityManager.getEntities("bullet")) {
+        if (auto inst = bullet->Instigator.lock()) {
+            std::cout << "inst is shared_ptr<Entity> of shooter!" << std::endl;
+            // inst is shared_ptr<Entity> of shooter
+            for (const auto& agent : agents) {
+                std::cout << "ai->agent is shared_ptr<Entity> in BaseAIAgent!" << std::endl;
+                // ai->agent is shared_ptr<Entity> in BaseAIAgent
+                if (inst.get() != agent->agent.get()) {
+                    // This bullet wasn’t fired by this AI
+                    std::cout << "This bullet wasn’t fired by this AI!" << std::endl;
+                    Vec2 overlap = Physics::GetOverlap(bullet, agent->agent);
+                    Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, agent->agent);
+                    
+                        if (0 < overlap.y && -m_gridSize.x < overlap.x) 
+                        {
+                                if (0 <= overlap.x && pOverlap.x <= 0) 
+                                {
+                                    spawnBrickDebris(agent->agent);
+                                    bullet->destroy();
+                                }
+                        }
+                        if (0 < overlap.x && -m_gridSize.y < overlap.y)  
+                        {
+                            if (0 <= overlap.y && pOverlap.y <= 0) 
+                            {
+                                spawnBrickDebris(agent->agent);
+                                bullet->destroy();
+                            }
+                        }
+                    // check if player hits the tile from the bottom
+                        if (0 < overlap.x && -m_gridSize.y < overlap.y ) 
+                        {
+                            if (0 <= overlap.y && pOverlap.y <= 0) 
+                            {
+                                spawnBrickDebris(agent->agent);
+                                bullet->destroy();
+                            }
+                        }
+                    // check player and tile side collide
+                        if (0 < overlap.y && -m_gridSize.x < overlap.x) 
+                        {
+                            if (0 <= overlap.x && pOverlap.x <= 0) 
+                            {
+                                spawnBrickDebris(agent->agent);
+                                bullet->destroy();
+                            }
+                        }
+
+
+
+
+                }
+            }
+        }
+    }
+
+
+
     for (const auto& bullet : m_entityManager.getEntities("bullet")) {
         for (const auto& tile : m_entityManager.getEntities("tile")) {
             // check bullet and tile side collide

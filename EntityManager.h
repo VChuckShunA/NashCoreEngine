@@ -24,6 +24,7 @@ public:
     void update();
 
     std::shared_ptr<Entity> addEntity(const std::string& tag);
+    std::shared_ptr<Entity> addEntity(const std::string& tag, std::shared_ptr<Entity> Instigator);
 
     EntityVec& getEntities();
 

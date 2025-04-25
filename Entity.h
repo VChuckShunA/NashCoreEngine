@@ -21,10 +21,8 @@ class Entity {
     friend class EntityManager;
 
     bool m_active = true;
-    const size_t m_id = 0;
     const std::string m_tag = "default";
     ComponentTuple m_components;
-
     // constructor is private, so we can never create entities
     // outside the EntityManager which had friend access
     Entity(size_t id, std::string tag);
@@ -32,12 +30,15 @@ class Entity {
 public:
     void destroy();
 
+    std::weak_ptr<Entity> Instigator;
+    const size_t m_id = 0;
     [[nodiscard]] size_t id() const;
 
     [[nodiscard]] bool isActive() const;
 
     [[nodiscard]] const std::string& tag() const;
 
+   
     template<class T>
     bool hasComponent() const {
         return getComponent<T>().has;

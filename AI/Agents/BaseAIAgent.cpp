@@ -10,11 +10,22 @@ BaseAIAgent::BaseAIAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* play
 
 void BaseAIAgent::updateCurrentPath(const Vec2& Destination)
 {
-    std::cout << "GreenAgent 21" << std::endl;
+  //  std::cout << "GreenAgent 21" << std::endl;
 
     currentpath = room->navmesh.FindPath(room->positionToGridCordinates(agent), Vec2(Destination.x, Destination.y));
     destinationReached = false;
-    std::cout << "GreenAgent 25" << std::endl;
+   // std::cout << "GreenAgent 25" << std::endl;
+}
+
+void BaseAIAgent::TakeDamage(int damageAmount)
+{
+    if (health > 0)
+    {
+        std::cout << "Previous Health " << health << std::endl;
+        health -= damageAmount;
+        std::cout << "Current Health " << health << std::endl;
+    }
+    else std::cout << "Player is dead "<< std::endl;
 }
 
 void BaseAIAgent::consumeFood()
@@ -28,10 +39,10 @@ void BaseAIAgent::consumeFood()
 
 void BaseAIAgent::initializeMoveToPoint(const Vec2& Destination)
 { //std::cout << "GreenAgent 28" << std::endl;
-    std::cout << "Destination is: " << Destination.x << " , " << Destination.y << std::endl;
+   // std::cout << "Destination is: " << Destination.x << " , " << Destination.y << std::endl;
     updateCurrentPath(Destination);
     destinationReached = false;
-    std::cout << "Path Updated: " << Destination.x << " , " << Destination.y << std::endl;
+   // std::cout << "Path Updated: " << Destination.x << " , " << Destination.y << std::endl;
 }
 
 void BaseAIAgent::MoveToPoint(const Vec2& Waypoint)
@@ -185,7 +196,8 @@ Node::Status EngageCombat::update()
     if (agent.hasWeapon)
     {
         agent.room->spawnBullet(agent.agent);
-        agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target);
+        if(agent.agent, agent.agent->getComponent<CVision>().Target)
+            agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target);
         return BH_SUCCESS;
     }
     return BH_RUNNING;

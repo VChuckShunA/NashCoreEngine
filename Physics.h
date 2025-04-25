@@ -6,6 +6,10 @@ public:
     static Vec2 GetOverlap(const std::shared_ptr<Entity>& a, const std::shared_ptr<Entity>& b);
 
     static Vec2 GetPreviousOverlap(const std::shared_ptr<Entity>& a, const std::shared_ptr<Entity>& b);
-
+    bool AABBCOllision(const std::shared_ptr<Entity>& a, const std::shared_ptr<Entity>& b);
+    float getLeft(const std::shared_ptr<Entity>& entity);
+    float getRight(const std::shared_ptr<Entity>& entity);
+    float getTop(const std::shared_ptr<Entity>& entity);
+    float getBottom(const std::shared_ptr<Entity>& entity);
 };
 
