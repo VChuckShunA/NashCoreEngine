@@ -12,7 +12,6 @@
 #include "Agents/BlueAgent.h"
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
-
     init(levelPath);
 
 
@@ -40,6 +39,46 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
+
+    auto e1 = m_entityManager.addEntity("agent"); 
+    e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    e1->addComponent<CTransform>(
+        gridToMidPixel(0, 11, e1),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    e1->addComponent<CBoundingBox>(Vec2(64, 64));
+    e1->addComponent<CVision>();
+
+    auto e2 = m_entityManager.addEntity("agent");
+    e2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    e2->addComponent<CTransform>(
+        gridToMidPixel(4, 0, e2),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    e2->addComponent<CBoundingBox>(Vec2(64, 64));
+    e2->addComponent<CVision>();
+
+    auto p1 = m_entityManager.addEntity("player");
+    p1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    p1->addComponent<CTransform>(
+        gridToMidPixel(2, 6, p1),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    p1->addComponent<CBoundingBox>(Vec2(64, 64));
+    p1->addComponent<CVision>();
+    agents.emplace_back(make_unique<GreenAgent>(e1, this));
+    agents.emplace_back(make_unique<GreenAgent>(e2, this));
+
+
+    agents.emplace_back(make_unique<BlueAgent>(p1, this));
+    playerPtr = static_cast<BlueAgent*>(agents.back().get());
+    /*
     AIAgent = m_entityManager.addEntity("agent");
     AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     AIAgent->addComponent<CTransform>(
@@ -72,15 +111,14 @@ void AIPlayroom::init(const std::string& levelPath) {
         0
     );
     AIAgent2->addComponent<CBoundingBox>(Vec2(64, 64));
-   
-   GreenAgent greenAgent(AIAgent, this);
-   GreenAgent green2Agent(AIAgent3, this);
-   BlueAgent playerAgent(AIAgent2, this);
+ //  GreenAgent greenAgent(AIAgent, this);
+   //GreenAgent green2Agent(AIAgent3, this);
+  // BlueAgent playerAgent(AIAgent2, this);
    agents.push_back(std::make_unique<GreenAgent>(AIAgent, this));
    agents.push_back(std::make_unique<GreenAgent>(AIAgent3, this));
    agents.push_back(std::make_unique<BlueAgent>(AIAgent2, this));
 
-   
+   */
 }
 
 
@@ -155,6 +193,7 @@ void AIPlayroom::update() {
         sVisionCone();
         m_currentFrame++;
     }
+    sAnimation();
     sRender();
 }
 
@@ -517,35 +556,33 @@ void AIPlayroom::sCollision() {
     // Destroy the tile if it has a Brick animation
 
     for (const auto& bullet : m_entityManager.getEntities("bullet")) {
+        //NOTE: .lock() is used to get a shared pointer from a weak pointer
         if (auto inst = bullet->Instigator.lock()) {
-            std::cout << "inst is shared_ptr<Entity> of shooter!" << std::endl;
             // inst is shared_ptr<Entity> of shooter
             for (const auto& agent : agents) {
-                std::cout << "ai->agent is shared_ptr<Entity> in BaseAIAgent!" << std::endl;
                 // ai->agent is shared_ptr<Entity> in BaseAIAgent
                 if (inst.get() != agent->agent.get()) {
                     // This bullet wasn’t fired by this AI
-                    std::cout << "This bullet wasn’t fired by this AI!" << std::endl;
                     Vec2 overlap = Physics::GetOverlap(bullet, agent->agent);
                     Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, agent->agent);
-                    Physics phy;
-                    bool check = phy.AABBCOllision(bullet, agent->agent);
                     
                   
                         if (0 < overlap.y && -m_gridSize.x < overlap.x) 
                         {
                                 if (0 <= overlap.x && pOverlap.x <= 0) 
                                 {
-                                   // spawnBrickDebris(agent->agent);
-                                    bullet->destroy();
+                                    spawnBrickDebris(bullet);
+                                    agent->TakeDamage();
+                                   // bullet->destroy();
                                 }
                         }
                         if (0 < overlap.x && -m_gridSize.y < overlap.y)  
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
-                               // spawnBrickDebris(agent->agent);
-                                bullet->destroy();
+                               spawnBrickDebris(bullet);
+                               agent->TakeDamage();
+                               // bullet->destroy();
                             }
                         }
                     // check if player hits the tile from the bottom
@@ -553,8 +590,9 @@ void AIPlayroom::sCollision() {
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
-                               // spawnBrickDebris(agent->agent);
-                                bullet->destroy();
+                                spawnBrickDebris(bullet);
+                                agent->TakeDamage();
+                               // bullet->destroy();
                             }
                         }
                     // check player and tile side collide
@@ -562,8 +600,9 @@ void AIPlayroom::sCollision() {
                         {
                             if (0 <= overlap.x && pOverlap.x <= 0) 
                             {
-                               // spawnBrickDebris(agent->agent);
-                                bullet->destroy();
+                                spawnBrickDebris(bullet);
+                                agent->TakeDamage();
+                               // bullet->destroy();
                             }
                         }
 
@@ -646,6 +685,18 @@ void AIPlayroom::sCollision() {
     }
 
    
+}
+
+void AIPlayroom::sAnimation()
+{
+    for (const auto& entity : m_entityManager.getEntities()) {
+        if (entity->getComponent<CAnimation>().animation.hasEnded() && !entity->getComponent<CAnimation>().repeat) {
+            entity->destroy();
+        }
+        if (entity->hasComponent<CAnimation>()) {
+            entity->getComponent<CAnimation>().animation.update();
+        }
+    }
 }
 
 void AIPlayroom::sDoAction(const Action& action) {
@@ -741,9 +792,13 @@ void AIPlayroom::sRender() {
             }
         }
     }
-
-
-    
+    int currentHealth = playerPtr->getHealth();
+    sf::Text HUD("health : " + std::to_string(currentHealth), m_game->assets().getFont("Mario"), 26);
+    HUD.setFillColor(sf::Color::White);
+    HUD.setPosition(
+       20,25
+    );
+    m_game->window().draw(HUD);
 }
 
 void AIPlayroom::changePlayerStateTo(const std::string& state) {
@@ -761,7 +816,11 @@ void AIPlayroom::changePlayerStateTo(const std::string& state) {
 void AIPlayroom::spawnBrickDebris(const std::shared_ptr<Entity>& tile) {
     tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
     // tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BrickDebris");
-    tile->addComponent<CLifespan>(10, m_currentFrame);
+    //tile->addComponent<CLifespan>(10, m_currentFrame);
+    tile->getComponent<CLifespan>().lifespan = 10;
+    tile->getComponent<CLifespan>().frameCreated = m_currentFrame;
+
+    
 }
 
 void AIPlayroom::spawnCoinSpin(const std::shared_ptr<Entity>& tile) {

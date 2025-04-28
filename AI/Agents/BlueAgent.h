@@ -18,6 +18,7 @@ class BlueAgent : public BaseAIAgent
 public:
     BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
     void update() override;
+    const int getHealth();
 
 };
 

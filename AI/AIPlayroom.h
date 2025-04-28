@@ -5,6 +5,7 @@
 #include "../Scene.h"
 #include "Pathfinding/AStar.h"
 #include "Agents/BaseAIAgent.h"
+#include "Agents/BlueAgent.h"
 #include <vector>
 class GreenAgent;
 class AIPlayroom :public Scene {
@@ -23,7 +24,7 @@ protected:
     bool m_drawGrid = false;
     const Vec2 m_gridSize = { 64, 64 };
     sf::Text m_gridText;
-
+    BlueAgent* playerPtr = nullptr;
     void init(const std::string& levelPath);
 
     void sLifespan();
@@ -31,7 +32,7 @@ protected:
 
     void sCollision();
 
-
+    void sAnimation();
 
     void sRender() override;
 

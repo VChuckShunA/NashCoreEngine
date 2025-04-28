@@ -6,6 +6,7 @@ BaseAIAgent::BaseAIAgent() : agent(nullptr), room(nullptr) {
 
 BaseAIAgent::BaseAIAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) :agent(std::move(entity)), room(playroom)
 {
+    health = maxHealth;
 }
 
 void BaseAIAgent::updateCurrentPath(const Vec2& Destination)
@@ -19,6 +20,7 @@ void BaseAIAgent::updateCurrentPath(const Vec2& Destination)
 
 void BaseAIAgent::TakeDamage(int damageAmount)
 {
+    //NOTE: Due to the iffy collision system, the Damage gets multiplied by 2
     if (health > 0)
     {
         std::cout << "Previous Health " << health << std::endl;

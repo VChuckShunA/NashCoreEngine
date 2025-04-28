@@ -19,8 +19,8 @@ public:
 	std::unique_ptr<Node> BehaviourTree;
 	bool hasWeapon = true;
 	bool hasFood = false;
-	int health = 100;
 	int maxHealth = 100;
+    int health=100; //NOTE : Need to clean and build for this to get updated
 	bool houseVisible = false;
 	bool itemVisible = false;
 	bool destinationReached = false;
@@ -39,7 +39,7 @@ public:
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
-    void TakeDamage(int damageAmount=35);
+    void TakeDamage(int damageAmount=1);
 	void pickUpItem(ItemType item);
 	void shootEnemy();
 	void flee();
