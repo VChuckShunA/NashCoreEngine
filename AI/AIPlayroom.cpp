@@ -103,7 +103,7 @@ Vec2 AIPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     //spawning bullet
-    auto bullet = m_entityManager.addEntity("bullet");
+    auto bullet = m_entityManager.addEntity("bullet", entity);
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
 
     //Setting bullet transforms
@@ -516,7 +516,6 @@ void AIPlayroom::sCollision() {
     // Implement bullet/tile collisions
     // Destroy the tile if it has a Brick animation
 
-
     for (const auto& bullet : m_entityManager.getEntities("bullet")) {
         if (auto inst = bullet->Instigator.lock()) {
             std::cout << "inst is shared_ptr<Entity> of shooter!" << std::endl;
@@ -529,12 +528,15 @@ void AIPlayroom::sCollision() {
                     std::cout << "This bullet wasn’t fired by this AI!" << std::endl;
                     Vec2 overlap = Physics::GetOverlap(bullet, agent->agent);
                     Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, agent->agent);
+                    Physics phy;
+                    bool check = phy.AABBCOllision(bullet, agent->agent);
                     
+                  
                         if (0 < overlap.y && -m_gridSize.x < overlap.x) 
                         {
                                 if (0 <= overlap.x && pOverlap.x <= 0) 
                                 {
-                                    spawnBrickDebris(agent->agent);
+                                   // spawnBrickDebris(agent->agent);
                                     bullet->destroy();
                                 }
                         }
@@ -542,7 +544,7 @@ void AIPlayroom::sCollision() {
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
-                                spawnBrickDebris(agent->agent);
+                               // spawnBrickDebris(agent->agent);
                                 bullet->destroy();
                             }
                         }
@@ -551,7 +553,7 @@ void AIPlayroom::sCollision() {
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
-                                spawnBrickDebris(agent->agent);
+                               // spawnBrickDebris(agent->agent);
                                 bullet->destroy();
                             }
                         }
@@ -560,7 +562,7 @@ void AIPlayroom::sCollision() {
                         {
                             if (0 <= overlap.x && pOverlap.x <= 0) 
                             {
-                                spawnBrickDebris(agent->agent);
+                               // spawnBrickDebris(agent->agent);
                                 bullet->destroy();
                             }
                         }
