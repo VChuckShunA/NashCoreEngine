@@ -39,13 +39,14 @@ public:
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
-    void TakeDamage(int damageAmount=1);
+    void TakeDamage(int damageAmount=35);
 	void pickUpItem(ItemType item);
 	void shootEnemy();
 	void flee();
 	void enterHouse();
 	void searchHouse();
 	void consumeFood();
+    void HandleDeath();
 	void initializeMoveToPoint(const Vec2& Destination);
 	void MoveToPoint(const Vec2& Waypoint);
 	void steer(float targetAngle);

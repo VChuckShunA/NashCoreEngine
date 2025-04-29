@@ -94,7 +94,9 @@ class CVision : public Component {
 public:
     float fovAngle;    // Field of View in degrees
     float visionRange; // Max sight distance
-    bool seesPlayer;   // Detection flag
+    bool seesPlayer=false;   // Detection flags
+    bool seesFood=false;
+    bool seesAmmo=false;
     std::shared_ptr<Entity> Target;
     CVision(float fov = 90.0f, float range = 300.0f)
         : fovAngle(fov), visionRange(range), seesPlayer(false) {

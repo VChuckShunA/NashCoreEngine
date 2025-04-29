@@ -13,6 +13,7 @@ GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playro
 
 void GreenAgent::update()
 {
+    if (health <= 0) { HandleDeath(); return; }
     BehaviourTree->tick(); // Runs the tree
 }
 

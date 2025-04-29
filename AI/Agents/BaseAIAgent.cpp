@@ -39,6 +39,12 @@ void BaseAIAgent::consumeFood()
     }
 }
 
+void BaseAIAgent::HandleDeath()
+{
+    BehaviourTree.reset();
+    room->RemoveAgent(this);
+}
+
 void BaseAIAgent::initializeMoveToPoint(const Vec2& Destination)
 { //std::cout << "GreenAgent 28" << std::endl;
    // std::cout << "Destination is: " << Destination.x << " , " << Destination.y << std::endl;
@@ -197,8 +203,8 @@ Node::Status EngageCombat::update()
     // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
     if (agent.hasWeapon)
     {
-        agent.room->spawnBullet(agent.agent);
-        if(agent.agent, agent.agent->getComponent<CVision>().Target)
+        agent.room->spawnBullet(agent.agent, agent.agent->getComponent<CVision>().Target);
+        if(agent.agent->getComponent<CVision>().Target) //NOTE: this had a agent.agent,  it was probably an overseight on my part, so I got rid of it. idk if it broke anything :|
             agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target);
         return BH_SUCCESS;
     }

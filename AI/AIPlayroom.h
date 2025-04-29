@@ -47,7 +47,8 @@ protected:
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:  
-    void spawnBullet(const std::shared_ptr<Entity>& entity);
+    void RemoveAgent(BaseAIAgent* ptr);
+    void spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
     AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);
     Vec2 gridToMidPixel(float, float, const std::shared_ptr<Entity>&);
     void update() override;

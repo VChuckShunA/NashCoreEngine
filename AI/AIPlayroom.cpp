@@ -78,47 +78,7 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
-    /*
-    AIAgent = m_entityManager.addEntity("agent");
-    AIAgent->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
-    AIAgent->addComponent<CTransform>(
-        gridToMidPixel(0,11, AIAgent),
-        Vec2(3, 0),
-        Vec2(1, 1),
-        0
-    );
-    AIAgent->addComponent<CBoundingBox>(Vec2(64, 64));
-    AIAgent->addComponent<CVision>();
-
-    AIAgent3 = m_entityManager.addEntity("agent");
-    AIAgent3->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
-    AIAgent3->addComponent<CTransform>(
-        gridToMidPixel(4, 0, AIAgent3),
-        Vec2(3, 0),
-        Vec2(1, 1),
-        0
-    );
-    AIAgent3->addComponent<CBoundingBox>(Vec2(64, 64));
-    AIAgent3->addComponent<CVision>();
     
-    std::shared_ptr<Entity> AIAgent2;
-    AIAgent2 = m_entityManager.addEntity("player");
-    AIAgent2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
-    AIAgent2->addComponent<CTransform>(
-        gridToMidPixel(2, 6, AIAgent2),
-        Vec2(3, 0),
-        Vec2(1, 1),
-        0
-    );
-    AIAgent2->addComponent<CBoundingBox>(Vec2(64, 64));
- //  GreenAgent greenAgent(AIAgent, this);
-   //GreenAgent green2Agent(AIAgent3, this);
-  // BlueAgent playerAgent(AIAgent2, this);
-   agents.push_back(std::make_unique<GreenAgent>(AIAgent, this));
-   agents.push_back(std::make_unique<GreenAgent>(AIAgent3, this));
-   agents.push_back(std::make_unique<BlueAgent>(AIAgent2, this));
-
-   */
 }
 
 
@@ -139,7 +99,17 @@ Vec2 AIPlayroom::gridToMidPixel(float gridX, float gridY, const std::shared_ptr<
 
 
 
-void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
+void AIPlayroom::RemoveAgent(BaseAIAgent* ptr)
+{
+    agents.erase(
+        std::remove_if(agents.begin(), agents.end(),
+            [&](auto const& up) { return up.get() == ptr; }),
+        agents.end()
+    );
+    ptr->agent->destroy();
+}
+
+void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target) {
     //spawning bullet
     auto bullet = m_entityManager.addEntity("bullet", entity);
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
@@ -153,7 +123,7 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
     ); 
   //  float angle = 90 * (std::numbers::pi / 180.0f);
      // Retrieve the position and angle from the entity
-    auto& target = m_entityManager.getEntities("player").at(0).get()->getComponent<CTransform>();
+    auto& targetTransform = target->getComponent<CTransform>();
 
     // shoot straight (at your own angle)
    // auto& entityTransform = entity->getComponent<CTransform>();
@@ -163,8 +133,8 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity) {
 
 
     //Turn towards Target
-    float deltaX = target.pos.x - entity->getComponent<CTransform>().pos.x;
-    float deltaY = target.pos.y - entity->getComponent<CTransform>().pos.y;
+    float deltaX = targetTransform.pos.x - entity->getComponent<CTransform>().pos.x;
+    float deltaY = targetTransform.pos.y - entity->getComponent<CTransform>().pos.y;
     float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
     float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
 
@@ -333,12 +303,15 @@ void AIPlayroom::sVisionCone()
             vision.Target = nullptr;
             continue;
         }
+        else {
+
+            vision.seesPlayer = true;
+            vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
+            std::cout << "SAW THE PLAYER\n";
+        }
 
         // 3. (Optional) Occlusion test via raycast or AABB clipping here
 
-        vision.seesPlayer = true;
-        vision.Target = players[0];
-        std::cout << "SAW THE PLAYER\n";
     }
 }
 
@@ -793,7 +766,11 @@ void AIPlayroom::sRender() {
         }
     }
     int currentHealth = playerPtr->getHealth();
-    sf::Text HUD("health : " + std::to_string(currentHealth), m_game->assets().getFont("Mario"), 26);
+    sf::Text HUD("health : " + std::to_string(currentHealth)+
+        "\nitems : [ ] [ ] [ ] [ ] [ ]"+
+        "\nbehavior : none"+
+        "\nstatus : running"
+        , m_game->assets().getFont("Mario"), 20);
     HUD.setFillColor(sf::Color::White);
     HUD.setPosition(
        20,25
