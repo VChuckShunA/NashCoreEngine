@@ -284,8 +284,18 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
 
 void AIPlayroom::sVisionCone()
 {
+    //NOTE: This is the WORST way to do this
+    //TODO: REDO THIS!
     auto& players = m_entityManager.getEntities("player");
-    if (players.empty()) return;
+    if (players.empty())
+    {
+        for (auto& enemy : m_entityManager.getEntities("agent")) {
+            auto& vision = enemy->getComponent<CVision>();
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            return;
+        }
+    }
     Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
 
     for (auto& enemy : m_entityManager.getEntities("agent")) {
@@ -293,15 +303,20 @@ void AIPlayroom::sVisionCone()
         auto& transform = enemy->getComponent<CTransform>();
         Vec2  eye = transform.pos;
 
-        // 1. Convert degrees → radians and build forward vector
+        // Convert degrees to radians and build forward vector
         float angleRad = transform.angle * (std::numbers::pi / 180.0f);
         Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
 
-        // 2. Single FOV + range check
+        // Single FOV + range check
         if (!vision.IsTargetInFOV(eye, lookDir, playerPos)) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
             continue;
+        }
+        else if (players.empty()) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            return;
         }
         else {
 
@@ -309,8 +324,6 @@ void AIPlayroom::sVisionCone()
             vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
             std::cout << "SAW THE PLAYER\n";
         }
-
-        // 3. (Optional) Occlusion test via raycast or AABB clipping here
 
     }
 }
