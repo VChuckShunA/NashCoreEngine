@@ -111,6 +111,8 @@ void AIPlayroom::RemoveAgent(BaseAIAgent* ptr)
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target) {
     //spawning bullet
+    if (target)
+    {
     auto bullet = m_entityManager.addEntity("bullet", entity);
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
 
@@ -133,6 +135,9 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
 
 
     //Turn towards Target
+    //NOTE: If you get pointed to this after player died,it's b because the target is a nullptr
+    //TODO: FIX IT SO THAT THE IT ONLY FIRES WHILE THE TARGET EXISTS
+   
     float deltaX = targetTransform.pos.x - entity->getComponent<CTransform>().pos.x;
     float deltaY = targetTransform.pos.y - entity->getComponent<CTransform>().pos.y;
     float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
@@ -148,6 +153,7 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
     bullet->getComponent<CTransform>().velocity.y = sin(angleRadians) * speed;
     bullet->addComponent<CLifespan>(120, m_currentFrame);
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
+    }
 }
 
 void AIPlayroom::update() {
@@ -160,7 +166,7 @@ void AIPlayroom::update() {
         sCollision();
         sVisionCone();
         RunBehaviourTrees();
-        sVisionCone();
+        //sVisionCone();
         m_currentFrame++;
     }
     sAnimation();
@@ -287,15 +293,7 @@ void AIPlayroom::sVisionCone()
     //NOTE: This is the WORST way to do this
     //TODO: REDO THIS!
     auto& players = m_entityManager.getEntities("player");
-    if (players.empty())
-    {
-        for (auto& enemy : m_entityManager.getEntities("agent")) {
-            auto& vision = enemy->getComponent<CVision>();
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-            return;
-        }
-    }
+   
     Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
 
     for (auto& enemy : m_entityManager.getEntities("agent")) {
@@ -317,15 +315,28 @@ void AIPlayroom::sVisionCone()
             vision.seesPlayer = false;
             vision.Target = nullptr;
             return;
-        }
-        else {
+        }   
+        else if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, playerPos))
+        {
 
-            vision.seesPlayer = true;
-            vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
-            std::cout << "SAW THE PLAYER\n";
-        }
+                vision.seesPlayer = true;
+                vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
+                std::cout << "SAW THE PLAYER\n";
+            }
+        
 
     }
+/*
+    if (players.empty())
+    {
+        for (auto& enemy : m_entityManager.getEntities("agent")) {
+            auto& vision = enemy->getComponent<CVision>();
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            return;
+        }
+    }*/
+
 }
 
 void AIPlayroom::drawVisionCone()

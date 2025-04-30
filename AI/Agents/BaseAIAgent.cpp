@@ -41,7 +41,8 @@ void BaseAIAgent::consumeFood()
 
 void BaseAIAgent::HandleDeath()
 {
-    BehaviourTree.reset();
+    BehaviourTree.reset(); 
+    BehaviourTree = nullptr;
     room->RemoveAgent(this);
 }
 
