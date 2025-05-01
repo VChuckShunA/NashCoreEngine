@@ -177,6 +177,13 @@ void BaseAIAgent::steer(float targetAngle)
     agent->getComponent<CTransform>().angle = fmod(agent->getComponent<CTransform>().angle + 360, 360);
 }
 
+bool BaseAIAgent::hasTarget()
+{
+    if (agent->getComponent<CVision>().Target)
+        return true;
+    return false;
+}
+
 
 
 
@@ -204,10 +211,24 @@ Node::Status EngageCombat::update()
     // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
     if (agent.hasWeapon)
     {
-        agent.room->spawnBullet(agent.agent, agent.agent->getComponent<CVision>().Target);
         if(agent.agent->getComponent<CVision>().Target) //NOTE: this had a agent.agent,  it was probably an overseight on my part, so I got rid of it. idk if it broke anything :|
-            agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target);
+        {
+            agent.room->spawnBullet(agent.agent, agent.agent->getComponent<CVision>().Target);
+        }
+            
         return BH_SUCCESS;
     }
     return BH_RUNNING;
+}
+
+TurnTowardsTarget::TurnTowardsTarget(BaseAIAgent& agent, int randomDeviation) :randDev(randomDeviation), agent(agent)
+{
+}
+
+
+Node::Status TurnTowardsTarget::update()
+{
+
+    agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target, randDev);
+    return BH_SUCCESS;
 }

@@ -50,6 +50,7 @@ public:
 	void initializeMoveToPoint(const Vec2& Destination);
 	void MoveToPoint(const Vec2& Waypoint);
 	void steer(float targetAngle);
+    bool hasTarget();
 protected:
 
 
@@ -133,6 +134,14 @@ private:
 };
 
 
+class TurnTowardsTarget : public Node {
+private:
+    int randDev;
+    BaseAIAgent& agent;
+public:
+    TurnTowardsTarget(BaseAIAgent& agent, int randomDeviation);
+    virtual Status update() override;
+};
 
 class WaitForSeconds : public Node {
 public:
@@ -190,17 +199,21 @@ public:
     }
 };
 
+
+
 class CombatSequence : public StatefulSequence
 {
 public:
     CombatSequence(BaseAIAgent& agent) {
         addChild(new IsEnemyVisible(agent));
-        addChild(new EngageCombat(agent));
-        addChild(new WaitForSeconds(agent, 0.5));
-        addChild(new EngageCombat(agent));
-        addChild(new WaitForSeconds(agent, 0.5));
-        addChild(new EngageCombat(agent));
-        addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new TurnTowardsTarget(agent,15));
+            // agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target, 15);
+            addChild(new EngageCombat(agent));
+            addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new EngageCombat(agent));
+            addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new EngageCombat(agent));
+            addChild(new WaitForSeconds(agent, 0.5));
     }
 };
 

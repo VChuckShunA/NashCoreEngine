@@ -64,7 +64,7 @@ public:
     void aimAndShoot(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
     float GetTurnAngle(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& Target);
     float GetTurnAngle(const Vec2& entity, const Vec2& Target);
-    void TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target);
+    void TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target, int randDev=0);
     void RunBehaviourTrees();
 };
 

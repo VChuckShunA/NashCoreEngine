@@ -10,6 +10,7 @@
 #include<numbers>
 #include "Agents/GreenAgent.h"
 #include "Agents/BlueAgent.h"
+#include <random>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
@@ -125,23 +126,23 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
     ); 
   //  float angle = 90 * (std::numbers::pi / 180.0f);
      // Retrieve the position and angle from the entity
-    auto& targetTransform = target->getComponent<CTransform>();
+    //auto& targetTransform = target->getComponent<CTransform>();
 
     // shoot straight (at your own angle)
-   // auto& entityTransform = entity->getComponent<CTransform>();
-   // Vec2 position = entityTransform.pos;
-   // float angleDegrees = entityTransform.angle;
-  //  float angleRadians = angleDegrees * (std::numbers::pi / 180.0f);
+    auto& entityTransform = entity->getComponent<CTransform>();
+    Vec2 position = entityTransform.pos;
+    float angleDegrees = entityTransform.angle;
+    float angleRadians = angleDegrees * (std::numbers::pi / 180.0f);
 
 
     //Turn towards Target
     //NOTE: If you get pointed to this after player died,it's b because the target is a nullptr
     //TODO: FIX IT SO THAT THE IT ONLY FIRES WHILE THE TARGET EXISTS
    
-    float deltaX = targetTransform.pos.x - entity->getComponent<CTransform>().pos.x;
-    float deltaY = targetTransform.pos.y - entity->getComponent<CTransform>().pos.y;
-    float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
-    float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
+    //float deltaX = targetTransform.pos.x - entity->getComponent<CTransform>().pos.x;
+    //float deltaY = targetTransform.pos.y - entity->getComponent<CTransform>().pos.y;
+    //float angleRadians = std::atan2(deltaY, deltaX); // Angle in radians
+    //float angleDegrees = angleRadians * (180.0f / std::numbers::pi); // Convert to degrees if needed
 
   //  steer(entity, angleRadians);
     // Convert angle from degrees to radians
@@ -474,23 +475,27 @@ float AIPlayroom::GetTurnAngle(const Vec2& entity, const Vec2& Target)
     return angleDegrees;;
 }
 
-void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target)
+void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target, int randDev)
 {  
 
     // 1) Retrieve positions
     const Vec2& shooterPos = entity->getComponent<CTransform>().pos;
     const Vec2& targetPos = Target->getComponent<CTransform>().pos;
 
-    // 2) Compute angle in radians
+    //Compute angle in radians
     float deltaX = targetPos.x - shooterPos.x;
     float deltaY = targetPos.y - shooterPos.y;
     float angleRadians = std::atan2(deltaY, deltaX);  // correct quadrant :contentReference[oaicite:2]{index=2}
 
-    // 3) Convert to degrees
+    //Convert to degrees
     float angleDegrees = angleRadians * (180.0f / std::numbers::pi);
 
-    // 4) Assign to the transform’s angle
-    entity->getComponent<CTransform>().angle = angleDegrees;
+    //Assign to the transform’s angle
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Mersenne Twister engine
+    std::uniform_int_distribution<> dis(-randDev, randDev);  // Uniform distribution in the range [min, max]
+
+    entity->getComponent<CTransform>().angle = angleDegrees + dis(gen);
 }
 
 void AIPlayroom::RunBehaviourTrees()
