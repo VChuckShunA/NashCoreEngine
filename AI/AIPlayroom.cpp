@@ -71,7 +71,7 @@ void AIPlayroom::init(const std::string& levelPath) {
         Vec2(1, 1),
         0
     );
-    p1->addComponent<CBoundingBox>(Vec2(64, 64));
+    p1->addComponent<CBoundingBox>(Vec2(32, 32));
     p1->addComponent<CVision>();
     agents.emplace_back(make_unique<GreenAgent>(e1, this));
     agents.emplace_back(make_unique<GreenAgent>(e2, this));
@@ -860,8 +860,8 @@ void AIPlayroom::sRender() {
     int currentHealth = playerPtr->getHealth();
     sf::Text HUD("health : " + std::to_string(currentHealth)+
         "\nitems : [ ] [ ] [ ] [ ] [ ]"+
-        "\nbehavior : "+ playerPtr->BehaviourTree->Name +
-        "\nstatus : " + std::to_string(playerPtr->BehaviourTree.get()->BH_SUCCESS) +
+        "\nbehavior : "+ behaviourName +
+        "\nstatus : " + behaviourSTatus +
         "\nSCORE : " + std::to_string(PlayerScore)
         , m_game->assets().getFont("Mario"), 20);
     HUD.setFillColor(sf::Color::White);

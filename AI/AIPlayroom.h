@@ -47,7 +47,8 @@ protected:
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:  
-
+    std::string behaviourName = "None";
+    std::string behaviourSTatus = "None";
     int PlayerScore = 0;
     void RemoveAgent(BaseAIAgent* ptr);
     void spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
