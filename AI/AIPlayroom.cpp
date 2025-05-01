@@ -64,7 +64,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     e2->addComponent<CVision>();
 
     auto p1 = m_entityManager.addEntity("player");
-    p1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
         gridToMidPixel(2, 6, p1),
         Vec2(3, 0),
@@ -294,7 +294,8 @@ void AIPlayroom::sVisionCone()
     //NOTE: This is the WORST way to do this
     //TODO: REDO THIS!
     auto& players = m_entityManager.getEntities("player");
-   
+    auto& enemies = m_entityManager.getEntities("agent");
+    auto& blueagentref = players[0];
     Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
 
     for (auto& enemy : m_entityManager.getEntities("agent")) {
@@ -327,6 +328,43 @@ void AIPlayroom::sVisionCone()
         
 
     }
+
+    for (auto& enemy : m_entityManager.getEntities("agent")) {
+
+        Vec2 enemyPos = enemy->getComponent<CTransform>().pos;
+        auto& vision = blueagentref->getComponent<CVision>();
+        auto& transform = blueagentref->getComponent<CTransform>();
+        Vec2  eye = transform.pos;
+
+        // Convert degrees to radians and build forward vector
+        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
+
+        // Single FOV + range check
+        if (!vision.IsTargetInFOV(eye, lookDir, enemyPos)) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            continue;
+        }
+        else if (players.empty()) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            return;
+        }
+        else if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, enemyPos))
+        {
+
+            vision.seesPlayer = true;
+            vision.Target = enemy; //Change this so that it sets whatever it sees as the target
+            std::cout << "SAW THE PLAYER\n";
+        }
+
+
+    }
+
+
+
+    
 /*
     if (players.empty())
     {
@@ -344,6 +382,28 @@ void AIPlayroom::drawVisionCone()
 {
    // if (!(AIAgent->getComponent<CVision>())) return;
     for (auto& enemy : m_entityManager.getEntities("agent")) {
+        auto& vision = enemy->getComponent<CVision>();
+        auto& transform = enemy->getComponent<CTransform>();
+
+        sf::VertexArray visionCone(sf::TrianglesFan, 12);
+        visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
+        visionCone[0].color = sf::Color(255, 255, 0, 100);
+        if (vision.seesPlayer) { visionCone[0].color = sf::Color(255, 0, 0, 100); }
+
+        for (int i = 0; i <= 10; i++) {
+            float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
+            float rad = angle * (std::numbers::pi / 180.0f);
+            Vec2 point = transform.pos + Vec2(cos(rad), sin(rad)) * vision.visionRange;
+
+            visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
+            visionCone[i + 1].color = sf::Color(255, 255, 0, 100);
+            if (vision.seesPlayer) { visionCone[i + 1].color = sf::Color(255, 0, 0, 100); }
+        }
+
+        m_game->window().draw(visionCone);
+    }
+
+    for (auto& enemy : m_entityManager.getEntities("player")) {
         auto& vision = enemy->getComponent<CVision>();
         auto& transform = enemy->getComponent<CTransform>();
 
@@ -501,7 +561,8 @@ void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const 
 void AIPlayroom::RunBehaviourTrees()
 {
     for (auto& agent : agents) {
-        agent->update();
+        if(agent)
+            agent->update();
     }
 }
 
@@ -607,8 +668,6 @@ void AIPlayroom::sCollision() {
                                // bullet->destroy();
                             }
                         }
-
-
 
 
                 }
@@ -820,11 +879,15 @@ void AIPlayroom::changePlayerStateTo(const std::string& state) {
 }
 
 void AIPlayroom::spawnBrickDebris(const std::shared_ptr<Entity>& tile) {
-    tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("Explosion");
+    auto debris = m_entityManager.addEntity("debris");
+    debris->addComponent<CAnimation>(m_game->assets().getAnimation("Explosion"), false);
+
+    debris->addComponent<CTransform>(tile->getComponent<CTransform>());
+    tile->destroy();
     // tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BrickDebris");
     //tile->addComponent<CLifespan>(10, m_currentFrame);
-    tile->getComponent<CLifespan>().lifespan = 10;
-    tile->getComponent<CLifespan>().frameCreated = m_currentFrame;
+    debris->getComponent<CLifespan>().lifespan = 10;
+    debris->getComponent<CLifespan>().frameCreated = m_currentFrame;
 
     
 }

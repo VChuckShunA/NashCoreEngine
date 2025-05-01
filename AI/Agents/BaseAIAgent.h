@@ -20,6 +20,7 @@ public:
 	bool hasWeapon = true;
 	bool hasFood = false;
 	int maxHealth = 100;
+    int baseDamageAmount = 1;
     int health; //NOTE : Need to clean and build for this to get updated
 	bool houseVisible = false;
 	bool itemVisible = false;
@@ -39,7 +40,7 @@ public:
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
-    void TakeDamage(int damageAmount=1);
+    void TakeDamage();
 	void pickUpItem(ItemType item);
 	void shootEnemy();
 	void flee();
@@ -206,14 +207,13 @@ class CombatSequence : public StatefulSequence
 public:
     CombatSequence(BaseAIAgent& agent) {
         addChild(new IsEnemyVisible(agent));
-            addChild(new TurnTowardsTarget(agent,15));
-            // agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target, 15);
+            addChild(new TurnTowardsTarget(agent,12));
             addChild(new EngageCombat(agent));
             addChild(new WaitForSeconds(agent, 0.5));
             addChild(new EngageCombat(agent));
-            addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new WaitForSeconds(agent, 0.7));
             addChild(new EngageCombat(agent));
-            addChild(new WaitForSeconds(agent, 0.5));
+            addChild(new WaitForSeconds(agent, 2));
     }
 };
 

@@ -18,13 +18,13 @@ void BaseAIAgent::updateCurrentPath(const Vec2& Destination)
    // std::cout << "GreenAgent 25" << std::endl;
 }
 
-void BaseAIAgent::TakeDamage(int damageAmount)
+void BaseAIAgent::TakeDamage()
 {
     //NOTE: Due to the iffy collision system, the Damage gets multiplied by 2
     if (health > 0)
     {
         std::cout << "Previous Health " << health << std::endl;
-        health -= damageAmount;
+        health -= baseDamageAmount;
         std::cout << "Current Health " << health << std::endl;
     }
     else std::cout << "Player is dead "<< std::endl;
@@ -56,7 +56,6 @@ void BaseAIAgent::initializeMoveToPoint(const Vec2& Destination)
 
 void BaseAIAgent::MoveToPoint(const Vec2& Waypoint)
 {
-
     int AISpeed = 2;
     Vec2& AgentCTransform = agent->getComponent<CTransform>().pos;
     bool up = false, down = false, left = false, right = false;
@@ -65,7 +64,6 @@ void BaseAIAgent::MoveToPoint(const Vec2& Waypoint)
     if (!destinationReached)
     {
 
-        //  std::cout << "GreenAgent 77" << std::endl;
         if (!currentpath.empty()) {
             distanceBetween = Vec2(abs(AgentCTransform.x - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x), abs(AgentCTransform.y - room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).y));
 
