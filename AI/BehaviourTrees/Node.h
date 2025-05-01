@@ -10,6 +10,9 @@ public:
     BH_RUNNING,
 };
 
+    std::string Name = "BaseNode";
+
+   
     virtual Status update() = 0;
     virtual void onInitialize() {}
     virtual void onTerminate(Status) {}

@@ -3,6 +3,7 @@
 #include <vector>
 class Sequence : public Node {
 public:
+    Sequence(){ Name = "Sequence"; }
     void addChild(Node* child) {
         m_Children.push_back(child);
     }

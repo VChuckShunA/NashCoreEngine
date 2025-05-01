@@ -47,7 +47,7 @@ public:
 	void enterHouse();
 	void searchHouse();
 	void consumeFood();
-    void HandleDeath();
+    virtual void HandleDeath();
 	void initializeMoveToPoint(const Vec2& Destination);
 	void MoveToPoint(const Vec2& Waypoint);
 	void steer(float targetAngle);
@@ -61,7 +61,7 @@ protected:
 class LowHealth : public Node
 {
 public:
-	LowHealth(BaseAIAgent& agent) :greenAgent(agent) {}
+    LowHealth(BaseAIAgent& agent) :greenAgent(agent) { Name = "Low Health Check"; }
 private:
 	BaseAIAgent& greenAgent;
 	virtual Status update() override {
@@ -107,7 +107,7 @@ class MoveToPoint : public Node
 {
 public:
     MoveToPoint(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
-
+        Name = "Move To Point";
         // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
     }
 private:
@@ -150,6 +150,7 @@ public:
     WaitForSeconds(BaseAIAgent& agent, float durationSeconds)
         : agent(agent), duration(durationSeconds), elapsed(0.0f)
     {
+        Name = "Wait For Seconds";
     }
 
     // When starting, reset the elapsed time and restart the clock.
@@ -189,6 +190,7 @@ public:
     float time1 = 0.3;
     float time2 = 0.5;
     float time3 = 0.7;
+    Patrol() { Name = "Patrol"; }
     Patrol(BaseAIAgent& agent) {
         addChild(new MoveToPoint(agent, agent.Waypoint1));
         addChild(new WaitForSeconds(agent, time1));
@@ -205,6 +207,7 @@ public:
 class CombatSequence : public StatefulSequence
 {
 public:
+    CombatSequence() { Name = "Combat Sequence"; }
     CombatSequence(BaseAIAgent& agent) {
         addChild(new IsEnemyVisible(agent));
             addChild(new TurnTowardsTarget(agent,12));
@@ -220,6 +223,7 @@ public:
 
 class PatrolSelector : public Selector {
 public:
+    PatrolSelector(){ Name = "Patrol Selector"; }
     PatrolSelector(BaseAIAgent& agent) {
         addChild(new LowHealth(agent));  // First, try healing
         addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
@@ -228,6 +232,7 @@ public:
 };
 class SurvivalSelector : public Selector {
 public:
+    SurvivalSelector(){ Name = "Survival Selector"; }
     SurvivalSelector(BaseAIAgent& agent) {
         addChild(new LowHealth(agent));  // First, try healing
         addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat

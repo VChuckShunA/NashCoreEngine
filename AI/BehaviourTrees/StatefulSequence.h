@@ -48,7 +48,16 @@ public:
             return s;
         }
     }
+    size_t getCurrentChildIndex() const {
+        return currentIndex;
+    }
 
+    Node* getCurrentChild() const {
+        
+            return m_Children[currentIndex];
+        
+    }
+    StatefulSequence(){ Name = "Stateful Sequence"; }
     ~StatefulSequence() {
         for (Node* child : m_Children) delete child;
         

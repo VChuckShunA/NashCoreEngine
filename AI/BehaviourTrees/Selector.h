@@ -3,6 +3,7 @@
 #include <vector>
 class Selector : public Node {
 public:
+    Selector(){ Name = "Selector"; }
     void addChild(Node* child) {
         m_Children.push_back(child);
     }

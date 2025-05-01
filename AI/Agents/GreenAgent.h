@@ -18,7 +18,7 @@
     public:
         GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom); 
         void update() override;
-       
+        void HandleDeath() override;
     };
 
 

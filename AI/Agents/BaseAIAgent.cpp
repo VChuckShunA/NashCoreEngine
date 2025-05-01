@@ -187,7 +187,7 @@ bool BaseAIAgent::hasTarget()
 
 IsEnemyVisible::IsEnemyVisible(BaseAIAgent& agent) : agent(agent)
 {
-
+    Name = "Is Enemy Visible";
 }
 
 Node::Status IsEnemyVisible::update()
@@ -201,7 +201,7 @@ Node::Status IsEnemyVisible::update()
     return Status::BH_FAILURE;
 }
 
-EngageCombat::EngageCombat(BaseAIAgent& agent) : agent(agent) {}
+EngageCombat::EngageCombat(BaseAIAgent& agent) : agent(agent) { Name = "Engage Combat"; }
 
 Node::Status EngageCombat::update()
 {
@@ -221,6 +221,7 @@ Node::Status EngageCombat::update()
 
 TurnTowardsTarget::TurnTowardsTarget(BaseAIAgent& agent, int randomDeviation) :randDev(randomDeviation), agent(agent)
 {
+    Name = "Turn Towards Target";
 }
 
 

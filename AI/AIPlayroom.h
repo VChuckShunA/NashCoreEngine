@@ -47,6 +47,8 @@ protected:
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:  
+
+    int PlayerScore = 0;
     void RemoveAgent(BaseAIAgent* ptr);
     void spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
     AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);

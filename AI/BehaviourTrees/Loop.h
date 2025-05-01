@@ -4,7 +4,9 @@
 
 class Loop : public Node {
 public:
-    Loop(Node* child) : child(child) {}
+    Loop(Node* child) : child(child) {
+        Name = "Loop";
+    }
     virtual void onInitialize() override {
         child->reset();
     }

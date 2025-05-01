@@ -298,7 +298,7 @@ void AIPlayroom::sVisionCone()
     auto& blueagentref = players[0];
     Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
 
-    for (auto& enemy : m_entityManager.getEntities("agent")) {
+    for (auto& enemy : enemies) {
         auto& vision = enemy->getComponent<CVision>();
         auto& transform = enemy->getComponent<CTransform>();
         Vec2  eye = transform.pos;
@@ -328,9 +328,17 @@ void AIPlayroom::sVisionCone()
         
 
     }
-
-    for (auto& enemy : m_entityManager.getEntities("agent")) {
-
+    if (enemies.empty())
+    {
+            auto& vision = blueagentref->getComponent<CVision>();
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            return;
+        
+    }
+    for (auto& enemy : enemies) {
+        if (players.empty()) return;
+        std::cout << "342\n";
         Vec2 enemyPos = enemy->getComponent<CTransform>().pos;
         auto& vision = blueagentref->getComponent<CVision>();
         auto& transform = blueagentref->getComponent<CTransform>();
@@ -344,37 +352,30 @@ void AIPlayroom::sVisionCone()
         if (!vision.IsTargetInFOV(eye, lookDir, enemyPos)) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
+            std::cout << "347\n";
             continue;
         }
         else if (players.empty()) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
+            std::cout << "352\n";
             return;
         }
-        else if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, enemyPos))
+        else if (vision.IsTargetInFOV(eye, lookDir, enemyPos))
         {
 
             vision.seesPlayer = true;
             vision.Target = enemy; //Change this so that it sets whatever it sees as the target
-            std::cout << "SAW THE PLAYER\n";
+            std::cout << "SAW THE ENEMY\n";
         }
+       
 
 
     }
 
 
 
-    
-/*
-    if (players.empty())
-    {
-        for (auto& enemy : m_entityManager.getEntities("agent")) {
-            auto& vision = enemy->getComponent<CVision>();
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-            return;
-        }
-    }*/
+
 
 }
 
@@ -537,8 +538,9 @@ float AIPlayroom::GetTurnAngle(const Vec2& entity, const Vec2& Target)
 
 void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target, int randDev)
 {  
-
-    // 1) Retrieve positions
+    if(Target)
+    {
+    //Retrieve positions
     const Vec2& shooterPos = entity->getComponent<CTransform>().pos;
     const Vec2& targetPos = Target->getComponent<CTransform>().pos;
 
@@ -556,6 +558,7 @@ void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const 
     std::uniform_int_distribution<> dis(-randDev, randDev);  // Uniform distribution in the range [min, max]
 
     entity->getComponent<CTransform>().angle = angleDegrees + dis(gen);
+    }
 }
 
 void AIPlayroom::RunBehaviourTrees()
@@ -625,12 +628,13 @@ void AIPlayroom::sCollision() {
             for (const auto& agent : agents) {
                 // ai->agent is shared_ptr<Entity> in BaseAIAgent
                 if (inst.get() != agent->agent.get()) {
+                    auto& gridSize = agent->agent->getComponent<CBoundingBox>().size;
                     // This bullet wasn’t fired by this AI
                     Vec2 overlap = Physics::GetOverlap(bullet, agent->agent);
                     Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, agent->agent);
                     
                   
-                        if (0 < overlap.y && -m_gridSize.x < overlap.x) 
+                        if (0 < overlap.y && -gridSize.x < overlap.x)
                         {
                                 if (0 <= overlap.x && pOverlap.x <= 0) 
                                 {
@@ -639,7 +643,7 @@ void AIPlayroom::sCollision() {
                                    // bullet->destroy();
                                 }
                         }
-                        if (0 < overlap.x && -m_gridSize.y < overlap.y)  
+                        if (0 < overlap.x && -gridSize.y < overlap.y)
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
@@ -649,7 +653,7 @@ void AIPlayroom::sCollision() {
                             }
                         }
                     // check if player hits the tile from the bottom
-                        if (0 < overlap.x && -m_gridSize.y < overlap.y ) 
+                        if (0 < overlap.x && -gridSize.y < overlap.y )
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
@@ -659,7 +663,7 @@ void AIPlayroom::sCollision() {
                             }
                         }
                     // check player and tile side collide
-                        if (0 < overlap.y && -m_gridSize.x < overlap.x) 
+                        if (0 < overlap.y && -gridSize.x < overlap.x)
                         {
                             if (0 <= overlap.x && pOverlap.x <= 0) 
                             {
@@ -856,8 +860,9 @@ void AIPlayroom::sRender() {
     int currentHealth = playerPtr->getHealth();
     sf::Text HUD("health : " + std::to_string(currentHealth)+
         "\nitems : [ ] [ ] [ ] [ ] [ ]"+
-        "\nbehavior : none"+
-        "\nstatus : running"
+        "\nbehavior : "+ playerPtr->BehaviourTree->Name +
+        "\nstatus : " + std::to_string(playerPtr->BehaviourTree.get()->BH_SUCCESS) +
+        "\nSCORE : " + std::to_string(PlayerScore)
         , m_game->assets().getFont("Mario"), 20);
     HUD.setFillColor(sf::Color::White);
     HUD.setPosition(

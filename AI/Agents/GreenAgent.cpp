@@ -10,12 +10,18 @@ GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playro
 {
    
     BehaviourTree = std::make_unique<PatrolSelector>(*this);
-    baseDamageAmount = 20;
+    baseDamageAmount = 10;
 }
 
 void GreenAgent::update()
 {
     if (health <= 0) { HandleDeath(); return; }
     BehaviourTree->tick(); // Runs the tree
+}
+
+void GreenAgent::HandleDeath()
+{
+    room->PlayerScore++;
+    BaseAIAgent::HandleDeath();
 }
 
