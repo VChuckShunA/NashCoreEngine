@@ -57,12 +57,17 @@ public:
     void update() override;
     //AI
     AStar navmesh;
+    bool LineOfSight(const Vec2& A, const Vec2& P);
+    bool liangBarsky(float x0, float y0, float x1, float y1,
+        float xmin, float ymin, float xmax, float ymax);
     std::vector<std::unique_ptr<BaseAIAgent>> agents;
     std::vector<Vec2> path;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
     void drawVisionCone();
+    bool pointInTriangle(const Vec2& P, const Vec2& A,
+        const Vec2& B, const Vec2& C);
     void steer(const std::shared_ptr<Entity>& entity, float targetAngle);
     void aimAndShoot(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
     float GetTurnAngle(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& Target);

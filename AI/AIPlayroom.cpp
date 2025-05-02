@@ -10,6 +10,9 @@
 #include<numbers>
 #include "Agents/GreenAgent.h"
 #include "Agents/BlueAgent.h"
+#include "Health.h"
+#include "Ammo.h"
+#include "Coin.h"
 #include <random>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
@@ -76,15 +79,40 @@ void AIPlayroom::init(const std::string& levelPath) {
     agents.emplace_back(make_unique<GreenAgent>(e1, this));
     agents.emplace_back(make_unique<GreenAgent>(e2, this));
     
-    auto item = m_entityManager.addEntity("item");
-    item->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
-    item->addComponent<CTransform>(
-        gridToMidPixel(4, 6, item),
+    auto item1 = m_entityManager.addEntity("item");
+    item1->addComponent<CTransform>(
+        gridToMidPixel(4, 6, item1),
         Vec2(3, 0),
         Vec2(1, 1),
         0
     );
-    item->addComponent<CBoundingBox>(Vec2(32, 32));
+    item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item1->addComponent<CBoundingBox>(Vec2(64, 64));
+    std::shared_ptr<Health> healthItem = std::make_shared<Health>(item1);
+
+    auto item2 = m_entityManager.addEntity("item");
+    item2->addComponent<CTransform>(
+        gridToMidPixel(7, 6, item2),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item2->addComponent<CBoundingBox>(Vec2(64, 64));
+    std::shared_ptr<Ammo> ammoItem = std::make_shared<Ammo>(item2);
+
+    auto item3 = m_entityManager.addEntity("item");
+    item3->addComponent<CTransform>(
+        gridToMidPixel(11, 5, item3),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
+    item3->addComponent<CBoundingBox>(Vec2(64, 64));
+    std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
+
+    //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
     
@@ -180,6 +208,41 @@ void AIPlayroom::update() {
     }
     sAnimation();
     sRender();
+}
+
+bool AIPlayroom::LineOfSight(const Vec2& A, const Vec2& P)
+{
+    for (auto& brick : m_entityManager.getEntities("bricks")) {
+        auto& T = brick->getComponent<CTransform>();
+        auto& B = brick->getComponent<CBoundingBox>();
+        float xmin = T.pos.x - B.halfSize.x,
+            xmax = T.pos.x + B.halfSize.x;
+        float ymin = T.pos.y - B.halfSize.y,
+            ymax = T.pos.y + B.halfSize.y;
+        if (liangBarsky(A.x, A.y, P.x, P.y, xmin, ymin, xmax, ymax))
+            return false;
+    }
+    return true;
+}
+
+bool AIPlayroom::liangBarsky(float x0, float y0, float x1, float y1, float xmin, float ymin, float xmax, float ymax)
+{
+    float dx = x1 - x0, dy = y1 - y0;
+    float p[4] = { -dx, dx, -dy, dy };
+    float q[4] = { x0 - xmin, xmax - x0, y0 - ymin, ymax - y0 };
+    float u1 = 0.0f, u2 = 1.0f;
+    for (int i = 0; i < 4; ++i) {
+        if (p[i] == 0) {
+            if (q[i] < 0) return false;
+        }
+        else {
+            float t = q[i] / p[i];
+            if (p[i] < 0) u1 = std::max(u1, t);
+            else          u2 = std::min(u2, t);
+            if (u1 > u2)  return false;
+        }
+    }
+    return true;;
 }
 
 Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
@@ -298,7 +361,46 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
 }
 
 void AIPlayroom::sVisionCone()
-{
+{/*
+    {    auto& players = m_entityManager.getEntities("player");
+    if (players.empty()) return;
+
+    Vec2 P = players[0]->getComponent<CTransform>().pos;
+    for (auto& enemy : m_entityManager.getEntities("agent")) {
+        auto& vision = enemy->getComponent<CVision>();
+        auto& transform = enemy->getComponent<CTransform>();
+        Vec2  A = transform.pos;
+
+        // 1) Build triangle ABC
+        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+        float halfRad = (vision.fovAngle * 0.5f) * (std::numbers::pi / 180.0f);
+        Vec2  dirL{ std::cos(angleRad - halfRad), std::sin(angleRad - halfRad) };
+        Vec2  dirR{ std::cos(angleRad + halfRad), std::sin(angleRad + halfRad) };
+        Vec2  B = A + dirL * vision.visionRange;
+        Vec2  C = A + dirR * vision.visionRange;
+
+        // 2) Pixel-perfect FOV check
+        if (!pointInTriangle(P, A, B, C)) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            continue;
+        }
+        // 3) Occlusion check
+        if (!LineOfSight(A, P)) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+        }
+        else {
+            vision.seesPlayer = true;
+            vision.Target = players[0];
+            std::cout << "SAW THE PLAYER\n";
+        }
+    }
+    }
+
+
+   
+    */
     //NOTE: This is the WORST way to do this
     //TODO: REDO THIS!
     auto& players = m_entityManager.getEntities("player");
@@ -382,12 +484,10 @@ void AIPlayroom::sVisionCone()
 
     }
     
-
 }
 
 void AIPlayroom::drawVisionCone()
 {
-   // if (!(AIAgent->getComponent<CVision>())) return;
     for (auto& enemy : m_entityManager.getEntities("agent")) {
         auto& vision = enemy->getComponent<CVision>();
         auto& transform = enemy->getComponent<CTransform>();
@@ -431,6 +531,19 @@ void AIPlayroom::drawVisionCone()
 
         m_game->window().draw(visionCone);
     }
+}
+
+bool AIPlayroom::pointInTriangle(const Vec2& P, const Vec2& A, const Vec2& B, const Vec2& C)
+{
+    Vec2 v0 = C - A, v1 = B - A, v2 = P - A;
+    float d00 = v0.dot(v0), d01 = v0.dot(v1);
+    float d11 = v1.dot(v1), d20 = v2.dot(v0);
+    float d21 = v2.dot(v1);
+    float denom = d00 * d11 - d01 * d01;
+    float v = (d11 * d20 - d01 * d21) / denom;
+    float w = (d00 * d21 - d01 * d20) / denom;
+    float u = 1.0f - v - w;
+    return (u >= 0) && (v >= 0) && (w >= 0);
 }
 
 void AIPlayroom::steer(const std::shared_ptr<Entity>& entity, float targetAngle)
