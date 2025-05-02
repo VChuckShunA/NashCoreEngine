@@ -18,8 +18,14 @@ void BaseAIAgent::updateCurrentPath(const Vec2& Destination)
    // std::cout << "GreenAgent 25" << std::endl;
 }
 
-void BaseAIAgent::TakeDamage()
+void BaseAIAgent::TakeDamage(std::shared_ptr<Entity> Instigator)
 {
+   if (!agent->getComponent<CVision>().Target)
+    {
+       room->TurnTowardsTarget(agent, Instigator, 2);
+       agent->getComponent<CVision>().seesPlayer = true;
+       agent->getComponent<CVision>().Target = Instigator;
+    }
     //NOTE: Due to the iffy collision system, the Damage gets multiplied by 2
     if (health > 0)
     {
@@ -195,7 +201,7 @@ Node::Status IsEnemyVisible::update()
 
     //agent.enemyState == VISIBLE
     //agent.agent->getComponent<CVision>().seesPlayer
-    if (agent.agent->getComponent<CVision>().seesPlayer) {
+    if (agent.agent->getComponent<CVision>().Target) {
         return Status::BH_SUCCESS;
     }
     return Status::BH_FAILURE;

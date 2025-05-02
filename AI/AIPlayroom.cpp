@@ -40,7 +40,7 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-
+    
     auto e1 = m_entityManager.addEntity("agent"); 
     e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e1->addComponent<CTransform>(
@@ -51,7 +51,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     e1->addComponent<CBoundingBox>(Vec2(64, 64));
     e1->addComponent<CVision>();
-
+    
     auto e2 = m_entityManager.addEntity("agent");
     e2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e2->addComponent<CTransform>(
@@ -62,7 +62,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     e2->addComponent<CBoundingBox>(Vec2(64, 64));
     e2->addComponent<CVision>();
-
+    
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
@@ -71,12 +71,20 @@ void AIPlayroom::init(const std::string& levelPath) {
         Vec2(1, 1),
         0
     );
-    p1->addComponent<CBoundingBox>(Vec2(32, 32));
+    p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
     agents.emplace_back(make_unique<GreenAgent>(e1, this));
     agents.emplace_back(make_unique<GreenAgent>(e2, this));
-
-
+    
+    auto item = m_entityManager.addEntity("item");
+    item->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item->addComponent<CTransform>(
+        gridToMidPixel(4, 6, item),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    item->addComponent<CBoundingBox>(Vec2(32, 32));
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
     
@@ -167,7 +175,7 @@ void AIPlayroom::update() {
         sCollision();
         sVisionCone();
         RunBehaviourTrees();
-        //sVisionCone();
+        sVisionCone();
         m_currentFrame++;
     }
     sAnimation();
@@ -313,12 +321,12 @@ void AIPlayroom::sVisionCone()
             vision.Target = nullptr;
             continue;
         }
-        else if (players.empty()) {
+         if (players.empty()) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
             return;
         }   
-        else if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, playerPos))
+         if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, playerPos))
         {
 
                 vision.seesPlayer = true;
@@ -336,6 +344,8 @@ void AIPlayroom::sVisionCone()
             return;
         
     }
+    
+    
     for (auto& enemy : enemies) {
         if (players.empty()) return;
         std::cout << "342\n";
@@ -355,27 +365,23 @@ void AIPlayroom::sVisionCone()
             std::cout << "347\n";
             continue;
         }
-        else if (players.empty()) {
+         if (players.empty()) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
             std::cout << "352\n";
             return;
         }
-        else if (vision.IsTargetInFOV(eye, lookDir, enemyPos))
+         if (vision.IsTargetInFOV(eye, lookDir, enemyPos))
         {
 
             vision.seesPlayer = true;
-            vision.Target = enemy; //Change this so that it sets whatever it sees as the target
+            vision.Target = enemy; 
             std::cout << "SAW THE ENEMY\n";
         }
        
 
-
     }
-
-
-
-
+    
 
 }
 
@@ -628,47 +634,47 @@ void AIPlayroom::sCollision() {
             for (const auto& agent : agents) {
                 // ai->agent is shared_ptr<Entity> in BaseAIAgent
                 if (inst.get() != agent->agent.get()) {
-                    auto& gridSize = agent->agent->getComponent<CBoundingBox>().size;
+                    //auto& gridSize = agent->agent->getComponent<CBoundingBox>().size;
                     // This bullet wasn’t fired by this AI
                     Vec2 overlap = Physics::GetOverlap(bullet, agent->agent);
                     Vec2 pOverlap = Physics::GetPreviousOverlap(bullet, agent->agent);
                     
                   
-                        if (0 < overlap.y && -gridSize.x < overlap.x)
+                        if (0 < overlap.y && -m_gridSize.x < overlap.x)
                         {
                                 if (0 <= overlap.x && pOverlap.x <= 0) 
                                 {
                                     spawnBrickDebris(bullet);
-                                    agent->TakeDamage();
+                                    agent->TakeDamage(bullet->Instigator.lock());
                                    // bullet->destroy();
                                 }
                         }
-                        if (0 < overlap.x && -gridSize.y < overlap.y)
+                        if (0 < overlap.x && -m_gridSize.y < overlap.y)
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
                                spawnBrickDebris(bullet);
-                               agent->TakeDamage();
+                               agent->TakeDamage(bullet->Instigator.lock());
                                // bullet->destroy();
                             }
                         }
                     // check if player hits the tile from the bottom
-                        if (0 < overlap.x && -gridSize.y < overlap.y )
+                         if (0 < overlap.x && -m_gridSize.y < overlap.y )
                         {
                             if (0 <= overlap.y && pOverlap.y <= 0) 
                             {
                                 spawnBrickDebris(bullet);
-                                agent->TakeDamage();
+                                agent->TakeDamage(bullet->Instigator.lock());
                                // bullet->destroy();
                             }
                         }
                     // check player and tile side collide
-                        if (0 < overlap.y && -gridSize.x < overlap.x)
+                         if (0 < overlap.y && -m_gridSize.x < overlap.x)
                         {
                             if (0 <= overlap.x && pOverlap.x <= 0) 
                             {
                                 spawnBrickDebris(bullet);
-                                agent->TakeDamage();
+                                agent->TakeDamage(bullet->Instigator.lock());
                                // bullet->destroy();
                             }
                         }

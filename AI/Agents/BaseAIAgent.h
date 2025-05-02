@@ -40,7 +40,7 @@ public:
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
-    void TakeDamage();
+    void TakeDamage(std::shared_ptr<Entity> Instigator);
 	void pickUpItem(ItemType item);
 	void shootEnemy();
 	void flee();
