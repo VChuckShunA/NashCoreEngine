@@ -371,6 +371,10 @@ void AshuraLevel::sCollision()
                             if (it != bullets.end()) {
                                 bullets.erase(it);
                             }
+                            auto enem = std::find(enemies.begin(), enemies.end(), enemies[points[j]->index]);
+                            if (enem != enemies.end()) {
+                                enemies.erase(enem);
+                            }
                         }
                        
                     } 
@@ -401,18 +405,23 @@ void AshuraLevel::sCollision()
             }
 
         }
-        
+        std::cout << "Bullet Size " << bullets.size() << std::endl;
+
+        std::cout << "Enemies Size " << enemies.size() << std::endl;
       
-        //for (int i = 0; i < bullets.size(); i++) {
-        //    if (bullets[i]->toRemove) {
-        //        bullets.erase(bullets.begin() + i);
-        //    }
-        //}
-        //for (int i = 0; i < enemies.size(); i++) {
-        //    if (enemies[i]->toRemove) {
-        //        enemies.erase(enemies.begin() + i);
-        //    }
-        //}
+      /*  for (int i = 0; i < bullets.size(); i++) {
+            if (!bullets[i]) {
+                std::cout << "erasing bullet" << std::endl;
+                bullets.erase(bullets.begin() + i);
+            }
+        }
+        for (int i = 0; i < enemies.size(); i++) {
+            if (enemies[i]->toRemove) {
+                std::cout << "erasing enemy" << std::endl;
+                enemies[i]->destroy();
+                enemies.erase(enemies.begin() + i);
+            }
+        }*/
 
     }
    
@@ -614,6 +623,7 @@ void AshuraLevel::spawnBrickDebris(const std::shared_ptr<Entity>& tile)
 
 AshuraLevel::AshuraLevel(GameEngine* gameEngine, const std::string& levelPath) : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
+   
 }
 
 void AshuraLevel::update()
@@ -622,11 +632,11 @@ void AshuraLevel::update()
 
     // implement pause functionality
     if (!m_paused) {
-   // for (int i = 0; i < 50; i++)
-   // {
+   // for (int i = 0; i < 5; i++)
+    //{
 
             SpawnEnemies();
-      //  }
+    //}
         
     
         sMovement();
