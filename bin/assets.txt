@@ -1,0 +1,78 @@
+Texture     TexStand       assets/images/megaman/stand_128x64.png
+Texture     TexStandShoot  assets/images/megaman/stand_shoot.png
+Texture     TexRun         assets/images/megaman/run_192x64.png
+Texture     TexRunShoot    assets/images/megaman/run_shoot.png
+Texture     TexJump        assets/images/megaman/jump.png
+Texture     TexAirShoot    assets/images/megaman/air_shoot.png
+Texture     TexBuster      assets/images/megaman/buster16.png
+Texture     TexExplode     assets/images/misc/explosion64.png
+Texture     TexGround      assets/images/mario/ground.png
+Texture     TexBrick       assets/images/mario/brick.png
+Texture     TexBrickDebris assets/images/mario/brick_debris.png
+Texture     TexQuestion    assets/images/mario/question.png
+Texture     TexQuestionHit assets/images/mario/question_hit.png
+Texture     TexCoinSpin    assets/images/mario/coin.png
+Texture     TexTree        assets/images/mario/tree.png
+Texture     TexCastleSmall assets/images/mario/castle_small.png
+Texture     TexFlower      assets/images/mario/flower.png
+Texture     TexBush        assets/images/mario/bush.png
+Texture     TexBridge      assets/images/Cuneiform2/bridge.png
+Texture     TexComponent   assets/images/Cuneiform2/component.png
+Texture     TexConnection  assets/images/Cuneiform2/connection.png
+Texture     TexCorner      assets/images/Cuneiform2/corner.png
+Texture     TexDskew       assets/images/Cuneiform2/dskew.png
+Texture     TexSkew        assets/images/Cuneiform2/skew.png
+Texture     TexSubstrate   assets/images/Cuneiform2/substrate.png
+Texture     TexT           assets/images/Cuneiform2/t.png
+Texture     TexTrack       assets/images/Cuneiform2/track.png
+Texture     TexTransition  assets/images/Cuneiform2/transition.png
+Texture     TexTurn        assets/images/Cuneiform2/turn.png
+Texture     TexViad        assets/images/Cuneiform2/viad.png
+Texture     TexVias        assets/images/Cuneiform2/vias.png
+Texture     TexWire        assets/images/Cuneiform2/wire.png
+Texture     TexAshura      assets/images/Ashura/Ashura.png
+Texture     TexStar	   assets/images/Ashura/FlyingStar.png
+Texture     TexGA	   assets/images/AI/greenAgent.png
+Texture     TexBA	   assets/images/AI/blueAgent.png
+Texture     TexFA	   assets/images/AI/firstaid.png
+Texture     TexBullets	   assets/images/AI/bullets.png
+Animation   Stand          TexStand       2  30
+Animation   StandShoot     TexStandShoot  1   1
+Animation   Run            TexRun         3   7
+Animation   RunShoot       TexRunShoot    3   7
+Animation   Jump           TexJump        1   1
+Animation   AirShoot       TexAirShoot    1   1
+Animation   Buster         TexBuster      1   1
+Animation   Explosion      TexExplode    12   2
+Animation   Ground         TexGround      1   1
+Animation   Brick          TexBrick       1   1
+Animation   BrickDebris    TexBrickDebris 1   1
+Animation   Question       TexQuestion    2  10
+Animation   QuestionHit    TexQuestionHit 1   1
+Animation   CoinSpin       TexCoinSpin    4  10
+Animation   Tree           TexTree        1   1
+Animation   CastleSmall    TexCastleSmall 1   1
+Animation   Flower         TexFlower      1   1
+Animation   Bush           TexBush        1   1
+Animation   Component      TexComponent   1   1
+Animation   Connection     TexConnection  1   1
+Animation   Corner         TexCorner      1   1
+Animation   DSkew          TexDskew       1   1
+Animation   Skew           TexSkew        1   1
+Animation   Substrate      TexSubstrate   1   1
+Animation   T              TexT           1   1
+Animation   Track          TexTrack       1   1
+Animation   Transition     TexTransition  1   1
+Animation   Turn           TexTurn        1   1
+Animation   ViaD           TexViad        1   1
+Animation   Wire           TexWire        1   1
+Animation   Bridge         TexBridge      1   1
+Animation   ViaS           TexVias        1   1
+Animation   Ashura         TexAshura      1   1
+Animation   Star           TexStar        1   1
+Animation   GreenAgent     TexGA	  1   1
+Animation   BlueAgent      TexBA	  1   1
+Animation   Bullets   	   TexBullets	  1   1
+Animation   FirstAid       TexFA	  1   1
+Font        Tech           assets/fonts/tech.ttf
+Font        Mario          assets/fonts/mario.ttf

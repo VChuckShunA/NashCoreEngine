@@ -11,7 +11,7 @@ public:
         ITM_COIN,
     };
     Item(const std::shared_ptr<Entity>& entity);
-    const std::shared_ptr<Entity>& entity;
+    const std::shared_ptr<Entity> entity;
     Type type;
     virtual void AddToPlayer() = 0;
     virtual void UseItem() = 0;

@@ -43,7 +43,7 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    
+    /*
     auto e1 = m_entityManager.addEntity("agent"); 
     e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e1->addComponent<CTransform>(
@@ -65,57 +65,59 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     e2->addComponent<CBoundingBox>(Vec2(64, 64));
     e2->addComponent<CVision>();
-    
+    */
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
         gridToMidPixel(2, 6, p1),
-        Vec2(3, 0),
+        Vec2(0, 0),
         Vec2(1, 1),
         0
     );
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
-    agents.emplace_back(make_unique<GreenAgent>(e1, this));
-    agents.emplace_back(make_unique<GreenAgent>(e2, this));
+   // agents.emplace_back(make_unique<GreenAgent>(e1, this));
+   // agents.emplace_back(make_unique<GreenAgent>(e2, this));
     
     auto item1 = m_entityManager.addEntity("item");
+    item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
         gridToMidPixel(4, 6, item1),
-        Vec2(3, 0),
+        Vec2(0, 0),
         Vec2(1, 1),
         0
     );
-    item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CBoundingBox>(Vec2(64, 64));
-    std::shared_ptr<Health> healthItem = std::make_shared<Health>(item1);
+    //std::shared_ptr<Health> healthItem = std::make_shared<Health>(item1);
 
     auto item2 = m_entityManager.addEntity("item");
+    item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item2->addComponent<CTransform>(
         gridToMidPixel(7, 6, item2),
-        Vec2(3, 0),
+        Vec2(0, 0),
         Vec2(1, 1),
         0
     );
-    item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item2->addComponent<CBoundingBox>(Vec2(64, 64));
-    std::shared_ptr<Ammo> ammoItem = std::make_shared<Ammo>(item2);
+  //  std::shared_ptr<Ammo> ammoItem = std::make_shared<Ammo>(item2);
 
     auto item3 = m_entityManager.addEntity("item");
+    item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
     item3->addComponent<CTransform>(
         gridToMidPixel(11, 5, item3),
-        Vec2(3, 0),
+        Vec2(0, 0),
         Vec2(1, 1),
         0
     );
-    item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
     item3->addComponent<CBoundingBox>(Vec2(64, 64));
-    std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
+    //std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
 
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
-    
+    items.emplace_back(std::make_unique<Health>(item1));
+    items.emplace_back(std::make_unique<Ammo>(item2));
+    items.emplace_back(std::make_unique<Coin>(item3));
 }
 
 
@@ -405,6 +407,7 @@ void AIPlayroom::sVisionCone()
     //TODO: REDO THIS!
     auto& players = m_entityManager.getEntities("player");
     auto& enemies = m_entityManager.getEntities("agent");
+   
     auto& blueagentref = players[0];
     Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
 
@@ -421,12 +424,12 @@ void AIPlayroom::sVisionCone()
         if (!vision.IsTargetInFOV(eye, lookDir, playerPos)) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
-            continue;
+           // continue;
         }
          if (players.empty()) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
-            return;
+           // return;
         }   
          if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, playerPos))
         {
@@ -443,13 +446,13 @@ void AIPlayroom::sVisionCone()
             auto& vision = blueagentref->getComponent<CVision>();
             vision.seesPlayer = false;
             vision.Target = nullptr;
-            return;
+          //  return;
         
     }
     
     
     for (auto& enemy : enemies) {
-        if (players.empty()) return;
+      //  if (players.empty()) return;
         std::cout << "342\n";
         Vec2 enemyPos = enemy->getComponent<CTransform>().pos;
         auto& vision = blueagentref->getComponent<CVision>();
@@ -465,13 +468,13 @@ void AIPlayroom::sVisionCone()
             vision.seesPlayer = false;
             vision.Target = nullptr;
             std::cout << "347\n";
-            continue;
+            //continue;
         }
          if (players.empty()) {
             vision.seesPlayer = false;
             vision.Target = nullptr;
             std::cout << "352\n";
-            return;
+            //return;
         }
          if (vision.IsTargetInFOV(eye, lookDir, enemyPos))
         {
@@ -484,6 +487,130 @@ void AIPlayroom::sVisionCone()
 
     }
     
+    ItemScanner();
+}
+
+void AIPlayroom::ItemScanner()
+{
+
+    auto& vision = playerPtr->agent->getComponent<CVision>();
+    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    Vec2  eye = transform.pos;
+
+    // Reset all visibility flags up front:
+    vision.seesAmmo = vision.seesFood = vision.seesCoin = false;
+ 
+
+    // Build the look-direction once
+    float angRad = transform.angle * (std::numbers::pi / 180.0f);
+    Vec2  lookDir{ std::cos(angRad), std::sin(angRad) };
+
+    for (auto& item : items)
+    {
+        Vec2 P = item->entity->getComponent<CTransform>().pos;
+
+        // 1) FOV + range test
+        if (!vision.IsTargetInFOV(eye, lookDir, P))
+            continue;
+
+        // 2) Occlusion test
+        if (!LineOfSight(eye, P))
+            continue;
+
+        // 3) We’ve seen this item—mark the appropriate flag
+        switch (item->type)
+        {
+        case Item::ITM_AMMO:
+            vision.seesAmmo = true;
+            break;
+        case Item::ITM_HEALTH:
+            vision.seesFood = true;
+            break;
+        case Item::ITM_COIN:
+            vision.seesCoin = true;
+            break;
+        }
+        // Optionally set a generic Target pointer if you want to pick one
+      
+
+        // If you only care about the *first* visible item, you can break here:
+        // break;
+    }
+
+    /*
+
+    for (auto& item : items)
+    {
+        std::cout << "352\n";
+        Vec2 itemPosition = item->entity->getComponent<CTransform>().pos;
+        auto& vision = playerPtr->agent->getComponent<CVision>();
+        auto& transform = playerPtr->agent->getComponent<CTransform>();
+        Vec2  eye = transform.pos;
+
+        // Convert degrees to radians and build forward vector
+        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
+
+        // Single FOV + range check
+        if (!vision.IsTargetInFOV(eye, lookDir, itemPosition)) {
+            vision.seesAmmo = false;
+            vision.seesFood = false;
+            vision.seesCoin = false;
+            vision.Target = nullptr;
+             continue;
+        }
+        if (items.empty()) {
+            vision.seesAmmo = false;
+            vision.seesFood = false;
+            vision.seesCoin = false;
+            vision.Target = nullptr;
+            return;
+        }
+        if (vision.IsTargetInFOV(eye, lookDir, itemPosition))
+        {
+            if (item->type == Item::ITM_AMMO)
+            {
+                vision.seesAmmo = true;
+                std::cout << "Sees Ammo\n";
+            }
+            else
+            {
+
+                vision.seesAmmo = false;
+            }
+
+            if (item->type == Item::ITM_HEALTH)
+            {
+                vision.seesFood = true;
+                std::cout << "Sees Food\n";
+            }
+            else
+            {
+                vision.seesFood = false;
+            }
+
+            if (item->type == Item::ITM_COIN)
+            {
+                vision.seesCoin = true;
+                std::cout << "Sees Coin\n";
+            }
+            else
+            {
+                vision.seesCoin = false;
+            }
+            //vision.Target = item;
+            std::cout << "SAW ITEMS\n";
+        }
+        else
+        {
+            vision.seesAmmo = false;
+            vision.seesFood = false;
+            vision.seesCoin = false;
+        }
+
+    }
+
+    */
 }
 
 void AIPlayroom::drawVisionCone()
@@ -516,8 +643,16 @@ void AIPlayroom::drawVisionCone()
 
         sf::VertexArray visionCone(sf::TrianglesFan, 12);
         visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
-        visionCone[0].color = sf::Color(255, 255, 0, 100);
+        visionCone[0].color = sf::Color(255, 255, 255, 100);//sf::Color(255, 255, 0, 100);
         if (vision.seesPlayer) { visionCone[0].color = sf::Color(255, 0, 0, 100); }
+        if (vision.seesAmmo) { visionCone[0].color = sf::Color(0, 0, 255, 100);
+        std::cout << "Sees Ammo should work\n";
+        }
+        if (vision.seesFood) { visionCone[0].color = sf::Color(0, 255, 0, 100); }
+        if (vision.seesCoin) { visionCone[0].color = sf::Color(255, 255, 0, 100); }
+
+      
+
 
         for (int i = 0; i <= 10; i++) {
             float angle = transform.angle - vision.fovAngle * 0.5f + (vision.fovAngle / 10.0f) * i;
@@ -525,11 +660,19 @@ void AIPlayroom::drawVisionCone()
             Vec2 point = transform.pos + Vec2(cos(rad), sin(rad)) * vision.visionRange;
 
             visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
-            visionCone[i + 1].color = sf::Color(255, 255, 0, 100);
+            visionCone[i + 1].color = sf::Color(255, 255, 255, 100);//sf::Color(255, 255, 0, 100);
             if (vision.seesPlayer) { visionCone[i + 1].color = sf::Color(255, 0, 0, 100); }
+            if (vision.seesAmmo) { visionCone[0].color = sf::Color(0, 0, 255, 100);
+            std::cout << "Sees Ammo should work\n";
+            }
+            if (vision.seesFood) { visionCone[0].color = sf::Color(0, 255, 0, 100); }
+            if (vision.seesCoin) { visionCone[0].color = sf::Color(255, 255, 0, 100); }
+
+
         }
 
         m_game->window().draw(visionCone);
+
     }
 }
 
@@ -822,7 +965,7 @@ void AIPlayroom::sCollision() {
     // used by the Animation system
     // reset gravity
    // m_player->getComponent<CGravity>().gravity = m_playerConfig.GRAVITY;
-    for (const auto& tile : m_entityManager.getEntities("tile")) {
+ /*   for (const auto& tile : m_entityManager.getEntities("tile")) {
         Vec2 overlap = Physics::GetOverlap(AIAgent, tile);
         Vec2 pOverlap = Physics::GetPreviousOverlap(AIAgent, tile);
         // check if player is in air
@@ -868,7 +1011,7 @@ void AIPlayroom::sCollision() {
         }
     }
 
-   
+   */
 }
 
 void AIPlayroom::sAnimation()
@@ -890,7 +1033,7 @@ void AIPlayroom::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        else if (action.name() == "MoveAgent") { MoveEntity(AIAgent, path); }
+        //else if (action.name() == "MoveAgent") { MoveEntity(AIAgent, path); }
 
       
     }
@@ -991,7 +1134,7 @@ void AIPlayroom::sRender() {
 }
 
 void AIPlayroom::changePlayerStateTo(const std::string& state) {
-    auto& prev = AIAgent->getComponent<CState>().previousState;
+  /*  auto& prev = AIAgent->getComponent<CState>().previousState;
     if (prev != state) {
         prev = AIAgent->getComponent<CState>().state;
         AIAgent->getComponent<CState>().state = state;
@@ -999,7 +1142,7 @@ void AIPlayroom::changePlayerStateTo(const std::string& state) {
     }
     else {
         AIAgent->getComponent<CState>().changeAnimation = false;
-    }
+    }*/
 }
 
 void AIPlayroom::spawnBrickDebris(const std::shared_ptr<Entity>& tile) {

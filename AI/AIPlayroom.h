@@ -6,6 +6,7 @@
 #include "Pathfinding/AStar.h"
 #include "Agents/BaseAIAgent.h"
 #include "Agents/BlueAgent.h"
+#include "Item.h"
 #include <vector>
 class GreenAgent;
 class AIPlayroom :public Scene {
@@ -16,8 +17,8 @@ class AIPlayroom :public Scene {
     };
 
 protected:
-    std::shared_ptr<Entity> AIAgent;
-    std::shared_ptr<Entity> AIAgent3;
+   // std::shared_ptr<Entity> AIAgent;
+    //std::shared_ptr<Entity> AIAgent3;
     std::string m_levelPath;
     bool m_drawTextures = true;
     bool m_drawCollision = false;
@@ -61,10 +62,12 @@ public:
     bool liangBarsky(float x0, float y0, float x1, float y1,
         float xmin, float ymin, float xmax, float ymax);
     std::vector<std::unique_ptr<BaseAIAgent>> agents;
+    std::vector<std::unique_ptr<Item>> items;
     std::vector<Vec2> path;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
+    void ItemScanner();
     void drawVisionCone();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
         const Vec2& B, const Vec2& C);

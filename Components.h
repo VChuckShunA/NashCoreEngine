@@ -97,6 +97,7 @@ public:
     bool seesPlayer=false;   // Detection flags
     bool seesFood=false;
     bool seesAmmo=false;
+    bool seesCoin = false;
     std::shared_ptr<Entity> Target;
     CVision(float fov = 90.0f, float range = 300.0f)
         : fovAngle(fov), visionRange(range), seesPlayer(false) {

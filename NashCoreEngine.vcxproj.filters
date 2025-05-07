@@ -263,10 +263,13 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="config(old).txt" />
-    <Text Include="bin\assets.txt" />
-    <Text Include="bin\config.txt" />
     <Text Include="bin\level1.txt" />
     <Text Include="config(old2).txt" />
+    <Text Include="bin\level2.txt" />
+    <Text Include="bin\level3.txt" />
+    <Text Include="bin\assets(old).txt" />
+    <Text Include="bin\assets.txt" />
+    <Text Include="bin\config.txt" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fonts\Arial.ttf" />
