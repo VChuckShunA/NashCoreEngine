@@ -501,14 +501,14 @@ void AIPlayroom::EnemyScanner()
     auto& players = m_entityManager.getEntities("player");
     auto& transform = playerPtr->agent->getComponent<CTransform>();
     Vec2  eye = transform.pos;
-    /* if (agents.empty())
+     if (agents.empty())
     {
            
             vision.seesPlayer = false;
             vision.Target = nullptr;
             return;
         
-    }*/
+    }
     vision.seesPlayer = false;
     vision.Target = nullptr;
     
@@ -566,9 +566,7 @@ void AIPlayroom::drawVisionCone()
         visionCone[0].position = sf::Vector2f(transform.pos.x, transform.pos.y);
         visionCone[0].color = sf::Color(255, 255, 255, 100);//sf::Color(255, 255, 0, 100);
         if (vision.seesPlayer) { visionCone[0].color = sf::Color(255, 0, 0, 100); }
-        if (vision.seesAmmo) { visionCone[0].color = sf::Color(0, 0, 255, 100);
-        std::cout << "Sees Ammo should work\n";
-        }
+        if (vision.seesAmmo) { visionCone[0].color = sf::Color(0, 0, 255, 100); }
         if (vision.seesFood) { visionCone[0].color = sf::Color(0, 255, 0, 100); }
         if (vision.seesCoin) { visionCone[0].color = sf::Color(255, 255, 0, 100); }
 
@@ -583,11 +581,9 @@ void AIPlayroom::drawVisionCone()
             visionCone[i + 1].position = sf::Vector2f(point.x, point.y);
             visionCone[i + 1].color = sf::Color(255, 255, 255, 100);//sf::Color(255, 255, 0, 100);
             if (vision.seesPlayer) { visionCone[i + 1].color = sf::Color(255, 0, 0, 100); }
-            if (vision.seesAmmo) { visionCone[0].color = sf::Color(0, 0, 255, 100);
-            std::cout << "Sees Ammo should work\n";
-            }
-            if (vision.seesFood) { visionCone[0].color = sf::Color(0, 255, 0, 100); }
-            if (vision.seesCoin) { visionCone[0].color = sf::Color(255, 255, 0, 100); }
+            if (vision.seesAmmo) { visionCone[i + 1].color = sf::Color(0, 0, 255, 100);}
+            if (vision.seesFood) { visionCone[i + 1].color = sf::Color(0, 255, 0, 100); }
+            if (vision.seesCoin) { visionCone[i + 1].color = sf::Color(255, 255, 0, 100); }
 
 
         }
