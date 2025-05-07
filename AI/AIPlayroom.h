@@ -68,6 +68,7 @@ public:
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
     void ItemScanner();
+    void EnemyScanner();
     void drawVisionCone();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
         const Vec2& B, const Vec2& C);

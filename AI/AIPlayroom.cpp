@@ -43,7 +43,7 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    /*
+   
     auto e1 = m_entityManager.addEntity("agent"); 
     e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e1->addComponent<CTransform>(
@@ -65,7 +65,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     e2->addComponent<CBoundingBox>(Vec2(64, 64));
     e2->addComponent<CVision>();
-    */
+  
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
@@ -76,8 +76,8 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
-   // agents.emplace_back(make_unique<GreenAgent>(e1, this));
-   // agents.emplace_back(make_unique<GreenAgent>(e2, this));
+    agents.emplace_back(make_unique<GreenAgent>(e1, this));
+    agents.emplace_back(make_unique<GreenAgent>(e2, this));
     
     auto item1 = m_entityManager.addEntity("item");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
@@ -441,52 +441,8 @@ void AIPlayroom::sVisionCone()
         
 
     }
-    if (enemies.empty())
-    {
-            auto& vision = blueagentref->getComponent<CVision>();
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-          //  return;
-        
-    }
-    
-    
-    for (auto& enemy : enemies) {
-      //  if (players.empty()) return;
-        std::cout << "342\n";
-        Vec2 enemyPos = enemy->getComponent<CTransform>().pos;
-        auto& vision = blueagentref->getComponent<CVision>();
-        auto& transform = blueagentref->getComponent<CTransform>();
-        Vec2  eye = transform.pos;
-
-        // Convert degrees to radians and build forward vector
-        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
-
-        // Single FOV + range check
-        if (!vision.IsTargetInFOV(eye, lookDir, enemyPos)) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-            std::cout << "347\n";
-            //continue;
-        }
-         if (players.empty()) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-            std::cout << "352\n";
-            //return;
-        }
-         if (vision.IsTargetInFOV(eye, lookDir, enemyPos))
-        {
-
-            vision.seesPlayer = true;
-            vision.Target = enemy; 
-            std::cout << "SAW THE ENEMY\n";
-        }
-       
-
-    }
-    
+   
+    EnemyScanner();
     ItemScanner();
 }
 
@@ -497,11 +453,11 @@ void AIPlayroom::ItemScanner()
     auto& transform = playerPtr->agent->getComponent<CTransform>();
     Vec2  eye = transform.pos;
 
-    // Reset all visibility flags up front:
+    // Reset visibility
     vision.seesAmmo = vision.seesFood = vision.seesCoin = false;
  
 
-    // Build the look-direction once
+    // Build look direction
     float angRad = transform.angle * (std::numbers::pi / 180.0f);
     Vec2  lookDir{ std::cos(angRad), std::sin(angRad) };
 
@@ -509,15 +465,15 @@ void AIPlayroom::ItemScanner()
     {
         Vec2 P = item->entity->getComponent<CTransform>().pos;
 
-        // 1) FOV + range test
+        //FOV + range test
         if (!vision.IsTargetInFOV(eye, lookDir, P))
             continue;
 
-        // 2) Occlusion test
+        //Occlusion test
         if (!LineOfSight(eye, P))
             continue;
 
-        // 3) We’ve seen this item—mark the appropriate flag
+        //Item Seen
         switch (item->type)
         {
         case Item::ITM_AMMO:
@@ -537,80 +493,45 @@ void AIPlayroom::ItemScanner()
         // break;
     }
 
-    /*
+}
 
-    for (auto& item : items)
+void AIPlayroom::EnemyScanner()
+{
+    auto& vision = playerPtr->agent->getComponent<CVision>();
+    auto& players = m_entityManager.getEntities("player");
+    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    Vec2  eye = transform.pos;
+    /* if (agents.empty())
     {
-        std::cout << "352\n";
-        Vec2 itemPosition = item->entity->getComponent<CTransform>().pos;
-        auto& vision = playerPtr->agent->getComponent<CVision>();
-        auto& transform = playerPtr->agent->getComponent<CTransform>();
-        Vec2  eye = transform.pos;
-
-        // Convert degrees to radians and build forward vector
-        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
-
-        // Single FOV + range check
-        if (!vision.IsTargetInFOV(eye, lookDir, itemPosition)) {
-            vision.seesAmmo = false;
-            vision.seesFood = false;
-            vision.seesCoin = false;
-            vision.Target = nullptr;
-             continue;
-        }
-        if (items.empty()) {
-            vision.seesAmmo = false;
-            vision.seesFood = false;
-            vision.seesCoin = false;
+           
+            vision.seesPlayer = false;
             vision.Target = nullptr;
             return;
-        }
-        if (vision.IsTargetInFOV(eye, lookDir, itemPosition))
-        {
-            if (item->type == Item::ITM_AMMO)
-            {
-                vision.seesAmmo = true;
-                std::cout << "Sees Ammo\n";
-            }
-            else
-            {
+        
+    }*/
+    vision.seesPlayer = false;
+    vision.Target = nullptr;
+    
+    float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+    Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
 
-                vision.seesAmmo = false;
-            }
+   
 
-            if (item->type == Item::ITM_HEALTH)
-            {
-                vision.seesFood = true;
-                std::cout << "Sees Food\n";
-            }
-            else
-            {
-                vision.seesFood = false;
-            }
+    for (auto& enemy : agents) {
+        Vec2 enemyPos = enemy->agent->getComponent<CTransform>().pos;
 
-            if (item->type == Item::ITM_COIN)
-            {
-                vision.seesCoin = true;
-                std::cout << "Sees Coin\n";
-            }
-            else
-            {
-                vision.seesCoin = false;
-            }
-            //vision.Target = item;
-            std::cout << "SAW ITEMS\n";
+        if (!vision.IsTargetInFOV(eye, lookDir, enemyPos)) {
+            continue;
         }
-        else
-        {
-            vision.seesAmmo = false;
-            vision.seesFood = false;
-            vision.seesCoin = false;
+        if (!LineOfSight(eye, enemyPos)) {
+            continue;
         }
+
+        vision.seesPlayer = true;
+        vision.Target = enemy->agent;
+       
 
     }
-
-    */
 }
 
 void AIPlayroom::drawVisionCone()
