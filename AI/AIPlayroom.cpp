@@ -363,85 +363,8 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
 }
 
 void AIPlayroom::sVisionCone()
-{/*
-    {    auto& players = m_entityManager.getEntities("player");
-    if (players.empty()) return;
-
-    Vec2 P = players[0]->getComponent<CTransform>().pos;
-    for (auto& enemy : m_entityManager.getEntities("agent")) {
-        auto& vision = enemy->getComponent<CVision>();
-        auto& transform = enemy->getComponent<CTransform>();
-        Vec2  A = transform.pos;
-
-        // 1) Build triangle ABC
-        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-        float halfRad = (vision.fovAngle * 0.5f) * (std::numbers::pi / 180.0f);
-        Vec2  dirL{ std::cos(angleRad - halfRad), std::sin(angleRad - halfRad) };
-        Vec2  dirR{ std::cos(angleRad + halfRad), std::sin(angleRad + halfRad) };
-        Vec2  B = A + dirL * vision.visionRange;
-        Vec2  C = A + dirR * vision.visionRange;
-
-        // 2) Pixel-perfect FOV check
-        if (!pointInTriangle(P, A, B, C)) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-            continue;
-        }
-        // 3) Occlusion check
-        if (!LineOfSight(A, P)) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-        }
-        else {
-            vision.seesPlayer = true;
-            vision.Target = players[0];
-            std::cout << "SAW THE PLAYER\n";
-        }
-    }
-    }
-
-
-   
-    */
-    //NOTE: This is the WORST way to do this
-    //TODO: REDO THIS!
-    auto& players = m_entityManager.getEntities("player");
-    auto& enemies = m_entityManager.getEntities("agent");
-   
-    auto& blueagentref = players[0];
-    Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
-
-    for (auto& enemy : enemies) {
-        auto& vision = enemy->getComponent<CVision>();
-        auto& transform = enemy->getComponent<CTransform>();
-        Vec2  eye = transform.pos;
-
-        // Convert degrees to radians and build forward vector
-        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
-
-        // Single FOV + range check
-        if (!vision.IsTargetInFOV(eye, lookDir, playerPos)) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-           // continue;
-        }
-         if (players.empty()) {
-            vision.seesPlayer = false;
-            vision.Target = nullptr;
-           // return;
-        }   
-         if (!players.empty() && vision.IsTargetInFOV(eye, lookDir, playerPos))
-        {
-
-                vision.seesPlayer = true;
-                vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
-                std::cout << "SAW THE PLAYER\n";
-            }
-        
-
-    }
-   
+{
+    PlayerScanner();
     EnemyScanner();
     ItemScanner();
 }
@@ -532,6 +455,50 @@ void AIPlayroom::EnemyScanner()
        
 
     }
+}
+
+void AIPlayroom::PlayerScanner()
+{
+   
+    auto& players = m_entityManager.getEntities("player");
+    if (agents.empty()) return;
+
+    for (auto& enemy : agents) {
+        auto& vision = enemy->agent->getComponent<CVision>();
+        auto& transform = enemy->agent->getComponent<CTransform>();
+        Vec2  eye = transform.pos;
+
+        vision.seesPlayer = false;
+        vision.Target = nullptr;
+
+        // Convert degrees to radians and build forward vector
+        float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+        Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
+
+        Vec2 playerPos = playerPtr->agent->getComponent<CTransform>().pos;
+        // Single FOV + range check
+        if (!vision.IsTargetInFOV(eye, lookDir, playerPos)) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+             continue;
+        }
+        if (!LineOfSight(eye, playerPos)) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+            continue;
+        }
+        if (players.empty()) {
+            vision.seesPlayer = false;
+            vision.Target = nullptr;
+             return;
+        }
+
+            vision.seesPlayer = true;
+            vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
+            std::cout << "SAW THE PLAYER\n";
+    }
+
+
 }
 
 void AIPlayroom::drawVisionCone()

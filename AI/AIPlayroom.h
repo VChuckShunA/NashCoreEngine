@@ -69,6 +69,7 @@ public:
     void sVisionCone();
     void ItemScanner();
     void EnemyScanner();
+    void PlayerScanner();
     void drawVisionCone();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
         const Vec2& B, const Vec2& C);
