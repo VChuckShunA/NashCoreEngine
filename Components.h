@@ -99,6 +99,7 @@ public:
     bool seesAmmo=false;
     bool seesCoin = false;
     std::shared_ptr<Entity> Target;
+    std::shared_ptr<Entity> Item;
     CVision(float fov = 90.0f, float range = 300.0f)
         : fovAngle(fov), visionRange(range), seesPlayer(false) {
     }

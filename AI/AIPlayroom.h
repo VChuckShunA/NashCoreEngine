@@ -71,6 +71,7 @@ public:
     void EnemyScanner();
     void PlayerScanner();
     void drawVisionCone();
+    void SpawnEnemies();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
         const Vec2& B, const Vec2& C);
     void steer(const std::shared_ptr<Entity>& entity, float targetAngle);

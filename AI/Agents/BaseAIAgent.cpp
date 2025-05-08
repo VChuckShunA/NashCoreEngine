@@ -45,6 +45,11 @@ void BaseAIAgent::consumeFood()
     }
 }
 
+void BaseAIAgent::UpdateItemPosition()
+{
+    if((agent->getComponent<CVision>().Item)) ItemPosition = room->positionToGridCordinates(agent->getComponent<CVision>().Item);
+}
+
 void BaseAIAgent::HandleDeath()
 {
     BehaviourTree.reset(); 
@@ -213,7 +218,7 @@ Node::Status EngageCombat::update()
 {
     // Here you might return BH_RUNNING until the enemy is neutralized,
     // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
-    if (agent.hasWeapon)
+    if (agent.hasAmmo)
     {
         if(agent.agent->getComponent<CVision>().Target) //NOTE: this had a agent.agent,  it was probably an overseight on my part, so I got rid of it. idk if it broke anything :|
         {

@@ -44,28 +44,8 @@ void AIPlayroom::init(const std::string& levelPath) {
     navmesh.initializeNavMesh();
     //Spawn AI
    
-    auto e1 = m_entityManager.addEntity("agent"); 
-    e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
-    e1->addComponent<CTransform>(
-        gridToMidPixel(0, 11, e1),
-        Vec2(3, 0),
-        Vec2(1, 1),
-        0
-    );
-    e1->addComponent<CBoundingBox>(Vec2(64, 64));
-    e1->addComponent<CVision>();
-    
-    auto e2 = m_entityManager.addEntity("agent");
-    e2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
-    e2->addComponent<CTransform>(
-        gridToMidPixel(4, 0, e2),
-        Vec2(3, 0),
-        Vec2(1, 1),
-        0
-    );
-    e2->addComponent<CBoundingBox>(Vec2(64, 64));
-    e2->addComponent<CVision>();
-  
+   
+  //  SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
@@ -76,13 +56,11 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
-    agents.emplace_back(make_unique<GreenAgent>(e1, this));
-    agents.emplace_back(make_unique<GreenAgent>(e2, this));
     
     auto item1 = m_entityManager.addEntity("item");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
-        gridToMidPixel(4, 6, item1),
+        gridToMidPixel(4, 0, item1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -93,7 +71,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item2 = m_entityManager.addEntity("item");
     item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item2->addComponent<CTransform>(
-        gridToMidPixel(7, 6, item2),
+        gridToMidPixel(10, 3, item2),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -104,7 +82,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item3 = m_entityManager.addEntity("item");
     item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
     item3->addComponent<CTransform>(
-        gridToMidPixel(11, 5, item3),
+        gridToMidPixel(14, 5, item3),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -205,7 +183,7 @@ void AIPlayroom::update() {
         sCollision();
         sVisionCone();
         RunBehaviourTrees();
-        sVisionCone();
+        //sVisionCone();
         m_currentFrame++;
     }
     sAnimation();
@@ -249,6 +227,7 @@ bool AIPlayroom::liangBarsky(float x0, float y0, float x1, float y1, float xmin,
 
 Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
 {
+
     return { (entity->getComponent<CTransform>().pos.x / 64) ,
         ((m_game->window().getSize().y - (entity->getComponent<CTransform>().pos.y - 1)) / 64) };
   
@@ -383,37 +362,49 @@ void AIPlayroom::ItemScanner()
     // Build look direction
     float angRad = transform.angle * (std::numbers::pi / 180.0f);
     Vec2  lookDir{ std::cos(angRad), std::sin(angRad) };
-
+  
     for (auto& item : items)
     {
         Vec2 P = item->entity->getComponent<CTransform>().pos;
 
         //FOV + range test
         if (!vision.IsTargetInFOV(eye, lookDir, P))
+        {
+           // vision.Item = nullptr;
             continue;
 
+
+        }
         //Occlusion test
         if (!LineOfSight(eye, P))
+        {
+
+           // vision.Item = nullptr;
             continue;
+        }
 
         //Item Seen
         switch (item->type)
         {
         case Item::ITM_AMMO:
             vision.seesAmmo = true;
+            vision.Item = item->entity;
             break;
         case Item::ITM_HEALTH:
             vision.seesFood = true;
+            vision.Item = item->entity;
             break;
         case Item::ITM_COIN:
             vision.seesCoin = true;
+            vision.Item = item->entity;
             break;
         }
+        //vision.Item = item->entity;
         // Optionally set a generic Target pointer if you want to pick one
       
 
         // If you only care about the *first* visible item, you can break here:
-        // break;
+         //break;
     }
 
 }
@@ -558,6 +549,35 @@ void AIPlayroom::drawVisionCone()
         m_game->window().draw(visionCone);
 
     }
+}
+
+void AIPlayroom::SpawnEnemies()
+{
+    auto e1 = m_entityManager.addEntity("agent");
+    e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    e1->addComponent<CTransform>(
+        gridToMidPixel(0, 11, e1),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    e1->addComponent<CBoundingBox>(Vec2(64, 64));
+    e1->addComponent<CVision>();
+
+    auto e2 = m_entityManager.addEntity("agent");
+    e2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    e2->addComponent<CTransform>(
+        gridToMidPixel(4, 0, e2),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    e2->addComponent<CBoundingBox>(Vec2(64, 64));
+    e2->addComponent<CVision>();
+
+
+    agents.emplace_back(make_unique<GreenAgent>(e1, this));
+    agents.emplace_back(make_unique<GreenAgent>(e2, this));
 }
 
 bool AIPlayroom::pointInTriangle(const Vec2& P, const Vec2& A, const Vec2& B, const Vec2& C)

@@ -17,7 +17,7 @@ private:
 public:
 	BaseAIAgent();//Default Concstructor
 	std::unique_ptr<Node> BehaviourTree;
-	bool hasWeapon = true;
+	bool hasAmmo = true;
 	bool hasFood = false;
 	int maxHealth = 100;
     int baseDamageAmount = 1;
@@ -37,6 +37,7 @@ public:
 	Vec2 Waypoint1 = Vec2(19, 11);
 	Vec2 Waypoint2 = Vec2(4, 6);
 	Vec2 Waypoint3 = Vec2(0, 11);
+    Vec2 ItemPosition;
 	virtual void update() =0;
 	void updateCurrentPath(const Vec2& Destination);
 
@@ -47,6 +48,7 @@ public:
 	void enterHouse();
 	void searchHouse();
 	void consumeFood();
+    void UpdateItemPosition();
     virtual void HandleDeath();
 	void initializeMoveToPoint(const Vec2& Destination);
 	void MoveToPoint(const Vec2& Waypoint);
@@ -117,7 +119,6 @@ private:
     virtual void onInitialize() override {
 
         greenAgent.initializeMoveToPoint(Waypoint);
-
     }
 
     virtual Status update() override {
@@ -221,6 +222,117 @@ public:
 };
 
 
+class CheckSeesFood : public Node {
+    BaseAIAgent& ag;
+public:
+    CheckSeesFood(BaseAIAgent& a) :ag(a) { Name = "Check Sees Food"; }
+    Status update() override {
+        return ag.agent->getComponent<CVision>().seesFood
+            ? BH_SUCCESS
+            : BH_FAILURE;
+    }
+};
+
+class CheckNeedsFood : public Node {
+    BaseAIAgent& ag;
+public:
+    CheckNeedsFood(BaseAIAgent& a) :ag(a) { Name = "Check Needs Food"; }
+
+    virtual void onInitialize() override {
+
+        ag.UpdateItemPosition();
+
+    }
+    Status update() override {
+       // ag.UpdateItemPosition();
+        //&& ag.health < ag.maxHealth
+        return (!ag.hasFood)
+            ? BH_SUCCESS
+            : BH_FAILURE;
+    }
+};
+
+class CheckSeesAmmo : public Node {
+    BaseAIAgent& ag;
+public:
+    CheckSeesAmmo(BaseAIAgent& a) :ag(a) { Name = "Check Sees Ammo"; }
+    Status update() override {
+        return ag.agent->getComponent<CVision>().seesAmmo
+            ? BH_SUCCESS
+            : BH_FAILURE;
+    }
+};
+
+class CheckNeedsAmmo : public Node {
+    BaseAIAgent& ag;
+public:
+    virtual void onInitialize() override {
+
+        ag.UpdateItemPosition();
+
+    }
+
+
+    CheckNeedsAmmo(BaseAIAgent& a) :ag(a) { Name = "Check Needs Ammo "; }
+    Status update() override {
+       // ag.UpdateItemPosition();
+        //&& ag.health < ag.maxHealth
+        return (ag.hasAmmo )
+            ? BH_SUCCESS
+            : BH_FAILURE;
+    }
+};
+
+class CheckSeesCoin : public Node {
+    BaseAIAgent& ag;
+public:
+    CheckSeesCoin(BaseAIAgent& a) :ag(a) { Name = "Check Sees Coin"; }
+
+    virtual void onInitialize() override {
+
+        ag.UpdateItemPosition();
+
+    }
+    Status update() override {
+        //ag.UpdateItemPosition();
+        return ag.agent->getComponent<CVision>().seesCoin
+            ? BH_SUCCESS
+            : BH_FAILURE;
+    }
+};
+
+class ItemFetchSelector : public Selector {
+public:
+    ItemFetchSelector(BaseAIAgent& ag) {
+        Name = "FetchItems";
+        
+        // Food branch
+        Sequence* fetchFood = new Sequence();
+        fetchFood->addChild(new CheckSeesFood(ag));
+        fetchFood->addChild(new CheckNeedsFood(ag));
+        fetchFood->addChild(new MoveToPoint(ag, ag.ItemPosition));
+      
+
+        // Ammo branch
+        Sequence* fetchAmmo = new Sequence();
+        fetchAmmo->addChild(new CheckSeesAmmo(ag));
+        fetchAmmo->addChild(new CheckNeedsAmmo(ag));
+        fetchAmmo->addChild(new MoveToPoint(ag, ag.ItemPosition));
+
+        // Coin branch (always pick up if seen)
+        Sequence* fetchCoin = new Sequence();
+        fetchCoin->addChild(new CheckSeesCoin(ag));
+        fetchCoin->addChild(new MoveToPoint(ag, ag.ItemPosition));
+       
+
+        addChild(fetchFood);
+        addChild(fetchAmmo);
+        addChild(fetchCoin);
+    }
+};
+
+
+
 class PatrolSelector : public Selector {
 public:
     PatrolSelector(){ Name = "Patrol Selector"; }
@@ -236,6 +348,7 @@ public:
     SurvivalSelector(BaseAIAgent& agent) {
         addChild(new LowHealth(agent));  // First, try healing
         addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
+        addChild(new ItemFetchSelector(agent)); //Check for items
         addChild(new Patrol(agent)); //Patrol
     }
 };
