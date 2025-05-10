@@ -13,12 +13,13 @@
 #include "Health.h"
 #include "Ammo.h"
 #include "Coin.h"
+#include "Item.h"
 #include <random>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
 
-
+    inventory.reserve(INVENTORY_SIZE);
 
 }
 
@@ -124,6 +125,24 @@ void AIPlayroom::RemoveAgent(BaseAIAgent* ptr)
         agents.end()
     );
     ptr->agent->destroy();
+    delete ptr;
+    ptr = nullptr;
+}
+
+void AIPlayroom::RemoveItem(Item* ptr)
+{
+    items.erase(
+        std::remove_if(items.begin(), items.end(),
+            [&](auto const& up) { return up.get() == ptr; }),
+        items.end()
+    );
+    if (ptr->type != 3) //Add to inventory if it's not a coin
+    {
+
+        inventory.push_back(std::move(ptr));
+       
+    } std::cout << "Inventory Size : " << inventory.size() << std::endl;
+    //ptr->entity->destroy();
 }
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target) {
@@ -551,6 +570,65 @@ void AIPlayroom::drawVisionCone()
     }
 }
 
+void AIPlayroom::ManageInventory()
+{
+    
+    for (const auto& item : items)
+    {
+        Vec2 overlap = Physics::GetOverlap(item->entity, playerPtr->agent);
+        Vec2 pOverlap = Physics::GetPreviousOverlap(item->entity, playerPtr->agent);
+
+ 
+        if (0 < overlap.y && -m_gridSize.x < overlap.x)
+        {
+            if (0 <= overlap.x && pOverlap.x <= 0)
+            {
+                item->AddToPlayer(this);
+                break;
+
+            }
+        }
+        else if (0 < overlap.x && -m_gridSize.y < overlap.y)
+        {
+            if (0 <= overlap.y && pOverlap.y <= 0)
+            {
+
+                item->AddToPlayer(this);
+
+                break;
+               
+            }
+        }
+        // check if player hits the tile from the bottom
+        else if (0 < overlap.x && -m_gridSize.y < overlap.y)
+        {
+            if (0 <= overlap.y && pOverlap.y <= 0)
+            {
+
+                item->AddToPlayer(this);
+
+                break;
+              
+            }
+        }
+        // check player and tile side collide
+        else if (0 < overlap.y && -m_gridSize.x < overlap.x)
+        {
+            if (0 <= overlap.x && pOverlap.x <= 0)
+            {
+
+                item->AddToPlayer(this);
+
+                break;
+             
+            }
+        }
+
+      
+    }
+
+}
+
 void AIPlayroom::SpawnEnemies()
 {
     auto e1 = m_entityManager.addEntity("agent");
@@ -579,6 +657,8 @@ void AIPlayroom::SpawnEnemies()
     agents.emplace_back(make_unique<GreenAgent>(e1, this));
     agents.emplace_back(make_unique<GreenAgent>(e2, this));
 }
+
+
 
 bool AIPlayroom::pointInTriangle(const Vec2& P, const Vec2& A, const Vec2& B, const Vec2& C)
 {
@@ -863,59 +943,7 @@ void AIPlayroom::sCollision() {
         }
     }
 
-    // Implement player/tile collisions and resolutions
-    // Update the CState component of the player to store whether
-    // it is currently on the ground or in the air. This will be
-    // used by the Animation system
-    // reset gravity
-   // m_player->getComponent<CGravity>().gravity = m_playerConfig.GRAVITY;
- /*   for (const auto& tile : m_entityManager.getEntities("tile")) {
-        Vec2 overlap = Physics::GetOverlap(AIAgent, tile);
-        Vec2 pOverlap = Physics::GetPreviousOverlap(AIAgent, tile);
-        // check if player is in air
-        // check tiles being below player
-        float dy = tile->getComponent<CTransform>().pos.y - AIAgent->getComponent<CTransform>().pos.y;
-        if (0 < overlap.x && -m_gridSize.y < overlap.y && dy > 0) {
-            if (0 <= overlap.y && pOverlap.y <= 0) {
-                // stand on tile
-                AIAgent->getComponent<CInput>().canJump = true;
-                AIAgent->getComponent<CGravity>().gravity = 0;
-                AIAgent->getComponent<CTransform>().velocity.y = 0;
-                // collision resolution
-                AIAgent->getComponent<CTransform>().pos.y -= overlap.y;
-            }
-        }
-        // check if player hits the tile from the bottom
-        if (0 < overlap.x && -m_gridSize.y < overlap.y && dy < 0) {
-            if (0 <= overlap.y && pOverlap.y <= 0) {
-                AIAgent->getComponent<CTransform>().pos.y += overlap.y;
-                AIAgent->getComponent<CTransform>().velocity.y = 0;
-                if (tile->getComponent<CAnimation>().animation.getName() == "Question") {
-                    tile->getComponent<CAnimation>().animation = m_game->assets().getAnimation("QuestionHit");
-                    spawnCoinSpin(tile);
-                }
-                if (tile->getComponent<CAnimation>().animation.getName() == "Brick") {
-                    spawnBrickDebris(tile);
-                }
-            }
-        }
-        // check player and tile side collide
-        float dx = tile->getComponent<CTransform>().pos.x - AIAgent->getComponent<CTransform>().pos.x;
-        if (0 < overlap.y && -m_gridSize.x < overlap.x) {
-            if (0 <= overlap.x && pOverlap.x <= 0) {
-                if (dx > 0) {
-                    // tile is right of player
-                    AIAgent->getComponent<CTransform>().pos.x -= overlap.x;
-                }
-                else {
-                    // tile is left of player
-                    AIAgent->getComponent<CTransform>().pos.x += overlap.x;
-                }
-            }
-        }
-    }
-
-   */
+    ManageInventory();
 }
 
 void AIPlayroom::sAnimation()
@@ -1024,8 +1052,28 @@ void AIPlayroom::sRender() {
         }
     }
     int currentHealth = playerPtr->getHealth();
+    static std::string inventory1, inventory2, inventory3, inventory4 , inventory5 ;
+   // std::unique_ptr<int> ptr1=
+        if (inventory.size() > 0)
+            inventory1 = enumToString();
+
+        if (inventory.size() > 1)
+            inventory2 = enumToString(inventory.at(1)->type);
+
+        if (inventory.size() > 2)
+            inventory3 = enumToString(inventory.at(2)->type);
+
+        if (inventory.size() > 3)
+            inventory4 = enumToString(inventory.at(3)->type);
+
+        if (inventory.size() > 4)
+            inventory5 = enumToString(inventory.at(4)->type);
+
+        if (inventory.size() > 0)
+            std::cout << inventory.at(0)->type << std::endl;
+  
     sf::Text HUD("health : " + std::to_string(currentHealth)+
-        "\nitems : [ ] [ ] [ ] [ ] [ ]"+
+        "\nitems : [" + inventory1 + "] [" + inventory2 + " ] [ " + inventory3 + " ] [ " + inventory4 +  " ] [ " + inventory5 + " ]"+
         "\nbehavior : "+ behaviourName +
         "\nstatus : " + behaviourSTatus +
         "\nSCORE : " + std::to_string(PlayerScore)

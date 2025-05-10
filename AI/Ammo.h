@@ -5,7 +5,6 @@ class Ammo :
 {
 public:
     Ammo(const std::shared_ptr<Entity>& entity);
-    virtual void AddToPlayer();
-    virtual void UseItem();
+    virtual void AddToPlayer(AIPlayroom* room);
 };
 

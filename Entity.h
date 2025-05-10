@@ -19,7 +19,7 @@ typedef std::tuple<
 
 class Entity {
     friend class EntityManager;
-
+    friend class AIPlayroom;
     bool m_active = true;
     const std::string m_tag = "default";
     ComponentTuple m_components;

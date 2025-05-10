@@ -11,7 +11,7 @@ void BlueAgent::update()
 	if (health <= 0) { HandleDeath(); return; }
 	BehaviourTree->tick(); // Runs the tree
 
-	std::cout << "Blue Agent is Running" << std::endl;
+	//std::cout << "Blue Agent is Running" << std::endl;
 }
 
 const int BlueAgent::getHealth()

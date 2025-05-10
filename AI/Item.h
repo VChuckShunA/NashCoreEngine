@@ -1,6 +1,7 @@
 #pragma once
 #include "../Entity.h"
 #include <string>
+#include "AIPlayroom.h"
 class Item
 {
 public:
@@ -10,11 +11,13 @@ public:
         ITM_AMMO,
         ITM_COIN,
     };
+
+
     Item(const std::shared_ptr<Entity>& entity);
     const std::shared_ptr<Entity> entity;
     Type type;
-    virtual void AddToPlayer() = 0;
-    virtual void UseItem() = 0;
+    virtual void AddToPlayer(AIPlayroom* room) = 0;
+    void HandleRemoval(AIPlayroom* room);
 
 };
 

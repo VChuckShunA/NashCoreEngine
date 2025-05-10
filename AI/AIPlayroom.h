@@ -9,6 +9,7 @@
 #include "Item.h"
 #include <vector>
 class GreenAgent;
+class Item;
 class AIPlayroom :public Scene {
 
     struct PlayerConfig {
@@ -52,6 +53,7 @@ public:
     std::string behaviourSTatus = "None";
     int PlayerScore = 0;
     void RemoveAgent(BaseAIAgent* ptr);
+    void RemoveItem(Item* ptr);
     void spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target);
     AIPlayroom(GameEngine* gameEngine, const std::string& levelPath);
     Vec2 gridToMidPixel(float, float, const std::shared_ptr<Entity>&);
@@ -64,6 +66,8 @@ public:
     std::vector<std::unique_ptr<BaseAIAgent>> agents;
     std::vector<std::unique_ptr<Item>> items;
     std::vector<Vec2> path;
+    std::vector<Item*> inventory;
+    const size_t INVENTORY_SIZE = 5;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
@@ -71,6 +75,20 @@ public:
     void EnemyScanner();
     void PlayerScanner();
     void drawVisionCone();
+    void ManageInventory();
+   
+    std::map<int, std::string> itemToString = {
+     { 0, "NONE" },
+     { 1, "Health" },
+     { 2, "Ammo" },
+     { 3, "Coin" },
+
+    };
+    std::string enumToString(int item)
+    {
+        return itemToString[item];
+    }
+
     void SpawnEnemies();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
         const Vec2& B, const Vec2& C);
