@@ -140,6 +140,32 @@ void AIPlayroom::RemoveItem(Item* ptr)
     {
 
         inventory.push_back(std::move(ptr));
+        if (inventory.size() == 1 && inventory[0])
+        {
+            inventoryItem1= enumToString(ptr->type);
+            return;
+        }
+        else if (inventory.size() == 2 && inventory[1])
+        {
+            inventoryItem2 = enumToString(ptr->type);
+            return;
+        }
+        else if (inventory.size() == 3 && inventory[2])
+        {
+            inventoryItem3 = enumToString(ptr->type);
+            return;
+        }
+        else if (inventory.size() == 4 && inventory[3])
+        {
+            inventoryItem4 = enumToString(ptr->type);
+            return;
+        }
+        else if (inventory.size() == 5 && inventory[4])
+        {
+            inventoryItem5 = enumToString(ptr->type);
+            return;
+        }
+            
        
     } std::cout << "Inventory Size : " << inventory.size() << std::endl;
     //ptr->entity->destroy();
@@ -1052,28 +1078,10 @@ void AIPlayroom::sRender() {
         }
     }
     int currentHealth = playerPtr->getHealth();
-    static std::string inventory1, inventory2, inventory3, inventory4 , inventory5 ;
-   // std::unique_ptr<int> ptr1=
-        if (inventory.size() > 0)
-            inventory1 = enumToString();
-
-        if (inventory.size() > 1)
-            inventory2 = enumToString(inventory.at(1)->type);
-
-        if (inventory.size() > 2)
-            inventory3 = enumToString(inventory.at(2)->type);
-
-        if (inventory.size() > 3)
-            inventory4 = enumToString(inventory.at(3)->type);
-
-        if (inventory.size() > 4)
-            inventory5 = enumToString(inventory.at(4)->type);
-
-        if (inventory.size() > 0)
-            std::cout << inventory.at(0)->type << std::endl;
+   
   
     sf::Text HUD("health : " + std::to_string(currentHealth)+
-        "\nitems : [" + inventory1 + "] [" + inventory2 + " ] [ " + inventory3 + " ] [ " + inventory4 +  " ] [ " + inventory5 + " ]"+
+        "\nitems : [" + inventoryItem1 + "] [" + inventoryItem2 + "] [" + inventoryItem3 + "] [" + inventoryItem4 +  "] [" + inventoryItem5 + "]"+
         "\nbehavior : "+ behaviourName +
         "\nstatus : " + behaviourSTatus +
         "\nSCORE : " + std::to_string(PlayerScore)

@@ -88,6 +88,7 @@ public:
     {
         return itemToString[item];
     }
+    std::string inventoryItem1, inventoryItem2, inventoryItem3, inventoryItem4, inventoryItem5 = " ";
 
     void SpawnEnemies();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
