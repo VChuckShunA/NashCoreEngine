@@ -36,6 +36,7 @@ Texture     TexGA	   assets/images/AI/greenAgent.png
 Texture     TexBA	   assets/images/AI/blueAgent.png
 Texture     TexFA	   assets/images/AI/firstaid.png
 Texture     TexBullets	   assets/images/AI/bullets.png
+Texture     TexHealing	   assets/images/AI/healing.png
 Animation   Stand          TexStand       2  30
 Animation   StandShoot     TexStandShoot  1   1
 Animation   Run            TexRun         3   7
@@ -44,6 +45,7 @@ Animation   Jump           TexJump        1   1
 Animation   AirShoot       TexAirShoot    1   1
 Animation   Buster         TexBuster      1   1
 Animation   Explosion      TexExplode    12   2
+Animation   Healing	   TexHealing     4   15
 Animation   Ground         TexGround      1   1
 Animation   Brick          TexBrick       1   1
 Animation   BrickDebris    TexBrickDebris 1   1

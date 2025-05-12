@@ -974,6 +974,10 @@ void AIPlayroom::sCollision() {
 
 void AIPlayroom::sAnimation()
 {
+    if (playerPtr->agent->getComponent<CAnimation>().animation.hasEnded()&& playerPtr->agent->getComponent<CAnimation>().animation.getName()=="Healing")
+    {
+        playerPtr->agent->getComponent<CAnimation>().animation = m_game->assets().getAnimation("BlueAgent");
+    }
     for (const auto& entity : m_entityManager.getEntities()) {
         if (entity->getComponent<CAnimation>().animation.hasEnded() && !entity->getComponent<CAnimation>().repeat) {
             entity->destroy();

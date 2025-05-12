@@ -46,6 +46,7 @@ void BaseAIAgent::consumeFood()
             if ((*it)->type == Item::ITM_HEALTH) {
                 // Convert reverse iterator to base iterator and decrement to get the correct position
                 room->inventory.erase(std::next(it).base());
+                agent->getComponent<CAnimation>().animation= room->m_game->assets().getAnimation("Healing");
                 std::cout << "INventory size " << room->inventory.size();
                 break; // Exit after removing the first matching item from the end
             }

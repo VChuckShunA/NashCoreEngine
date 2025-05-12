@@ -9,9 +9,9 @@
 
 class GameEngine;
 typedef std::map<int, std::string> ActionMap;
-
 class Scene {
 protected:
+    friend class BaseAIAgent;
     GameEngine* m_game = nullptr;
     EntityManager m_entityManager;
     ActionMap m_actionMap;
