@@ -38,9 +38,18 @@ void BaseAIAgent::TakeDamage(std::shared_ptr<Entity> Instigator)
 
 void BaseAIAgent::consumeFood()
 {
-    if (hasFood) {
+    if (hasFood()) {
         health = std::min(maxHealth, health + 50);
-        hasFood = false;
+
+        //This will cause an error if used by green agent
+        for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+            if ((*it)->type == Item::ITM_HEALTH) {
+                // Convert reverse iterator to base iterator and decrement to get the correct position
+                room->inventory.erase(std::next(it).base());
+                std::cout << "INventory size " << room->inventory.size();
+                break; // Exit after removing the first matching item from the end
+            }
+        }
         //  std::cout << "Consumed food. Health: " << health << std::endl;
     }
 }
@@ -193,6 +202,26 @@ bool BaseAIAgent::hasTarget()
     return false;
 }
 
+bool BaseAIAgent::hasAmmo()
+{
+    return true;
+}
+
+bool BaseAIAgent::hasFood()
+{
+    return true;
+}
+
+bool BaseAIAgent::needsFood()
+{
+    return true;
+}
+
+bool BaseAIAgent::needsAmmo()
+{
+    return true;
+}
+
 
 
 
@@ -218,7 +247,7 @@ Node::Status EngageCombat::update()
 {
     // Here you might return BH_RUNNING until the enemy is neutralized,
     // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
-    if (agent.hasAmmo)
+    if (agent.hasAmmo())
     {
         if(agent.agent->getComponent<CVision>().Target) //NOTE: this had a agent.agent,  it was probably an overseight on my part, so I got rid of it. idk if it broke anything :|
         {

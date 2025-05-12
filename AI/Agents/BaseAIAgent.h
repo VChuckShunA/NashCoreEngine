@@ -17,8 +17,8 @@ private:
 public:
 	BaseAIAgent();//Default Concstructor
 	std::unique_ptr<Node> BehaviourTree;
-	bool hasAmmo = true;
-	bool hasFood = false;
+	//bool hasAmmo = true;
+	//bool hasFood = false;
 	int maxHealth = 100;
     int baseDamageAmount = 1;
     int health; //NOTE : Need to clean and build for this to get updated
@@ -26,11 +26,7 @@ public:
 	bool itemVisible = false;
 	bool destinationReached = false;
 	BaseAIAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
-	enum ItemType { FOOD, WEAPON };
-	enum EnemyState { NONE, VISIBLE };
-	enum AgentState { IDLE, SEARCHING, FIGHTING, FLEEING, HEALING };
-	ItemType visibleItemType;
-	EnemyState enemyState = EnemyState::NONE;
+
 	AIPlayroom* room;
 	std::shared_ptr<Entity> agent;
 	std::vector<Vec2> currentpath;
@@ -38,11 +34,10 @@ public:
 	Vec2 Waypoint2 = Vec2(4, 6);
 	Vec2 Waypoint3 = Vec2(0, 11);
     Vec2 ItemPosition;
-	virtual void update() =0;
+	virtual void update() = 0;
 	void updateCurrentPath(const Vec2& Destination);
 
     void TakeDamage(std::shared_ptr<Entity> Instigator);
-	void pickUpItem(ItemType item);
 	void shootEnemy();
 	void flee();
 	void enterHouse();
@@ -54,6 +49,10 @@ public:
 	void MoveToPoint(const Vec2& Waypoint);
 	void steer(float targetAngle);
     bool hasTarget();
+    virtual bool hasAmmo();
+    virtual bool hasFood();
+    virtual bool needsFood();
+    virtual bool needsAmmo();
 protected:
 
 
@@ -73,9 +72,9 @@ private:
 			return BH_SUCCESS;
 		}
 		if (greenAgent.health < 25) {
-			if (greenAgent.hasFood) {
+			if (greenAgent.hasFood()) {
 				greenAgent.consumeFood();
-				greenAgent.hasFood = !greenAgent.hasFood;
+				//greenAgent.hasFood = !greenAgent.hasFood;
 				std::cout << "Successfully healed" << std::endl;
 				return BH_SUCCESS; // Successfully healed
 			}
@@ -246,7 +245,8 @@ public:
     Status update() override {
        // ag.UpdateItemPosition();
         //&& ag.health < ag.maxHealth
-        return (!ag.hasFood)
+        //Implement needs foods
+        return (!ag.hasFood())
             ? BH_SUCCESS
             : BH_FAILURE;
     }
@@ -277,7 +277,9 @@ public:
     Status update() override {
        // ag.UpdateItemPosition();
         //&& ag.health < ag.maxHealth
-        return (ag.hasAmmo )
+        bool needsAmmo = true;
+        //ag.hasAmmo() 
+        return (needsAmmo)
             ? BH_SUCCESS
             : BH_FAILURE;
     }

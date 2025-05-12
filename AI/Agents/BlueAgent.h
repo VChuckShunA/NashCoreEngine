@@ -19,7 +19,10 @@ public:
     BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
     void update() override;
     const int getHealth();
-
+    bool hasAmmo() override;
+    bool hasFood() override;
+    bool needsAmmo() override;
+    bool needsFood() override;
 };
 
 
