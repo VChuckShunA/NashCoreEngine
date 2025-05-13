@@ -21,45 +21,89 @@ const int BlueAgent::getHealth()
 }
 
 bool BlueAgent::hasAmmo()
-{
-	for (auto& it = *room->inventory.rbegin(); it != *room->inventory.rend(); ++it) {
-		if (it->type == Item::ITM_AMMO) return true;
+{if (room->inventory.empty()) 
+        return false;
+for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+	Item* itemPtr = *it;
+	if (!itemPtr)            // empty slot?
+		continue;            // skip it
+
+	if (itemPtr->type == Item::ITM_AMMO) {
+		std::cout << "HAS Food" << std::endl;
+		return true;
 	}
-	return false;
+}
+return false;
 }
 
 bool BlueAgent::hasFood()
 {
-	for (auto& it = *room->inventory.rbegin(); it != *room->inventory.rend(); ++it) {
-		if (it->type == Item::ITM_HEALTH) return true;
-	}
-	return false;
+	return std::any_of(
+		room->inventory.begin(),
+		room->inventory.end(),
+		[](Item* p) {
+		return p && p->type == Item::ITM_HEALTH;
+	});
+	//if (room->inventory.empty())
+	//	return false;
+	//
+	// for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+ //       Item* itemPtr = *it;
+ //       if (!itemPtr)            // empty slot?
+ //           continue;            // skip it
+
+ //       if (itemPtr->type == Item::ITM_HEALTH) {
+ //           std::cout << "HAS Food" << std::endl;
+ //           return true;
+ //       }
+ //   }
+ //   return false;
 }
 
 bool BlueAgent::needsAmmo()
 {
+	std::cout << "derived Implementation needsAmmo" << std::endl;
 	if (room->inventory.size() < 5)
 	{
 		int AmmoCount = 0;
-		for (auto& it = *room->inventory.rbegin(); it != *room->inventory.rend(); ++it) {
-			if (it->type == Item::ITM_AMMO) AmmoCount++;
+		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+			if ((*it)->type == Item::ITM_AMMO) AmmoCount++;
 		}
-		if (AmmoCount >= 3)
-			return false;
+		if (AmmoCount <= 3)
+			return true;
 	}
-	return true;
+	return false;
 }
 
 bool BlueAgent::needsFood()
 {
-	if (room->inventory.size() < 5)
+	std::cout << "derived Implementation needsFood" << std::endl;
+
+
+	if (!room->inventory.empty())
 	{
 		int FoodCount = 0;
-		for (auto& it = *room->inventory.rbegin(); it != *room->inventory.rend(); ++it) {
-			if (it->type == Item::ITM_HEALTH) FoodCount++;
+
+
+		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+			Item* itemPtr = *it;
+			if (!itemPtr)            // empty slot?
+				continue;            // skip it
+
+			if (itemPtr->type == Item::ITM_HEALTH) {
+				FoodCount++;
+			}
+
+			if (FoodCount <= 3)
+				return true;
 		}
-		if (FoodCount >= 3)
-			return false;
+
+		return false;
+		/*for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+			if ((*it)->type == Item::ITM_HEALTH) FoodCount++;
+		}
+		if (FoodCount <= 3)
+			return true;*/
 	}
-	return true;
+	return false;
 }

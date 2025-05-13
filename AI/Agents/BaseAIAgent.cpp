@@ -38,17 +38,34 @@ void BaseAIAgent::TakeDamage(std::shared_ptr<Entity> Instigator)
 
 void BaseAIAgent::consumeFood()
 {
+    //This will cause an error if used by green agent
     if (hasFood()) {
         health = std::min(maxHealth, health + 50);
-
-        //This will cause an error if used by green agent
+        //auto rit = std::find_if(
+        //    room->inventory.rbegin(), room->inventory.rend(),
+        //    [](Item* it) { return it->type == Item::ITM_HEALTH; }
+        //);
+        //if (rit != room->inventory.rend()) {
+        //    room->inventory.erase(std::next(rit).base());
+        //    //room->removeSlotAndCompact(rit);
+        //    agent->getComponent<CAnimation>().animation = room->m_game->assets().getAnimation("Healing");
+        //    room->UpdateInventoryUI();
+        //}
+      
+        size_t removeCount = room->INVENTORY_SIZE-1;
         for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+            removeCount --;
+            if (*it == nullptr) continue;
             if ((*it)->type == Item::ITM_HEALTH) {
-                // Convert reverse iterator to base iterator and decrement to get the correct position
-                room->inventory.erase(std::next(it).base());
-                agent->getComponent<CAnimation>().animation= room->m_game->assets().getAnimation("Healing");
+                // Remove it
+               // auto forward_it = std::next(it).base();
+                //room->inventory.erase(forward_it);
+               
+                *it = nullptr;
+               // room->removeSlotAndCompact(removeCount);
+                room->UpdateInventoryUI();
                 std::cout << "INventory size " << room->inventory.size();
-                break; // Exit after removing the first matching item from the end
+               // break; // Exit after removing the first matching item from the end
             }
         }
         //  std::cout << "Consumed food. Health: " << health << std::endl;
@@ -205,21 +222,25 @@ bool BaseAIAgent::hasTarget()
 
 bool BaseAIAgent::hasAmmo()
 {
+    std::cout << "Base Implementation hasAmmo" << std::endl;
     return true;
 }
 
 bool BaseAIAgent::hasFood()
 {
-    return true;
+    std::cout << "Base Implementation hasFood" << std::endl;
+    return false;
 }
 
 bool BaseAIAgent::needsFood()
 {
+    std::cout << "Base Implementation needsFood" << std::endl;
     return true;
 }
 
 bool BaseAIAgent::needsAmmo()
 {
+    std::cout << "Base Implementation needsAmmo" << std::endl;
     return true;
 }
 

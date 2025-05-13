@@ -76,6 +76,8 @@ public:
     void PlayerScanner();
     void drawVisionCone();
     void ManageInventory();
+    void UpdateInventoryUI();
+    void removeSlotAndCompact(size_t removeIndex);
    
     std::map<int, std::string> itemToString = {
      { 0, "NONE" },
@@ -86,6 +88,7 @@ public:
     };
     std::string enumToString(int item)
     {
+        std::cout << "enum to String " << itemToString[item] << std::endl;
         return itemToString[item];
     }
     std::string inventoryItem1, inventoryItem2, inventoryItem3, inventoryItem4, inventoryItem5 = " ";

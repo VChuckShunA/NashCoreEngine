@@ -19,7 +19,7 @@ AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
 
-    inventory.reserve(INVENTORY_SIZE);
+    inventory.resize(INVENTORY_SIZE, nullptr);
 
 }
 
@@ -61,7 +61,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item1 = m_entityManager.addEntity("item");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
-        gridToMidPixel(4, 0, item1),
+        gridToMidPixel(10, 3, item1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -72,7 +72,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item2 = m_entityManager.addEntity("item");
     item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item2->addComponent<CTransform>(
-        gridToMidPixel(10, 3, item2),
+        gridToMidPixel(4, 3, item2),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -90,6 +90,25 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     item3->addComponent<CBoundingBox>(Vec2(64, 64));
     //std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
+    auto item4 = m_entityManager.addEntity("item");
+    item4->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item4->addComponent<CTransform>(
+        gridToMidPixel(0, 11, item4),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item4->addComponent<CBoundingBox>(Vec2(64, 64));
+
+    auto item5 = m_entityManager.addEntity("item");
+    item5->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item5->addComponent<CTransform>(
+        gridToMidPixel(12, 3, item5),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item5->addComponent<CBoundingBox>(Vec2(64, 64));
 
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
@@ -97,6 +116,8 @@ void AIPlayroom::init(const std::string& levelPath) {
     items.emplace_back(std::make_unique<Health>(item1));
     items.emplace_back(std::make_unique<Ammo>(item2));
     items.emplace_back(std::make_unique<Coin>(item3));
+    items.emplace_back(std::make_unique<Ammo>(item4));
+    items.emplace_back(std::make_unique<Health>(item5));
 }
 
 
@@ -139,35 +160,28 @@ void AIPlayroom::RemoveItem(Item* ptr)
     if (ptr->type != 3) //Add to inventory if it's not a coin
     {
 
-        inventory.push_back(std::move(ptr));
-        if (inventory.size() == 1 && inventory[0])
-        {
-            inventoryItem1= enumToString(ptr->type);
-            return;
+        for (size_t i = 0; i < inventory.size(); ++i) {
+            if (inventory[i] == nullptr) {
+                inventory[i] = ptr;
+
+                // Update the HUD for that slot
+                static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
+                    switch (slotIndex) {
+                    case 0: inventoryItem1 = s; break;
+                    case 1: inventoryItem2 = s; break;
+                    case 2: inventoryItem3 = s; break;
+                    case 3: inventoryItem4 = s; break;
+                    case 4: inventoryItem5 = s; break;
+                    }
+                };
+                setSlotString(i, enumToString(ptr->type));
+
+                return; // done
+            }
+
+
         }
-        else if (inventory.size() == 2 && inventory[1])
-        {
-            inventoryItem2 = enumToString(ptr->type);
-            return;
-        }
-        else if (inventory.size() == 3 && inventory[2])
-        {
-            inventoryItem3 = enumToString(ptr->type);
-            return;
-        }
-        else if (inventory.size() == 4 && inventory[3])
-        {
-            inventoryItem4 = enumToString(ptr->type);
-            return;
-        }
-        else if (inventory.size() == 5 && inventory[4])
-        {
-            inventoryItem5 = enumToString(ptr->type);
-            return;
-        }
-            
-       
-    } std::cout << "Inventory Size : " << inventory.size() << std::endl;
+    }
     //ptr->entity->destroy();
 }
 
@@ -229,6 +243,7 @@ void AIPlayroom::update() {
         sVisionCone();
         RunBehaviourTrees();
         //sVisionCone();
+        std::cout << "Inventory Size : " << inventory.size() << std::endl;
         m_currentFrame++;
     }
     sAnimation();
@@ -653,6 +668,68 @@ void AIPlayroom::ManageInventory()
       
     }
 
+}
+
+void AIPlayroom::UpdateInventoryUI()
+{
+
+    for (size_t i = 0; i < inventory.size(); ++i) {
+        if (inventory[i] == nullptr) {
+
+            // Update the HUD for that slot
+            static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
+                switch (slotIndex) {
+                case 0: inventoryItem1 = s; break;
+                case 1: inventoryItem2 = s; break;
+                case 2: inventoryItem3 = s; break;
+                case 3: inventoryItem4 = s; break;
+                case 4: inventoryItem5 = s; break;
+                }
+            };
+            setSlotString(i,"");
+
+            return; // done
+        }
+
+
+    }
+
+    ////inventory.erase(it, inventory.end());
+    //if (inventory[0])
+    //{
+    //    inventoryItem1 = enumToString(inventory[0]->type);
+    //}
+    //if (inventory[1])
+    //{
+    //    inventoryItem2 = enumToString(inventory[1]->type);
+    //}
+    //if (inventory[2])
+    //{
+    //    inventoryItem3 = enumToString(inventory[2]->type);
+    //}
+    //if (inventory[3])
+    //{
+    //    inventoryItem4 = enumToString(inventory[3]->type);
+    //}
+    //if (inventory[4])
+    //{
+    //    inventoryItem5 = enumToString(inventory[4]->type);
+    //}
+    
+}
+
+void AIPlayroom::removeSlotAndCompact(size_t removeIndex)
+{
+    if (removeIndex >= inventory.size()) return; // out of bounds
+
+    // Delete or otherwise clean up the removed item if needed:
+    delete inventory[removeIndex];
+    // Shift everything after removeIndex one slot to the left
+    for (size_t i = removeIndex; i + 1 < inventory.size(); ++i) {
+        inventory[i] = inventory[i + 1];
+    }
+    // Clear the now-duplicate last slot
+    inventory[inventory.size() - 1] = nullptr;
 }
 
 void AIPlayroom::SpawnEnemies()

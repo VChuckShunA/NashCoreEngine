@@ -2,6 +2,7 @@
 #include <iostream>
 Item::Item(const std::shared_ptr<Entity>& entity):entity(entity)
 {
+	type = ITM_NONE;
 }
 
 void Item::AddToPlayer(AIPlayroom* room)

@@ -246,7 +246,7 @@ public:
        // ag.UpdateItemPosition();
         //&& ag.health < ag.maxHealth
         //Implement needs foods
-        return (!ag.hasFood())
+        return (ag.needsFood())
             ? BH_SUCCESS
             : BH_FAILURE;
     }
@@ -277,9 +277,9 @@ public:
     Status update() override {
        // ag.UpdateItemPosition();
         //&& ag.health < ag.maxHealth
-        bool needsAmmo = true;
+       // bool needsAmmo = true;
         //ag.hasAmmo() 
-        return (needsAmmo)
+        return (ag.needsAmmo())
             ? BH_SUCCESS
             : BH_FAILURE;
     }
