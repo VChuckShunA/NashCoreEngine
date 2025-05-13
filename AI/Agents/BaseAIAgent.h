@@ -339,7 +339,7 @@ class PatrolSelector : public Selector {
 public:
     PatrolSelector(){ Name = "Patrol Selector"; }
     PatrolSelector(BaseAIAgent& agent) {
-        addChild(new LowHealth(agent));  // First, try healing
+      //  addChild(new LowHealth(agent));  // First, try healing
         addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
         addChild(new Patrol(agent)); //Patrol
     }

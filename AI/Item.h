@@ -12,7 +12,7 @@ public:
         ITM_COIN,
     };
 
-
+    bool pickedUp = false;
     Item(const std::shared_ptr<Entity>& entity);
     const std::shared_ptr<Entity> entity;
     Type type;

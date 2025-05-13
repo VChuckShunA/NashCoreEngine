@@ -19,7 +19,7 @@ AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
 
-    inventory.resize(INVENTORY_SIZE, nullptr);
+    //inventory.resize(INVENTORY_SIZE, nullptr);
 
 }
 
@@ -93,7 +93,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item4 = m_entityManager.addEntity("item");
     item4->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item4->addComponent<CTransform>(
-        gridToMidPixel(0, 11, item4),
+        gridToMidPixel(19, 11, item4),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -103,7 +103,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item5 = m_entityManager.addEntity("item");
     item5->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item5->addComponent<CTransform>(
-        gridToMidPixel(12, 3, item5),
+        gridToMidPixel(0, 11, item5),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -152,9 +152,42 @@ void AIPlayroom::RemoveAgent(BaseAIAgent* ptr)
 
 void AIPlayroom::RemoveItem(Item* ptr)
 {
+    auto it = std::find_if(items.begin(), items.end(),
+        [&](auto const& up) { return up.get() == ptr; });
+    if (it != items.end()) {
+        // move the unique_ptr into the first empty slot:
+        for (auto& slot : inventory) {
+            if (!slot) {
+                slot = std::move(*it);    // transfer ownership
+                items.erase(it);     // deletes no object—because ptr is !null
+                if (it->get()->type != 3) //Add to inventory if it's not a coin
+                {
+
+                    for (size_t i = 0; i < inventory.size(); ++i) {
+                        if (inventory[i] == nullptr) {
+                            static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
+                                switch (slotIndex) {
+                                case 0: inventoryItem1 = s; break;
+                                case 1: inventoryItem2 = s; break;
+                                case 2: inventoryItem3 = s; break;
+                                case 3: inventoryItem4 = s; break;
+                                case 4: inventoryItem5 = s; break;
+                                }
+                            };
+                            setSlotString(i, enumToString(ptr->type));
+                            //return; // done
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    /*
     items.erase(
         std::remove_if(items.begin(), items.end(),
-            [&](auto const& up) { return up.get() == ptr; }),
+            [](auto& up) { return up->pickedUp; }),
         items.end()
     );
     if (ptr->type != 3) //Add to inventory if it's not a coin
@@ -162,8 +195,9 @@ void AIPlayroom::RemoveItem(Item* ptr)
 
         for (size_t i = 0; i < inventory.size(); ++i) {
             if (inventory[i] == nullptr) {
-                inventory[i] = ptr;
-
+                inventory[i] = std::move(ptr);
+                inventory[i]->entity->destroy();
+                std::cout << "new item type " << inventory[i]->type << std::endl;
                 // Update the HUD for that slot
                 static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
                     switch (slotIndex) {
@@ -175,14 +209,10 @@ void AIPlayroom::RemoveItem(Item* ptr)
                     }
                 };
                 setSlotString(i, enumToString(ptr->type));
-
                 return; // done
             }
-
-
         }
-    }
-    //ptr->entity->destroy();
+    }   */
 }
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target) {
@@ -720,16 +750,16 @@ void AIPlayroom::UpdateInventoryUI()
 
 void AIPlayroom::removeSlotAndCompact(size_t removeIndex)
 {
-    if (removeIndex >= inventory.size()) return; // out of bounds
+    //if (removeIndex >= inventory.size()) return; // out of bounds
 
-    // Delete or otherwise clean up the removed item if needed:
-    delete inventory[removeIndex];
-    // Shift everything after removeIndex one slot to the left
-    for (size_t i = removeIndex; i + 1 < inventory.size(); ++i) {
-        inventory[i] = inventory[i + 1];
-    }
-    // Clear the now-duplicate last slot
-    inventory[inventory.size() - 1] = nullptr;
+    //// Delete or otherwise clean up the removed item if needed:
+    //delete inventory[removeIndex];
+    //// Shift everything after removeIndex one slot to the left
+    //for (size_t i = removeIndex; i + 1 < inventory.size(); ++i) {
+    //    inventory[i] = inventory[i + 1];
+    //}
+    //// Clear the now-duplicate last slot
+    //inventory[inventory.size() - 1] = nullptr;
 }
 
 void AIPlayroom::SpawnEnemies()
@@ -1072,7 +1102,7 @@ void AIPlayroom::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        //else if (action.name() == "MoveAgent") { MoveEntity(AIAgent, path); }
+        else if (action.name() == "MoveAgent") { playerPtr->health=22; }
 
       
     }

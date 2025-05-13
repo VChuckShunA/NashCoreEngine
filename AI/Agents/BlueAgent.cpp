@@ -1,5 +1,6 @@
 #include "BlueAgent.h"
 #include "../AIPlayroom.h"
+#include "../Health.h"
 BlueAgent::BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) : BaseAIAgent(std::move(entity), playroom) //NOTE: std::move is used to transfer ownership
 {
 	BehaviourTree = std::make_unique<SurvivalSelector>(*this);
@@ -24,7 +25,7 @@ bool BlueAgent::hasAmmo()
 {if (room->inventory.empty()) 
         return false;
 for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
-	Item* itemPtr = *it;
+	Item* itemPtr = it->get();
 	if (!itemPtr)            // empty slot?
 		continue;            // skip it
 
@@ -38,26 +39,69 @@ return false;
 
 bool BlueAgent::hasFood()
 {
-	return std::any_of(
+
+	for (auto rit = room->inventory.rbegin();
+		rit != room->inventory.rend();
+		++rit)
+	{
+		std::cout << "iterating" << std::endl;
+		Item* slotPtr = rit->get();     // dereference the reverse_iterator
+		if (!slotPtr)             // skip empty slots
+		{
+			std::cout << "nullptr, skipping" << std::endl;
+			continue;
+		}
+
+		if (slotPtr->type == Item::ITM_HEALTH)
+		{
+			std::cout << "Found a health item, returning true" << std::endl;
+			return true;
+		}
+		std::cout << "Item is of type " << slotPtr->type << std::endl;
+	}
+	return false;
+
+	//for (auto rit = room->inventory.rbegin();
+	//	rit != room->inventory.rend();
+	//	++rit)
+	//{
+	//	std::cout << "iterating" << std::endl;
+	//	Item* itemPtr = *rit;            // now this is a real pointer from the container
+	//	if (itemPtr == nullptr)                    // skip empty slots, if you’re using nullptr for empties
+
+	//	{
+	//		std::cout << "nullptr, skipping" << std::endl;
+	//		continue;
+	//	}
+	//	if (itemPtr->type == Item::ITM_HEALTH)
+	//	{
+	//		std::cout << "Found a health item, returning true" << std::endl;
+	//		return true;
+	//	}
+	//	std::cout << "Item is of type " << itemPtr->type << std::endl;
+	//}
+	//return false;
+
+	/*return std::any_of(
 		room->inventory.begin(),
 		room->inventory.end(),
 		[](Item* p) {
 		return p && p->type == Item::ITM_HEALTH;
-	});
-	//if (room->inventory.empty())
-	//	return false;
-	//
-	// for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
- //       Item* itemPtr = *it;
- //       if (!itemPtr)            // empty slot?
- //           continue;            // skip it
-
- //       if (itemPtr->type == Item::ITM_HEALTH) {
- //           std::cout << "HAS Food" << std::endl;
- //           return true;
- //       }
- //   }
- //   return false;
+	});*/
+//	if (room->inventory.empty())
+//		return false;
+//	
+//	 for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
+//        //Item* itemPtr = *it;
+//        //if (!itemPtr)            // empty slot?
+//        //    continue;            // skip it
+//
+//        if ((*it)->type == Item::ITM_HEALTH) {
+//            std::cout << "HAS Food" << std::endl;
+//            return true;
+//        }
+//    }
+//    return false;
 }
 
 bool BlueAgent::needsAmmo()
@@ -86,7 +130,7 @@ bool BlueAgent::needsFood()
 
 
 		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
-			Item* itemPtr = *it;
+			Item* itemPtr = it->get();
 			if (!itemPtr)            // empty slot?
 				continue;            // skip it
 

@@ -66,8 +66,8 @@ public:
     std::vector<std::unique_ptr<BaseAIAgent>> agents;
     std::vector<std::unique_ptr<Item>> items;
     std::vector<Vec2> path;
-    std::vector<Item*> inventory;
     const size_t INVENTORY_SIZE = 5;
+    std::array<std::shared_ptr<Item>, 5> inventory;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();

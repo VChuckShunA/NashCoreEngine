@@ -62,6 +62,7 @@ void BaseAIAgent::consumeFood()
                 //room->inventory.erase(forward_it);
                
                 *it = nullptr;
+                agent->getComponent<CAnimation>().animation = room->m_game->assets().getAnimation("Healing");
                // room->removeSlotAndCompact(removeCount);
                 room->UpdateInventoryUI();
                 std::cout << "INventory size " << room->inventory.size();
