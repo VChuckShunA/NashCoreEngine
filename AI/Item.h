@@ -18,6 +18,7 @@ public:
     Type type;
     virtual void AddToPlayer(AIPlayroom* room) = 0;
     void HandleRemoval(AIPlayroom* room);
+    ~Item()=default;
 
 };
 

@@ -6,7 +6,10 @@ Coin::Coin(const std::shared_ptr<Entity>& entity) :Item(std::move(entity)) {
 
 void Coin::AddToPlayer(AIPlayroom* room)
 {
-	room->PlayerScore = room->PlayerScore+ 10;
+	if(!pickedUp)
+		room->PlayerScore = room->PlayerScore+ 10;
 	std::cout << "Added Coin to Player" << std::endl;
+	pickedUp = true;
+	entity->destroy();
 	HandleRemoval(room);
 }

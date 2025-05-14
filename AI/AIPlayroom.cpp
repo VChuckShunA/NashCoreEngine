@@ -155,30 +155,17 @@ void AIPlayroom::RemoveItem(Item* ptr)
     auto it = std::find_if(items.begin(), items.end(),
         [&](auto const& up) { return up.get() == ptr; });
     if (it != items.end()) {
+        if (ptr->type == Item::ITM_COIN)
+        {
+            items.erase(it);     // deletes no object—because ptr is !null
+            return;
+        }
         // move the unique_ptr into the first empty slot:
         for (auto& slot : inventory) {
             if (!slot) {
                 slot = std::move(*it);    // transfer ownership
                 items.erase(it);     // deletes no object—because ptr is !null
-                if (it->get()->type != 3) //Add to inventory if it's not a coin
-                {
-
-                    for (size_t i = 0; i < inventory.size(); ++i) {
-                        if (inventory[i] == nullptr) {
-                            static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
-                                switch (slotIndex) {
-                                case 0: inventoryItem1 = s; break;
-                                case 1: inventoryItem2 = s; break;
-                                case 2: inventoryItem3 = s; break;
-                                case 3: inventoryItem4 = s; break;
-                                case 4: inventoryItem5 = s; break;
-                                }
-                            };
-                            setSlotString(i, enumToString(ptr->type));
-                            //return; // done
-                        }
-                    }
-                }
+                UpdateInventoryUI();
                 break;
             }
         }
@@ -273,7 +260,7 @@ void AIPlayroom::update() {
         sVisionCone();
         RunBehaviourTrees();
         //sVisionCone();
-        std::cout << "Inventory Size : " << inventory.size() << std::endl;
+        std::cout << "Item Size : " << items.size() << std::endl;
         m_currentFrame++;
     }
     sAnimation();
@@ -705,46 +692,82 @@ void AIPlayroom::UpdateInventoryUI()
 
     for (size_t i = 0; i < inventory.size(); ++i) {
         if (inventory[i] == nullptr) {
-
+            std::cout << "NOT NULLPTR " << i<< std::endl;
             // Update the HUD for that slot
-            static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
+            if (inventory[0])
+            {
+                inventoryItem1 = enumToString(inventory[0]->type);
+            }
+            else
+            {
+                inventoryItem1 = "";
+            }
+            if (inventory[1])
+            {
+                inventoryItem2 = enumToString(inventory[1]->type);
+            }
+            else
+            {
+                inventoryItem2 = "";
+            }
+            if (inventory[2])
+            {
+                inventoryItem3 = enumToString(inventory[2]->type);
+            }
+            else
+            {
+                inventoryItem3 = "";
+            }
+            if (inventory[3])
+            {
+                inventoryItem4 = enumToString(inventory[3]->type);
+            }
+            else
+            {
+                inventoryItem4 = "";
+            }
+            if (inventory[4])
+            {
+                inventoryItem5 = enumToString(inventory[4]->type);
+            }
+            else
+            {
+                inventoryItem5 = "";
+            }
+           /* static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
                 switch (slotIndex) {
-                case 0: inventoryItem1 = s; break;
-                case 1: inventoryItem2 = s; break;
-                case 2: inventoryItem3 = s; break;
-                case 3: inventoryItem4 = s; break;
-                case 4: inventoryItem5 = s; break;
+                case 0: 
+                    inventoryItem1 = s;
+                    std::cout << "Case 0" << std::endl;
+                    break;
+                case 1: 
+                    inventoryItem2 = s;
+                    std::cout << "Case 1" << std::endl;
+                    break;
+                case 2: 
+                    inventoryItem3 = s;
+                    std::cout << "Case 2" << std::endl;
+                    break;
+                case 3: 
+                    inventoryItem4 = s;
+                    std::cout << "Case 3" << std::endl;
+                    break;
+                case 4: 
+                    inventoryItem5 = s;
+                    std::cout << "Case 4" << std::endl;
+                    break;
                 }
-            };
-            setSlotString(i,"");
+            };*/
+           // setSlotString(i,"  ");
 
-            return; // done
+          //  return; // done
         }
 
 
     }
 
     ////inventory.erase(it, inventory.end());
-    //if (inventory[0])
-    //{
-    //    inventoryItem1 = enumToString(inventory[0]->type);
-    //}
-    //if (inventory[1])
-    //{
-    //    inventoryItem2 = enumToString(inventory[1]->type);
-    //}
-    //if (inventory[2])
-    //{
-    //    inventoryItem3 = enumToString(inventory[2]->type);
-    //}
-    //if (inventory[3])
-    //{
-    //    inventoryItem4 = enumToString(inventory[3]->type);
-    //}
-    //if (inventory[4])
-    //{
-    //    inventoryItem5 = enumToString(inventory[4]->type);
-    //}
+   
     
 }
 
