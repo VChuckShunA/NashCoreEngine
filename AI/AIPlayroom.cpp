@@ -689,7 +689,7 @@ void AIPlayroom::ManageInventory()
 
 void AIPlayroom::UpdateInventoryUI()
 {
-
+    ResizeInventory();
     for (size_t i = 0; i < inventory.size(); ++i) {
         if (inventory[i] == nullptr) {
             std::cout << "NOT NULLPTR " << i<< std::endl;
@@ -771,8 +771,19 @@ void AIPlayroom::UpdateInventoryUI()
     
 }
 
-void AIPlayroom::removeSlotAndCompact(size_t removeIndex)
+void AIPlayroom::ResizeInventory()
 {
+    size_t writeIndex = 0;
+
+    for (size_t readIndex = 0; readIndex < inventory.size(); ++readIndex) {
+        if (inventory[readIndex]) {
+            if (writeIndex != readIndex) {
+                inventory[writeIndex] = std::move(inventory[readIndex]);
+                inventory[readIndex].reset(); // optional: clear old slot
+            }
+            ++writeIndex;
+        }
+    }
     //if (removeIndex >= inventory.size()) return; // out of bounds
 
     //// Delete or otherwise clean up the removed item if needed:

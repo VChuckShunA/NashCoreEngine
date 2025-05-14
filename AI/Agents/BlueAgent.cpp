@@ -4,7 +4,7 @@
 BlueAgent::BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) : BaseAIAgent(std::move(entity), playroom) //NOTE: std::move is used to transfer ownership
 {
 	BehaviourTree = std::make_unique<SurvivalSelector>(*this);
-	health = 1;
+	health = 100;
 	//std::cout << "Blue Agent Initialized" << std::endl;
 }
 

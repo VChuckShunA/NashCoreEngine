@@ -52,21 +52,19 @@ void BaseAIAgent::consumeFood()
         //    room->UpdateInventoryUI();
         //}
       
-        size_t removeCount = room->INVENTORY_SIZE-1;
-        for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
-            removeCount --;
+        for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {     
             if (*it == nullptr) continue;
             if ((*it)->type == Item::ITM_HEALTH) {
                 // Remove it
                // auto forward_it = std::next(it).base();
                 //room->inventory.erase(forward_it);
-               
+                room->ResizeInventory();
                 *it = nullptr;
                 agent->getComponent<CAnimation>().animation = room->m_game->assets().getAnimation("Healing");
                // room->removeSlotAndCompact(removeCount);
                 room->UpdateInventoryUI();
                 std::cout << "INventory size " << room->inventory.size();
-               // break; // Exit after removing the first matching item from the end
+                break; // Exit after removing the first matching item from the end
             }
         }
         //  std::cout << "Consumed food. Health: " << health << std::endl;

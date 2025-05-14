@@ -77,7 +77,7 @@ public:
     void drawVisionCone();
     void ManageInventory();
     void UpdateInventoryUI();
-    void removeSlotAndCompact(size_t removeIndex);
+    void ResizeInventory();
    
     std::map<int, std::string> itemToString = {
      { 0, "NONE" },
