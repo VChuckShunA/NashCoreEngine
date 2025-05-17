@@ -121,7 +121,7 @@ private:
     }
 
     virtual Status update() override {
-
+        std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
         if (!greenAgent.destinationReached)
         {
             greenAgent.MoveToPoint(Waypoint);

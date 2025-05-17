@@ -16,7 +16,7 @@ public:
     Item(const std::shared_ptr<Entity>& entity);
     const std::shared_ptr<Entity> entity;
     Type type;
-    virtual void AddToPlayer(AIPlayroom* room) = 0;
+    virtual void AddToPlayer(AIPlayroom*) = 0;
     void HandleRemoval(AIPlayroom* room);
     ~Item()=default;
 

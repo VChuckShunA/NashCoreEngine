@@ -107,14 +107,31 @@ bool BlueAgent::hasFood()
 bool BlueAgent::needsAmmo()
 {
 	std::cout << "derived Implementation needsAmmo" << std::endl;
-	if (room->inventory.size() < 5)
+	int AmmoCount = 0;
+	
+	if (!room->inventory.empty())
 	{
-		int AmmoCount = 0;
+		std::cout << "Needs Ammo: inventory states " << room->inventory.empty() << std::endl;
 		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
-			if ((*it)->type == Item::ITM_AMMO) AmmoCount++;
+			Item* itemPtr = it->get();
+			if (!itemPtr)            // empty slot?
+				continue;            // skip it
+
+			if (itemPtr->type == Item::ITM_AMMO) {
+				AmmoCount++;
+			}
+			std::cout << "Food Count " << AmmoCount << std::endl;
 		}
-		if (AmmoCount <= 3)
-			return true;
+	if (AmmoCount <= 3)
+	{
+		std::cout << "return true, Ammo Count is " << AmmoCount << std::endl;
+		return true;
+	}
+	else
+	{
+		std::cout << "return false, Ammo Count is " << AmmoCount << std::endl;
+		return false;
+	}
 	}
 	return false;
 }
@@ -123,11 +140,12 @@ bool BlueAgent::needsFood()
 {
 	std::cout << "derived Implementation needsFood" << std::endl;
 
+	int FoodCount = 0;
+	
 
 	if (!room->inventory.empty())
 	{
-		int FoodCount = 0;
-
+		std::cout << "Needs Food: inventory states " << room->inventory.empty() << std::endl;
 
 		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
 			Item* itemPtr = it->get();
@@ -137,12 +155,20 @@ bool BlueAgent::needsFood()
 			if (itemPtr->type == Item::ITM_HEALTH) {
 				FoodCount++;
 			}
-
-			if (FoodCount <= 3)
-				return true;
+			std::cout << "Food Count " << FoodCount<< std::endl;
+			
 		}
-
-		return false;
+		if (FoodCount < 3)
+		{
+			std::cout << "return true, Food Count is " << FoodCount << std::endl;
+			return true;
+		}
+		else
+		{
+			std::cout << "return false, Food Count is " << FoodCount << std::endl;
+			return false;
+		}
+		//return false;
 		/*for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
 			if ((*it)->type == Item::ITM_HEALTH) FoodCount++;
 		}

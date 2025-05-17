@@ -1,6 +1,8 @@
 #include "BaseAIAgent.h"
 #include "../AIPlayroom.h"
-
+#include "../Ammo.h"
+#include "../Coin.h"
+#include "../Health.h"
 BaseAIAgent::BaseAIAgent() : agent(nullptr), room(nullptr) {
 }
 
@@ -73,7 +75,24 @@ void BaseAIAgent::consumeFood()
 
 void BaseAIAgent::UpdateItemPosition()
 {
-    if((agent->getComponent<CVision>().Item)) ItemPosition = room->positionToGridCordinates(agent->getComponent<CVision>().Item);
+    if ((agent->getComponent<CVision>().Item)) ItemPosition = room->positionToGridCordinates(agent->getComponent<CVision>().Item->entity);
+
+    //static_cast<Ammo>(agent->getComponent<CVision>().Item);
+   // auto itemPtr = agent->getComponent<CVision>().Item;
+    /*auto item = agent->getComponent<CVision>().Item.get();
+    ItemPosition= room->positionToGridCordinates(item->entity);*/
+  /*  if (item && item->type == Item::ITM_AMMO) {
+        AmmoPosition = room->positionToGridCordinates(item->entity);
+    }
+    if (item && item->type == Item::ITM_HEALTH) {
+        FoodPosition = room->positionToGridCordinates(item->entity);
+    }
+    if (item && item->type == Item::ITM_COIN) {
+        CoinPosition = room->positionToGridCordinates(item->entity);
+    }*/
+
+   
+        
 }
 
 void BaseAIAgent::HandleDeath()

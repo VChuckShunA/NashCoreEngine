@@ -58,7 +58,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
     
-    auto item1 = m_entityManager.addEntity("item");
+    auto item1 = m_entityManager.addEntity("health");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
         gridToMidPixel(10, 3, item1),
@@ -69,7 +69,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     item1->addComponent<CBoundingBox>(Vec2(64, 64));
     //std::shared_ptr<Health> healthItem = std::make_shared<Health>(item1);
 
-    auto item2 = m_entityManager.addEntity("item");
+    auto item2 = m_entityManager.addEntity("ammo");
     item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item2->addComponent<CTransform>(
         gridToMidPixel(4, 3, item2),
@@ -80,44 +80,67 @@ void AIPlayroom::init(const std::string& levelPath) {
     item2->addComponent<CBoundingBox>(Vec2(64, 64));
   //  std::shared_ptr<Ammo> ammoItem = std::make_shared<Ammo>(item2);
 
-    auto item3 = m_entityManager.addEntity("item");
+    auto item3 = m_entityManager.addEntity("coin");
     item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
     item3->addComponent<CTransform>(
-        gridToMidPixel(14, 5, item3),
+        gridToMidPixel(17, 5, item3),
         Vec2(0, 0),
         Vec2(1, 1),
         0
     );
     item3->addComponent<CBoundingBox>(Vec2(64, 64));
     //std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
-    auto item4 = m_entityManager.addEntity("item");
+    auto item4 = m_entityManager.addEntity("ammo");
     item4->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item4->addComponent<CTransform>(
-        gridToMidPixel(19, 11, item4),
+        gridToMidPixel(19, 9, item4),
         Vec2(0, 0),
         Vec2(1, 1),
         0
     );
     item4->addComponent<CBoundingBox>(Vec2(64, 64));
 
-    auto item5 = m_entityManager.addEntity("item");
+    auto item5 = m_entityManager.addEntity("health");
     item5->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item5->addComponent<CTransform>(
-        gridToMidPixel(0, 11, item5),
+        gridToMidPixel(11, 3, item5),
         Vec2(0, 0),
         Vec2(1, 1),
         0
     );
     item5->addComponent<CBoundingBox>(Vec2(64, 64));
 
+
+    auto item6 = m_entityManager.addEntity("health");
+    item6->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item6->addComponent<CTransform>(
+        gridToMidPixel(4, 11, item6),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item6->addComponent<CBoundingBox>(Vec2(64, 64));
+
+    auto item7 = m_entityManager.addEntity("health");
+    item7->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item7->addComponent<CTransform>(
+        gridToMidPixel(12, 3, item7),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item7->addComponent<CBoundingBox>(Vec2(64, 64));
+
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
-    items.emplace_back(std::make_unique<Health>(item1));
-    items.emplace_back(std::make_unique<Ammo>(item2));
-    items.emplace_back(std::make_unique<Coin>(item3));
-    items.emplace_back(std::make_unique<Ammo>(item4));
-    items.emplace_back(std::make_unique<Health>(item5));
+    items.emplace_back(std::make_shared<Health>(item1));
+    items.emplace_back(std::make_shared<Ammo>(item2));
+    items.emplace_back(std::make_shared<Coin>(item3));
+    items.emplace_back(std::make_shared<Ammo>(item4));
+    items.emplace_back(std::make_shared<Health>(item5));
+    items.emplace_back(std::make_shared<Health>(item6));
+    items.emplace_back(std::make_shared<Health>(item7));
 }
 
 
@@ -465,15 +488,15 @@ void AIPlayroom::ItemScanner()
         {
         case Item::ITM_AMMO:
             vision.seesAmmo = true;
-            vision.Item = item->entity;
+            vision.Item = std::shared_ptr<Item>(item);
             break;
         case Item::ITM_HEALTH:
             vision.seesFood = true;
-            vision.Item = item->entity;
+            vision.Item = std::shared_ptr<Item>(item);
             break;
         case Item::ITM_COIN:
             vision.seesCoin = true;
-            vision.Item = item->entity;
+            vision.Item = std::shared_ptr<Item>(item);
             break;
         }
         //vision.Item = item->entity;

@@ -64,7 +64,7 @@ public:
     bool liangBarsky(float x0, float y0, float x1, float y1,
         float xmin, float ymin, float xmax, float ymax);
     std::vector<std::unique_ptr<BaseAIAgent>> agents;
-    std::vector<std::unique_ptr<Item>> items;
+    std::vector<std::shared_ptr<Item>> items;
     std::vector<Vec2> path;
     const size_t INVENTORY_SIZE = 5;
     std::array<std::shared_ptr<Item>, 5> inventory;
