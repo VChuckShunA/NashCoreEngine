@@ -24,6 +24,9 @@ public:
     int health; //NOTE : Need to clean and build for this to get updated
 	bool houseVisible = false;
 	bool itemVisible = false;
+    bool hasSeenFood = false;
+    bool hasSeenAmmo = false;
+    bool hasSeenCoin = false;
 	bool destinationReached = false;
 	BaseAIAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
 
@@ -33,7 +36,9 @@ public:
 	Vec2 Waypoint1 = Vec2(19, 11);
 	Vec2 Waypoint2 = Vec2(4, 6);
 	Vec2 Waypoint3 = Vec2(0, 11);
-    Vec2 ItemPosition;
+    Vec2 FoodPosition;
+    Vec2 CoinPosition;
+    Vec2 AmmoPosition;
 	virtual void update() = 0;
 	void updateCurrentPath(const Vec2& Destination);
 
@@ -121,7 +126,7 @@ private:
     }
 
     virtual Status update() override {
-        std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
+       // std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
         if (!greenAgent.destinationReached)
         {
             greenAgent.MoveToPoint(Waypoint);
@@ -226,7 +231,7 @@ class CheckSeesFood : public Node {
 public:
     CheckSeesFood(BaseAIAgent& a) :ag(a) { Name = "Check Sees Food"; }
     Status update() override {
-        return ag.agent->getComponent<CVision>().seesFood
+        return ag.hasSeenFood
             ? BH_SUCCESS
             : BH_FAILURE;
     }
@@ -257,7 +262,7 @@ class CheckSeesAmmo : public Node {
 public:
     CheckSeesAmmo(BaseAIAgent& a) :ag(a) { Name = "Check Sees Ammo"; }
     Status update() override {
-        return ag.agent->getComponent<CVision>().seesAmmo
+        return ag.hasSeenAmmo
             ? BH_SUCCESS
             : BH_FAILURE;
     }
@@ -297,7 +302,7 @@ public:
     }
     Status update() override {
         //ag.UpdateItemPosition();
-        return ag.agent->getComponent<CVision>().seesCoin
+        return ag.hasSeenCoin
             ? BH_SUCCESS
             : BH_FAILURE;
     }
@@ -312,19 +317,19 @@ public:
         Sequence* fetchFood = new Sequence();
         fetchFood->addChild(new CheckSeesFood(ag));
         fetchFood->addChild(new CheckNeedsFood(ag));
-        fetchFood->addChild(new MoveToPoint(ag, ag.ItemPosition));
+        fetchFood->addChild(new MoveToPoint(ag, ag.FoodPosition));
       
 
         // Ammo branch
         Sequence* fetchAmmo = new Sequence();
         fetchAmmo->addChild(new CheckSeesAmmo(ag));
         fetchAmmo->addChild(new CheckNeedsAmmo(ag));
-        fetchAmmo->addChild(new MoveToPoint(ag, ag.ItemPosition));
+        fetchAmmo->addChild(new MoveToPoint(ag, ag.AmmoPosition));
 
         // Coin branch (always pick up if seen)
         Sequence* fetchCoin = new Sequence();
         fetchCoin->addChild(new CheckSeesCoin(ag));
-        fetchCoin->addChild(new MoveToPoint(ag, ag.ItemPosition));
+        fetchCoin->addChild(new MoveToPoint(ag, ag.CoinPosition));
        
 
         addChild(fetchFood);

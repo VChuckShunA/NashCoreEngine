@@ -180,6 +180,7 @@ void AIPlayroom::RemoveItem(Item* ptr)
     if (it != items.end()) {
         if (ptr->type == Item::ITM_COIN)
         {
+            playerPtr->hasSeenCoin = false;
             items.erase(it);     // deletes no object—because ptr is !null
             return;
         }
@@ -188,6 +189,14 @@ void AIPlayroom::RemoveItem(Item* ptr)
             if (!slot) {
                 slot = std::move(*it);    // transfer ownership
                 items.erase(it);     // deletes no object—because ptr is !null
+                if (ptr->type == Item::ITM_AMMO)
+                {
+                    playerPtr->hasSeenAmmo = false;
+                }
+                if (ptr->type == Item::ITM_HEALTH)
+                {
+                    playerPtr->hasSeenFood = false;
+                }
                 UpdateInventoryUI();
                 break;
             }
@@ -282,8 +291,16 @@ void AIPlayroom::update() {
         sCollision();
         sVisionCone();
         RunBehaviourTrees();
-        //sVisionCone();
-        std::cout << "Item Size : " << items.size() << std::endl;
+        ////sVisionCone();
+        //std::cout << "Has Seen Food : " << playerPtr->hasSeenFood << std::endl;
+        //std::cout << "Has Seen Ammo : " << playerPtr->hasSeenAmmo << std::endl;
+        //std::cout << "Has Seen Coin : " << playerPtr->hasSeenCoin << std::endl;
+        //std::cout << "Food Position : " << playerPtr->FoodPosition.x <<" , "<<playerPtr->FoodPosition.y << std::endl;
+        //std::cout << "Ammo Position : " << playerPtr->AmmoPosition.x << " , " << playerPtr->AmmoPosition.y << std::endl;
+        //bool needfood= playerPtr->needsFood();
+        //bool needammo = playerPtr->needsAmmo();
+        //std::cout << "Needs Food : " << needfood << std::endl;
+        //std::cout << "Needs Ammo : " << needammo << std::endl;
         m_currentFrame++;
     }
     sAnimation();
@@ -353,14 +370,7 @@ void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<V
                 destinationReached=true;
             }
             
-           /* if (Vec2((int)positionToGridCordinates(entity).x, (int)positionToGridCordinates(entity).y) == Vec2(path.front().x, path.front().y))
-            {
-                path.erase(path.begin());
-            }*/
-            /*if (Vec2(entity->getComponent<CTransform>().pos.x, entity->getComponent<CTransform>().pos.y) == Vec2(gridToMidPixel(path.front().x,path.front().y,entity)))
-            {
-                path.erase(path.begin());
-            }*/
+           
             if (distanceBetween.x<5&&distanceBetween.y<5)
             {
                 path.erase(path.begin());
@@ -488,14 +498,17 @@ void AIPlayroom::ItemScanner()
         {
         case Item::ITM_AMMO:
             vision.seesAmmo = true;
+            playerPtr->hasSeenAmmo = true;
             vision.Item = std::shared_ptr<Item>(item);
             break;
         case Item::ITM_HEALTH:
             vision.seesFood = true;
+            playerPtr->hasSeenFood = true;
             vision.Item = std::shared_ptr<Item>(item);
             break;
         case Item::ITM_COIN:
             vision.seesCoin = true;
+            playerPtr->hasSeenCoin = true;
             vision.Item = std::shared_ptr<Item>(item);
             break;
         }
@@ -719,6 +732,7 @@ void AIPlayroom::UpdateInventoryUI()
             // Update the HUD for that slot
             if (inventory[0])
             {
+                std::cout << "Item 1 " <<std::endl;
                 inventoryItem1 = enumToString(inventory[0]->type);
             }
             else
@@ -727,6 +741,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[1])
             {
+                std::cout << "Item 2 " << std::endl;
                 inventoryItem2 = enumToString(inventory[1]->type);
             }
             else
@@ -735,6 +750,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[2])
             {
+                std::cout << "Item 3 " << std::endl;
                 inventoryItem3 = enumToString(inventory[2]->type);
             }
             else
@@ -743,6 +759,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[3])
             {
+                std::cout << "Item 4 " << std::endl;
                 inventoryItem4 = enumToString(inventory[3]->type);
             }
             else
@@ -751,47 +768,17 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[4])
             {
+                std::cout << "Item 5 " << std::endl;
                 inventoryItem5 = enumToString(inventory[4]->type);
             }
             else
             {
                 inventoryItem5 = "";
             }
-           /* static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
-                switch (slotIndex) {
-                case 0: 
-                    inventoryItem1 = s;
-                    std::cout << "Case 0" << std::endl;
-                    break;
-                case 1: 
-                    inventoryItem2 = s;
-                    std::cout << "Case 1" << std::endl;
-                    break;
-                case 2: 
-                    inventoryItem3 = s;
-                    std::cout << "Case 2" << std::endl;
-                    break;
-                case 3: 
-                    inventoryItem4 = s;
-                    std::cout << "Case 3" << std::endl;
-                    break;
-                case 4: 
-                    inventoryItem5 = s;
-                    std::cout << "Case 4" << std::endl;
-                    break;
-                }
-            };*/
-           // setSlotString(i,"  ");
-
+          
           //  return; // done
         }
-
-
-    }
-
-    ////inventory.erase(it, inventory.end());
-   
-    
+    }    
 }
 
 void AIPlayroom::ResizeInventory()

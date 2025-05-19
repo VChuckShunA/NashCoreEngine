@@ -75,13 +75,13 @@ void BaseAIAgent::consumeFood()
 
 void BaseAIAgent::UpdateItemPosition()
 {
-    if ((agent->getComponent<CVision>().Item)) ItemPosition = room->positionToGridCordinates(agent->getComponent<CVision>().Item->entity);
+    //if ((agent->getComponent<CVision>().Item)) ItemPosition = room->positionToGridCordinates(agent->getComponent<CVision>().Item->entity);
 
     //static_cast<Ammo>(agent->getComponent<CVision>().Item);
-   // auto itemPtr = agent->getComponent<CVision>().Item;
-    /*auto item = agent->getComponent<CVision>().Item.get();
-    ItemPosition= room->positionToGridCordinates(item->entity);*/
-  /*  if (item && item->type == Item::ITM_AMMO) {
+    //auto itemPtr = agent->getComponent<CVision>().Item;
+   auto item = agent->getComponent<CVision>().Item.get();
+    //ItemPosition= room->positionToGridCordinates(item->entity);
+    if (item && item->type == Item::ITM_AMMO) {
         AmmoPosition = room->positionToGridCordinates(item->entity);
     }
     if (item && item->type == Item::ITM_HEALTH) {
@@ -89,7 +89,7 @@ void BaseAIAgent::UpdateItemPosition()
     }
     if (item && item->type == Item::ITM_COIN) {
         CoinPosition = room->positionToGridCordinates(item->entity);
-    }*/
+    }
 
    
         
@@ -240,25 +240,25 @@ bool BaseAIAgent::hasTarget()
 
 bool BaseAIAgent::hasAmmo()
 {
-    std::cout << "Base Implementation hasAmmo" << std::endl;
+  //  std::cout << "Base Implementation hasAmmo" << std::endl;
     return true;
 }
 
 bool BaseAIAgent::hasFood()
 {
-    std::cout << "Base Implementation hasFood" << std::endl;
+//    std::cout << "Base Implementation hasFood" << std::endl;
     return false;
 }
 
 bool BaseAIAgent::needsFood()
 {
-    std::cout << "Base Implementation needsFood" << std::endl;
+//    std::cout << "Base Implementation needsFood" << std::endl;
     return true;
 }
 
 bool BaseAIAgent::needsAmmo()
 {
-    std::cout << "Base Implementation needsAmmo" << std::endl;
+  //  std::cout << "Base Implementation needsAmmo" << std::endl;
     return true;
 }
 

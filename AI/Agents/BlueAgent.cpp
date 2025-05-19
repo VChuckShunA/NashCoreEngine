@@ -44,20 +44,20 @@ bool BlueAgent::hasFood()
 		rit != room->inventory.rend();
 		++rit)
 	{
-		std::cout << "iterating" << std::endl;
+		//std::cout << "iterating" << std::endl;
 		Item* slotPtr = rit->get();     // dereference the reverse_iterator
 		if (!slotPtr)             // skip empty slots
 		{
-			std::cout << "nullptr, skipping" << std::endl;
+		//	std::cout << "nullptr, skipping" << std::endl;
 			continue;
 		}
 
 		if (slotPtr->type == Item::ITM_HEALTH)
 		{
-			std::cout << "Found a health item, returning true" << std::endl;
+	//		std::cout << "Found a health item, returning true" << std::endl;
 			return true;
 		}
-		std::cout << "Item is of type " << slotPtr->type << std::endl;
+	//	std::cout << "Item is of type " << slotPtr->type << std::endl;
 	}
 	return false;
 
@@ -106,12 +106,12 @@ bool BlueAgent::hasFood()
 
 bool BlueAgent::needsAmmo()
 {
-	std::cout << "derived Implementation needsAmmo" << std::endl;
+//	std::cout << "derived Implementation needsAmmo" << std::endl;
 	int AmmoCount = 0;
 	
 	if (!room->inventory.empty())
 	{
-		std::cout << "Needs Ammo: inventory states " << room->inventory.empty() << std::endl;
+	//	std::cout << "Needs Ammo: inventory states " << room->inventory.empty() << std::endl;
 		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
 			Item* itemPtr = it->get();
 			if (!itemPtr)            // empty slot?
@@ -120,16 +120,17 @@ bool BlueAgent::needsAmmo()
 			if (itemPtr->type == Item::ITM_AMMO) {
 				AmmoCount++;
 			}
-			std::cout << "Food Count " << AmmoCount << std::endl;
+		//	std::cout << "Food Count " << AmmoCount << std::endl;
 		}
-	if (AmmoCount <= 3)
+	if (AmmoCount < 3)
 	{
-		std::cout << "return true, Ammo Count is " << AmmoCount << std::endl;
+		//std::cout << "return true, Ammo Count is " << AmmoCount << std::endl;
 		return true;
 	}
 	else
 	{
-		std::cout << "return false, Ammo Count is " << AmmoCount << std::endl;
+		//hasSeenAmmo = false;
+	//	std::cout << "return false, Ammo Count is " << AmmoCount << std::endl;
 		return false;
 	}
 	}
@@ -138,14 +139,14 @@ bool BlueAgent::needsAmmo()
 
 bool BlueAgent::needsFood()
 {
-	std::cout << "derived Implementation needsFood" << std::endl;
+	//std::cout << "derived Implementation needsFood" << std::endl;
 
 	int FoodCount = 0;
 	
 
 	if (!room->inventory.empty())
 	{
-		std::cout << "Needs Food: inventory states " << room->inventory.empty() << std::endl;
+		//std::cout << "Needs Food: inventory states " << room->inventory.empty() << std::endl;
 
 		for (auto it = room->inventory.rbegin(); it != room->inventory.rend(); ++it) {
 			Item* itemPtr = it->get();
@@ -155,17 +156,18 @@ bool BlueAgent::needsFood()
 			if (itemPtr->type == Item::ITM_HEALTH) {
 				FoodCount++;
 			}
-			std::cout << "Food Count " << FoodCount<< std::endl;
+		//	std::cout << "Food Count " << FoodCount<< std::endl;
 			
 		}
 		if (FoodCount < 3)
 		{
-			std::cout << "return true, Food Count is " << FoodCount << std::endl;
+		//	std::cout << "return true, Food Count is " << FoodCount << std::endl;
 			return true;
 		}
 		else
 		{
-			std::cout << "return false, Food Count is " << FoodCount << std::endl;
+			//hasSeenFood = false;
+		//	std::cout << "return false, Food Count is " << FoodCount << std::endl;
 			return false;
 		}
 		//return false;
