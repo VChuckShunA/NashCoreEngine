@@ -727,7 +727,7 @@ void AIPlayroom::UpdateInventoryUI()
 {
     ResizeInventory();
     for (size_t i = 0; i < inventory.size(); ++i) {
-        if (inventory[i] == nullptr) {
+       // if (inventory[i] == nullptr) {
             std::cout << "NOT NULLPTR " << i<< std::endl;
             // Update the HUD for that slot
             if (inventory[0])
@@ -777,7 +777,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
           
           //  return; // done
-        }
+       // }
     }    
 }
 
