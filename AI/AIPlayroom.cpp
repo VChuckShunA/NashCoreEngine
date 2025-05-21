@@ -238,7 +238,29 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
     //spawning bullet
     if (target)
     {
-        
+        if (entity.get()->tag() == "player")
+        {
+            ammoCount--;
+            if (!ammoCount % 3)
+            {
+                std::cout << "Remove Ammo Now!" << std::endl;
+                for (auto it = inventory.rbegin(); it != inventory.rend(); ++it) {
+                    if (*it == nullptr) continue;
+                    if ((*it)->type == Item::ITM_AMMO) {
+                        // Remove it
+                       // auto forward_it = std::next(it).base();
+                        //room->inventory.erase(forward_it);
+                        ResizeInventory();
+                        *it = nullptr;
+                        // room->removeSlotAndCompact(removeCount);
+                        UpdateInventoryUI();
+                        std::cout << "INventory size " << inventory.size();
+                        break; // Exit after removing the first matching item from the end
+                    }
+                }
+
+            }
+        }
     auto bullet = m_entityManager.addEntity("bullet", entity);
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
 
@@ -281,29 +303,7 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
     }
 
-    if (entity.get()->tag() == "player")
-    {
-        ammoCount--;
-        if (!ammoCount % 3)
-        {
-            std::cout << "Remove Ammo Now!" << std::endl;
-            for (auto it = inventory.rbegin(); it != inventory.rend(); ++it) {
-                if (*it == nullptr) continue;
-                if ((*it)->type == Item::ITM_AMMO) {
-                    // Remove it
-                   // auto forward_it = std::next(it).base();
-                    //room->inventory.erase(forward_it);
-                    ResizeInventory();
-                    *it = nullptr;
-                    // room->removeSlotAndCompact(removeCount);
-                    UpdateInventoryUI();
-                    std::cout << "INventory size " << inventory.size();
-                    break; // Exit after removing the first matching item from the end
-                }
-            }
-
-        }
-    }
+    
 }
 
 void AIPlayroom::update() {
@@ -316,6 +316,7 @@ void AIPlayroom::update() {
         sCollision();
         sVisionCone();
         RunBehaviourTrees();
+        std::cout << "Ammo Count : " << ammoCount << std::endl;
         ////sVisionCone();
         //std::cout << "Has Seen Food : " << playerPtr->hasSeenFood << std::endl;
         //std::cout << "Has Seen Ammo : " << playerPtr->hasSeenAmmo << std::endl;
@@ -561,6 +562,7 @@ void AIPlayroom::EnemyScanner()
             return;
         
     }
+    // if (!vision) return;
     vision.seesPlayer = false;
     vision.Target = nullptr;
     

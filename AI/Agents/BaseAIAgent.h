@@ -250,31 +250,45 @@ public:
         Name = "Flee To Safe Position";
     }
 
+    virtual void onInitialize() override {
+        agent.initializeMoveToPoint(Vec2{ 0,0 });
+    }
+
     Status update() override {
-        agent.MoveToPoint(Vec2{ 0,0 });
-        return BH_SUCCESS;
+
+        if (!agent.destinationReached)
+        {
+            agent.MoveToPoint(Vec2{ 0,0 });
+            std::cout << "Fleeing" << std::endl;
+            return BH_RUNNING; //Not reached destination 
+        }
+        else if (agent.destinationReached) {
+            return BH_SUCCESS; // Reached the point = success
+        }
     }
 };
 
 
-class BlueAgentCombatSequence : public StatefulSequence
+class BlueAgentCombatSequence : public Selector
 {
 public:
     BlueAgentCombatSequence() { Name = "Combat Sequence"; }
     BlueAgentCombatSequence(BaseAIAgent& agent) {
-        addChild(new IsEnemyVisible(agent));
-            addChild(new HasAmmo(agent));
-                addChild(new TurnTowardsTarget(agent, 12));
-                addChild(new EngageCombat(agent));
-                addChild(new WaitForSeconds(agent, 0.5));
-                addChild(new EngageCombat(agent));
-                addChild(new WaitForSeconds(agent, 0.7));
-                addChild(new EngageCombat(agent));
-                addChild(new WaitForSeconds(agent, 2));
+        StatefulSequence* engageSequence = new StatefulSequence();
+        engageSequence->addChild(new IsEnemyVisible(agent));
+        engageSequence->addChild(new HasAmmo(agent));
+        engageSequence->addChild(new TurnTowardsTarget(agent, 12));
+        engageSequence->addChild(new EngageCombat(agent));
+        engageSequence->addChild(new WaitForSeconds(agent, 0.5));
+        engageSequence->addChild(new EngageCombat(agent));
+        engageSequence->addChild(new WaitForSeconds(agent, 0.7));
+        engageSequence->addChild(new EngageCombat(agent));
+        engageSequence->addChild(new WaitForSeconds(agent, 2));
 
-        Sequence* fleeSequence = new Sequence();
+        StatefulSequence* fleeSequence = new StatefulSequence();
         fleeSequence->addChild(new IsEnemyVisible(agent));
         fleeSequence->addChild(new FleeToSafePosition(agent));
+        addChild(engageSequence);
         addChild(fleeSequence);
 
     }
