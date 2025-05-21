@@ -31,11 +31,11 @@ void BaseAIAgent::TakeDamage(std::shared_ptr<Entity> Instigator)
     //NOTE: Due to the iffy collision system, the Damage gets multiplied by 2
     if (health > 0)
     {
-        std::cout << "Previous Health " << health << std::endl;
+       // std::cout << "Previous Health " << health << std::endl;
         health -= baseDamageAmount;
-        std::cout << "Current Health " << health << std::endl;
+      //  std::cout << "Current Health " << health << std::endl;
     }
-    else std::cout << "Player is dead "<< std::endl;
+   // else std::cout << "Player is dead "<< std::endl;
 }
 
 void BaseAIAgent::consumeFood()

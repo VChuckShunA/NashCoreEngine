@@ -101,6 +101,24 @@ private:
     Vec2 TargetPosition;
 };
 
+class HasAmmo : public Node {
+public:
+    HasAmmo(BaseAIAgent& agent) :agent(agent)
+    {
+        Name = "Has Ammo?";
+    }
+    virtual Status update() override
+    {
+        if (agent.hasAmmo()) {
+            return Status::BH_SUCCESS;
+        }
+        return Status::BH_FAILURE;
+    }
+private:
+    BaseAIAgent& agent;
+};
+
+
 class EngageCombat : public Node {
 public:
     EngageCombat(BaseAIAgent& agent);
@@ -225,6 +243,44 @@ public:
     }
 };
 
+class FleeToSafePosition : public Node {
+public:
+    BaseAIAgent& agent;
+    FleeToSafePosition(BaseAIAgent& ag) : agent(ag) {
+        Name = "Flee To Safe Position";
+    }
+
+    Status update() override {
+        agent.MoveToPoint(Vec2{ 0,0 });
+        return BH_SUCCESS;
+    }
+};
+
+
+class BlueAgentCombatSequence : public StatefulSequence
+{
+public:
+    BlueAgentCombatSequence() { Name = "Combat Sequence"; }
+    BlueAgentCombatSequence(BaseAIAgent& agent) {
+        addChild(new IsEnemyVisible(agent));
+            addChild(new HasAmmo(agent));
+                addChild(new TurnTowardsTarget(agent, 12));
+                addChild(new EngageCombat(agent));
+                addChild(new WaitForSeconds(agent, 0.5));
+                addChild(new EngageCombat(agent));
+                addChild(new WaitForSeconds(agent, 0.7));
+                addChild(new EngageCombat(agent));
+                addChild(new WaitForSeconds(agent, 2));
+
+        Sequence* fleeSequence = new Sequence();
+        fleeSequence->addChild(new IsEnemyVisible(agent));
+        fleeSequence->addChild(new FleeToSafePosition(agent));
+        addChild(fleeSequence);
+
+    }
+};
+
+
 
 class CheckSeesFood : public Node {
     BaseAIAgent& ag;
@@ -308,6 +364,7 @@ public:
     }
 };
 
+
 class ItemFetchSelector : public Selector {
 public:
     ItemFetchSelector(BaseAIAgent& ag) {
@@ -354,7 +411,7 @@ public:
     SurvivalSelector(){ Name = "Survival Selector"; }
     SurvivalSelector(BaseAIAgent& agent) {
         addChild(new LowHealth(agent));  // First, try healing
-        addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
+        addChild(new BlueAgentCombatSequence(agent)); //If Enemy is in Range, Engage in Combat
         addChild(new ItemFetchSelector(agent)); //Check for items
         addChild(new Patrol(agent)); //Patrol
     }

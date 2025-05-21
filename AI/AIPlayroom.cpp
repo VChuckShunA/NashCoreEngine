@@ -46,7 +46,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     //Spawn AI
    
    
-  //  SpawnEnemies();
+    SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
@@ -169,8 +169,8 @@ void AIPlayroom::RemoveAgent(BaseAIAgent* ptr)
         agents.end()
     );
     ptr->agent->destroy();
-    delete ptr;
-    ptr = nullptr;
+    //delete ptr;
+    //ptr = nullptr;
 }
 
 void AIPlayroom::RemoveItem(Item* ptr)
@@ -238,6 +238,7 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
     //spawning bullet
     if (target)
     {
+        
     auto bullet = m_entityManager.addEntity("bullet", entity);
     bullet->addComponent<CAnimation>(m_game->assets().getAnimation("Buster"), true);
 
@@ -278,6 +279,30 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
     bullet->getComponent<CTransform>().velocity.y = sin(angleRadians) * speed;
     bullet->addComponent<CLifespan>(120, m_currentFrame);
     bullet->addComponent<CBoundingBox>(bullet->getComponent<CAnimation>().animation.getSize());
+    }
+
+    if (entity.get()->tag() == "player")
+    {
+        ammoCount--;
+        if (!ammoCount % 3)
+        {
+            std::cout << "Remove Ammo Now!" << std::endl;
+            for (auto it = inventory.rbegin(); it != inventory.rend(); ++it) {
+                if (*it == nullptr) continue;
+                if ((*it)->type == Item::ITM_AMMO) {
+                    // Remove it
+                   // auto forward_it = std::next(it).base();
+                    //room->inventory.erase(forward_it);
+                    ResizeInventory();
+                    *it = nullptr;
+                    // room->removeSlotAndCompact(removeCount);
+                    UpdateInventoryUI();
+                    std::cout << "INventory size " << inventory.size();
+                    break; // Exit after removing the first matching item from the end
+                }
+            }
+
+        }
     }
 }
 
@@ -599,7 +624,7 @@ void AIPlayroom::PlayerScanner()
 
             vision.seesPlayer = true;
             vision.Target = players[0]; //Change this so that it sets whatever it sees as the target
-            std::cout << "SAW THE PLAYER\n";
+            //std::cout << "SAW THE PLAYER\n";
     }
 
 
