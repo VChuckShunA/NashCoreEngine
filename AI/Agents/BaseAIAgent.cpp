@@ -311,3 +311,57 @@ Node::Status TurnTowardsTarget::update()
     agent.room->TurnTowardsTarget(agent.agent, agent.agent->getComponent<CVision>().Target, randDev);
     return BH_SUCCESS;
 }
+
+//class FleeToSafePosition : public Node {
+//public:
+//    BaseAIAgent& agent;
+//    Vec2 safeSpot;
+//    FleeToSafePosition(BaseAIAgent& ag) : agent(ag) {
+//        Name = "Flee To Safe Position";
+//        safeSpot = agent.room->GetSafeSpot();
+//    }
+//
+//    virtual void onInitialize() override {
+//        agent.initializeMoveToPoint(safeSpot);
+//    }
+//
+//    Status update() override {
+//
+//        if (!agent.destinationReached)
+//        {
+//            agent.MoveToPoint(safeSpot);
+//            std::cout << "Fleeing" << std::endl;
+//            return BH_RUNNING; //Not reached destination 
+//        }
+//        else if (agent.destinationReached) {
+//            return BH_SUCCESS; // Reached the point = success
+//        }
+//    }
+//};
+
+FleeToSafePosition::FleeToSafePosition(BaseAIAgent& ag):agent(ag) {
+            Name = "Flee To Safe Position";
+        }
+
+void FleeToSafePosition::onInitialize()
+{
+    Vec2  targetPosition = agent.room->positionToGridCordinates(agent.agent->getComponent<CVision>().Target);
+    Vec2  playePosition = agent.room->positionToGridCordinates(agent.agent);
+    oppositeDirection = agent.room->GetOppositeDirection(targetPosition, playePosition);
+    safeSpot = agent.room->GetSafeSpot(oppositeDirection, playePosition);
+    agent.initializeMoveToPoint(safeSpot);
+
+}
+
+Node::Status  FleeToSafePosition::update()
+{
+    if (!agent.destinationReached)
+                {
+                    agent.MoveToPoint(safeSpot);
+                    std::cout << "Fleeing to " << safeSpot.x << " , "<< safeSpot.y << std::endl;
+                    return BH_RUNNING; //Not reached destination 
+                }
+                else if (agent.destinationReached) {
+                    return BH_SUCCESS; // Reached the point = success
+                }
+}

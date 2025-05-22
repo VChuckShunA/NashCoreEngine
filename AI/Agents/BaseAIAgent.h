@@ -246,26 +246,13 @@ public:
 class FleeToSafePosition : public Node {
 public:
     BaseAIAgent& agent;
-    FleeToSafePosition(BaseAIAgent& ag) : agent(ag) {
-        Name = "Flee To Safe Position";
-    }
+    Vec2 oppositeDirection;
+    Vec2 safeSpot;
+    FleeToSafePosition(BaseAIAgent& ag);
 
-    virtual void onInitialize() override {
-        agent.initializeMoveToPoint(Vec2{ 0,0 });
-    }
+virtual void onInitialize() override;
 
-    Status update() override {
-
-        if (!agent.destinationReached)
-        {
-            agent.MoveToPoint(Vec2{ 0,0 });
-            std::cout << "Fleeing" << std::endl;
-            return BH_RUNNING; //Not reached destination 
-        }
-        else if (agent.destinationReached) {
-            return BH_SUCCESS; // Reached the point = success
-        }
-    }
+Status update() override;
 };
 
 

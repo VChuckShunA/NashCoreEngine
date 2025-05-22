@@ -103,5 +103,7 @@ public:
     float GetTurnAngle(const Vec2& entity, const Vec2& Target);
     void TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target, int randDev=0);
     void RunBehaviourTrees();
+    Vec2 GetOppositeDirection(Vec2 targetPosition, Vec2 PlayerPosition);
+    Vec2 GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition);
 };
 

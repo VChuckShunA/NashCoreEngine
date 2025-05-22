@@ -203,35 +203,7 @@ void AIPlayroom::RemoveItem(Item* ptr)
         }
     }
 
-    /*
-    items.erase(
-        std::remove_if(items.begin(), items.end(),
-            [](auto& up) { return up->pickedUp; }),
-        items.end()
-    );
-    if (ptr->type != 3) //Add to inventory if it's not a coin
-    {
-
-        for (size_t i = 0; i < inventory.size(); ++i) {
-            if (inventory[i] == nullptr) {
-                inventory[i] = std::move(ptr);
-                inventory[i]->entity->destroy();
-                std::cout << "new item type " << inventory[i]->type << std::endl;
-                // Update the HUD for that slot
-                static auto setSlotString = [&](size_t slotIndex, const std::string& s) {
-                    switch (slotIndex) {
-                    case 0: inventoryItem1 = s; break;
-                    case 1: inventoryItem2 = s; break;
-                    case 2: inventoryItem3 = s; break;
-                    case 3: inventoryItem4 = s; break;
-                    case 4: inventoryItem5 = s; break;
-                    }
-                };
-                setSlotString(i, enumToString(ptr->type));
-                return; // done
-            }
-        }
-    }   */
+   
 }
 
 void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& target) {
@@ -248,11 +220,8 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
                     if (*it == nullptr) continue;
                     if ((*it)->type == Item::ITM_AMMO) {
                         // Remove it
-                       // auto forward_it = std::next(it).base();
-                        //room->inventory.erase(forward_it);
                         ResizeInventory();
                         *it = nullptr;
-                        // room->removeSlotAndCompact(removeCount);
                         UpdateInventoryUI();
                         std::cout << "INventory size " << inventory.size();
                         break; // Exit after removing the first matching item from the end
@@ -1019,6 +988,60 @@ void AIPlayroom::RunBehaviourTrees()
     }
 }
 
+Vec2 AIPlayroom::GetOppositeDirection(Vec2 targetPosition, Vec2 playerPosition)
+{
+
+    int dx=0;
+    int dy=0;
+    if (targetPosition.x > playerPosition.x)
+    {
+        dx = -1;
+    }
+    else if (targetPosition.x < playerPosition.x)
+    {
+        dx = 1;
+    }
+    if (targetPosition.y > playerPosition.y)
+    {
+        dy = -1;
+    }
+    else if (targetPosition.y < playerPosition.y)
+    {
+        dy = 1;
+    }
+    Vec2 oppositeDirection(dx, dy);
+    return oppositeDirection;
+}
+
+Vec2 AIPlayroom::GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition)
+{    
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Mersenne Twister engine
+    std::uniform_int_distribution<> disx(5, 10);  // Uniform distribution in the range [min, max]
+    std::uniform_int_distribution<> disy(5, 10);  // Uniform distribution in the range [min, max]
+    //multiply them by direction
+    int xDir = disx(gen)* oppositeDirection.x;
+    int yDir = disy(gen)* oppositeDirection.y;
+    //Get Safe Spot
+    Vec2 safeSpot{ playePosition.x+xDir,playePosition.y+yDir};
+    //Clap Safe spot
+    safeSpot = {
+    std::clamp(safeSpot.x, 0.0f, static_cast<float>(navmesh.NAVMESH_WIDTH - 1)),
+    std::clamp(safeSpot.y, 0.0f, static_cast<float>(navmesh.NAVMESH_HEIGHT - 1))
+    };
+    //check if it's walkable
+    if (navmesh.navMesh[safeSpot.x][safeSpot.y].walkable)
+    {
+        std::cout << "Found a safe spot" << std::endl;
+        return safeSpot;
+    }
+    else
+    {
+        std::cout << "Trying again" << std::endl;
+        GetSafeSpot(oppositeDirection, playePosition);
+    }
+}
+
 
 void AIPlayroom::sLifespan() {
     // Check lifespan of entities that have them, and destroy them if they go over
@@ -1197,10 +1220,12 @@ void AIPlayroom::sRender() {
     }
 
     // set the viewport of the window to be centered on the player if it's far enough right
-   // auto& pPos = m_player->getComponent<CTransform>().pos;
-   // float windowCenterX = std::max(float(m_game->window().getSize().x) / 2.0f, pPos.x);
+   // set the viewport of the window to be centered on the player if it's far enough right
+    auto& pPos = playerPtr->agent->getComponent<CTransform>().pos;
+    float windowCenterX = std::max(float(m_game->window().getSize().x) / 2.0f, pPos.x);
+    float windowCenterY = std::max(float(m_game->window().getSize().y) / 2.0f, pPos.y);
     sf::View view = m_game->window().getView();
-    //view.setCenter(windowCenterX, float(m_game->window().getSize().y) - view.getCenter().y);
+    view.setCenter(pPos.x, pPos.y);
     m_game->window().setView(view);
 
     // draw all Entity textures / animations
@@ -1270,7 +1295,7 @@ void AIPlayroom::sRender() {
         , m_game->assets().getFont("Mario"), 20);
     HUD.setFillColor(sf::Color::White);
     HUD.setPosition(
-       20,25
+        pPos.x-625, pPos.y-375
     );
     m_game->window().draw(HUD);
 }
