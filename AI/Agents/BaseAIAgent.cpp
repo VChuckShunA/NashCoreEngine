@@ -276,6 +276,7 @@ Node::Status IsEnemyVisible::update()
     //agent.enemyState == VISIBLE
     //agent.agent->getComponent<CVision>().seesPlayer
     if (agent.agent->getComponent<CVision>().Target) {
+        std::cout << "Sees target" << std::endl;
         return Status::BH_SUCCESS;
     }
     return Status::BH_FAILURE;
@@ -312,32 +313,6 @@ Node::Status TurnTowardsTarget::update()
     return BH_SUCCESS;
 }
 
-//class FleeToSafePosition : public Node {
-//public:
-//    BaseAIAgent& agent;
-//    Vec2 safeSpot;
-//    FleeToSafePosition(BaseAIAgent& ag) : agent(ag) {
-//        Name = "Flee To Safe Position";
-//        safeSpot = agent.room->GetSafeSpot();
-//    }
-//
-//    virtual void onInitialize() override {
-//        agent.initializeMoveToPoint(safeSpot);
-//    }
-//
-//    Status update() override {
-//
-//        if (!agent.destinationReached)
-//        {
-//            agent.MoveToPoint(safeSpot);
-//            std::cout << "Fleeing" << std::endl;
-//            return BH_RUNNING; //Not reached destination 
-//        }
-//        else if (agent.destinationReached) {
-//            return BH_SUCCESS; // Reached the point = success
-//        }
-//    }
-//};
 
 FleeToSafePosition::FleeToSafePosition(BaseAIAgent& ag):agent(ag) {
             Name = "Flee To Safe Position";
@@ -364,4 +339,65 @@ Node::Status  FleeToSafePosition::update()
                 else if (agent.destinationReached) {
                     return BH_SUCCESS; // Reached the point = success
                 }
+}
+
+Wander::Wander(BaseAIAgent& ag):elapsed(0.0f), agent(ag),timeout(3.0f)
+{
+    Name = "Wandering";
+}
+
+void Wander::onInitialize()
+{
+    wanderSpot = agent.room->GetRandomWanderSpot();
+    agent.initializeMoveToPoint(wanderSpot);
+    clock.restart();
+}
+
+void Wander::reset() 
+{
+        elapsed = 0.0f;
+        timeout = 3.0f;
+        clock.restart();
+        m_eStatus = BH_INVALID;
+}
+
+Node::Status Wander::update()
+{
+    elapsed = clock.getElapsedTime().asSeconds();
+   
+
+    std::cout << "Wander Update: dt = " << 0 << ", elapsed = " << elapsed << ", timeout = " << timeout << std::endl;
+
+
+    if (agent.destinationReached) {
+        std::cout << "Wander: Destination Reached. Returning BH_SUCCESS." << std::endl;
+        return BH_SUCCESS;
+    }
+    if (elapsed >= timeout) {
+        std::cout << "Wander: Timeout (" << elapsed << " >= " << timeout << "). Returning BH_SUCCESS." << std::endl;
+        return BH_SUCCESS;
+    }
+    if (
+        agent.hasSeenAmmo ||
+        agent.hasSeenCoin ||
+        agent.hasSeenFood ||
+        agent.agent->getComponent<CVision>().seesPlayer ||
+        agent.agent->getComponent<CVision>().seesFood ||
+        agent.agent->getComponent<CVision>().seesCoin ||
+        agent.agent->getComponent<CVision>().seesAmmo||
+        agent.agent->getComponent<CVision>().Target) {
+        std::cout << "Wander: Interrupted by Perception. Returning BH_SUCCESS." << std::endl;
+        // You might want to log specifically *what* caused the interruption
+        if (agent.hasSeenAmmo) std::cout << "  - Saw Ammo" << std::endl;
+        if (agent.hasSeenCoin) std::cout << "  - Saw Coin" << std::endl;
+        if (agent.hasSeenFood) std::cout << "  - Saw Food" << std::endl;
+        if (agent.agent->getComponent<CVision>().seesPlayer) std::cout << "  - Saw Player" << std::endl;
+        return BH_SUCCESS; // Reached the point = success
+    } 
+
+    agent.MoveToPoint(wanderSpot);
+    std::cout << "Wandering (Still Running)" << std::endl;
+        return BH_RUNNING; //Not reached destination 
+    
+
 }

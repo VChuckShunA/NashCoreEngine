@@ -255,6 +255,21 @@ virtual void onInitialize() override;
 Status update() override;
 };
 
+class Wander : public Node {
+public:
+    float timeout;   // How many seconds to wait.
+    float elapsed;    // Accumulated time.
+    sf::Clock clock;  // Clock to measure delta time.
+    Vec2 wanderSpot;
+    BaseAIAgent& agent;
+    Wander(BaseAIAgent& ag);
+    virtual void onInitialize() override;
+
+    virtual void reset() override;
+    Status update() override;
+};
+
+
 
 class BlueAgentCombatSequence : public Selector
 {
@@ -272,7 +287,7 @@ public:
         engageSequence->addChild(new EngageCombat(agent));
         engageSequence->addChild(new WaitForSeconds(agent, 2));
 
-        StatefulSequence* fleeSequence = new StatefulSequence();
+        Sequence* fleeSequence = new Sequence();
         fleeSequence->addChild(new IsEnemyVisible(agent));
         fleeSequence->addChild(new FleeToSafePosition(agent));
         addChild(engageSequence);
@@ -414,6 +429,6 @@ public:
         addChild(new LowHealth(agent));  // First, try healing
         addChild(new BlueAgentCombatSequence(agent)); //If Enemy is in Range, Engage in Combat
         addChild(new ItemFetchSelector(agent)); //Check for items
-        addChild(new Patrol(agent)); //Patrol
+        addChild(new Wander(agent)); //Patrol
     }
 };

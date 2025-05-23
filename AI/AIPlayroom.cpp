@@ -818,7 +818,7 @@ void AIPlayroom::SpawnEnemies()
     auto e2 = m_entityManager.addEntity("agent");
     e2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e2->addComponent<CTransform>(
-        gridToMidPixel(4, 0, e2),
+        gridToMidPixel(11, 0, e2),
         Vec2(3, 0),
         Vec2(1, 1),
         0
@@ -1037,8 +1037,32 @@ Vec2 AIPlayroom::GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition)
     }
     else
     {
-        std::cout << "Trying again" << std::endl;
+        std::cout << "Can't walk to safe spot, trying again" << std::endl;
         GetSafeSpot(oppositeDirection, playePosition);
+    }
+}
+
+Vec2 AIPlayroom::GetRandomWanderSpot()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Mersenne Twister engine
+    std::uniform_int_distribution<> disx(0, navmesh.NAVMESH_WIDTH - 1);  // Uniform distribution in the range [min, max]
+    std::uniform_int_distribution<> disy(0, navmesh.NAVMESH_HEIGHT - 1);  // Uniform distribution in the range [min, max]
+    //multiply them by direction
+    int xVal = disx(gen);
+    int yVal = disy(gen);
+    //Get Safe Spot
+    Vec2 safeSpot{ static_cast<float>(xVal),static_cast<float>(yVal) };
+    //check if it's walkable
+    if (navmesh.navMesh[safeSpot.x][safeSpot.y].walkable)
+    {
+        std::cout << "Found a random spot "<< safeSpot.x<< " , "<< safeSpot.y << std::endl;
+        return safeSpot;
+    }
+    else
+    {
+        std::cout << "Can't walk to random spot, trying again" << std::endl;
+        GetRandomWanderSpot();
     }
 }
 

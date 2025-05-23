@@ -105,5 +105,6 @@ public:
     void RunBehaviourTrees();
     Vec2 GetOppositeDirection(Vec2 targetPosition, Vec2 PlayerPosition);
     Vec2 GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition);
+    Vec2 GetRandomWanderSpot();
 };
 
