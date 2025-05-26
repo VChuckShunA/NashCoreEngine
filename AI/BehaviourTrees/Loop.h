@@ -22,9 +22,7 @@ public:
         child->reset();
         m_eStatus = BH_INVALID;
     }
-    virtual ~Loop() {
-        delete child;
-    }
+    virtual ~Loop() = default;
 private:
-    Node* child;
+    std::unique_ptr<Node> child;
 };

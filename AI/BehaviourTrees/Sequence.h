@@ -5,10 +5,10 @@ class Sequence : public Node {
 public:
     Sequence(){ Name = "Sequence"; }
     void addChild(Node* child) {
-        m_Children.push_back(child);
+        m_Children.emplace_back(std::move(child));
     }
     Status update() override {
-        for (Node* child : m_Children) {
+        for (const auto& child : m_Children) {
             Status status = child->tick();
             if (status != BH_SUCCESS) {
                 return status;
@@ -16,10 +16,7 @@ public:
         }
         return BH_SUCCESS;
     }
-    ~Sequence() {
-        for (Node* child : m_Children)
-            delete child;
-    }
+    ~Sequence() = default;
 private:
-    std::vector<Node*> m_Children;
+    std::vector<std::unique_ptr<Node>>  m_Children;
 };

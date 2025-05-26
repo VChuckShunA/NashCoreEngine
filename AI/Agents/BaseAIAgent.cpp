@@ -378,13 +378,13 @@ Node::Status Wander::update()
         return BH_SUCCESS;
     }
     if (
-        agent.hasSeenAmmo ||
-        agent.hasSeenCoin ||
-        agent.hasSeenFood ||
+        (agent.hasSeenAmmo && agent.needsAmmo() )||
+        agent.hasSeenCoin  ||
+        (agent.hasSeenFood && agent.needsFood()) ||
         agent.agent->getComponent<CVision>().seesPlayer ||
-        agent.agent->getComponent<CVision>().seesFood ||
+        (agent.agent->getComponent<CVision>().seesFood && agent.needsFood()) ||
         agent.agent->getComponent<CVision>().seesCoin ||
-        agent.agent->getComponent<CVision>().seesAmmo||
+        (agent.agent->getComponent<CVision>().seesAmmo && agent.needsAmmo()) ||
         agent.agent->getComponent<CVision>().Target) {
         std::cout << "Wander: Interrupted by Perception. Returning BH_SUCCESS." << std::endl;
         // You might want to log specifically *what* caused the interruption

@@ -5,7 +5,6 @@
 #include "../BehaviourTrees/Selector.h"
 #include "../BehaviourTrees/Sequence.h"
 #include "../BehaviourTrees/StatefulSequence.h"
-#include "../BehaviourTrees/Loop.h"
 #include "../../EntityManager.h"
 #include <SFML/System.hpp>
 

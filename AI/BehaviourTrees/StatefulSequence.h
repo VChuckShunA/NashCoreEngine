@@ -4,13 +4,13 @@
 class StatefulSequence : public Node {
 public:
     void addChild(Node* child) {
-        m_Children.push_back(child);
+        m_Children.emplace_back(std::move(child));
     }
 
     // Reset the sequence state when starting a new patrol cycle
     virtual void reset() {
         currentIndex = 0;
-        for (auto child : m_Children) {
+        for (const auto& child : m_Children) {
             child->reset();
         }
         m_eStatus = BH_INVALID;
@@ -54,15 +54,12 @@ public:
 
     Node* getCurrentChild() const {
         
-            return m_Children[currentIndex];
+            return m_Children[currentIndex].get();
         
     }
     StatefulSequence(){ Name = "Stateful Sequence"; }
-    ~StatefulSequence() {
-        for (Node* child : m_Children) delete child;
-        
-    }
+    ~StatefulSequence() = default;
 private:
-    std::vector<Node*> m_Children;
+    std::vector<std::unique_ptr<Node>>  m_Children;
     size_t currentIndex=0;
 };
