@@ -1286,28 +1286,60 @@ void AIPlayroom::sRender() {
 
     navmesh.DrawPath(m_game->window());
     drawVisionCone();
-    // draw the grid 
+    //// draw the grid 
+    //if (m_drawGrid) {
+    //    float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
+    //    float rightX = leftX + width() + m_gridSize.x;
+    //    float nextGridX = leftX - float((int)leftX % (int)m_gridSize.x);
+
+    //    for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
+    //        drawLine(Vec2(x, 0), Vec2(x, height()));
+    //    }
+
+    //    for (float y = 0; y < height(); y += float(m_gridSize.y)) {
+    //        drawLine(Vec2(leftX, height() - y), Vec2(rightX, height() - y));
+
+    //        for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
+    //            std::string xCell = std::to_string((int)x / (int)m_gridSize.x);
+    //            std::string yCell = std::to_string(((int)y / (int)m_gridSize.y));
+    //            m_gridText.setString("(" + xCell + "," + yCell + ")");
+    //            m_gridText.setPosition(x + 3, height() - y - m_gridSize.y + 2);
+    //            m_game->window().draw(m_gridText);
+    //        }
+    //    }
+    //}
+
     if (m_drawGrid) {
-        float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
-        float rightX = leftX + width() + m_gridSize.x;
-        float nextGridX = leftX - float((int)leftX % (int)m_gridSize.x);
+    float leftX = 0.0f;
+    float rightX = navmesh.NAVMESH_WIDTH * m_gridSize.x;
+    float bottomY = 0.0f;
+    float topY = navmesh.NAVMESH_HEIGHT * m_gridSize.y;
 
-        for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
-            drawLine(Vec2(x, 0), Vec2(x, height()));
-        }
+    // Vertical lines (X varies, Y spans full navmesh height)
+    for (float x = 0.0f; x <= rightX; x += m_gridSize.x) {
+        drawLine(
+            Vec2(x, height() - 0.0f),                      // Bottom-left Y flipped
+            Vec2(x, height() - topY),                  // Top-left Y flipped
+            sf::Color::Green
+        );
+    }
+    // Horizontal grid lines (flip Y to draw from bottom-left)
+    for (float y = 0.0f; y <= topY; y += m_gridSize.y) {
+        float flippedY = height() - y;
+        drawLine(Vec2(leftX, flippedY), Vec2(rightX, flippedY), sf::Color::Green);
 
-        for (float y = 0; y < height(); y += float(m_gridSize.y)) {
-            drawLine(Vec2(leftX, height() - y), Vec2(rightX, height() - y));
+        // Cell labels (flip Y)
+        for (float x = leftX; x <= rightX; x += m_gridSize.x) {
+            int xCell = static_cast<int>(x / m_gridSize.x);
+            int yCell = static_cast<int>(y / m_gridSize.y);
 
-            for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
-                std::string xCell = std::to_string((int)x / (int)m_gridSize.x);
-                std::string yCell = std::to_string(((int)y / (int)m_gridSize.y));
-                m_gridText.setString("(" + xCell + "," + yCell + ")");
-                m_gridText.setPosition(x + 3, height() - y - m_gridSize.y + 2);
-                m_game->window().draw(m_gridText);
-            }
+            m_gridText.setString("(" + std::to_string(xCell) + "," + std::to_string(yCell) + ")");
+            m_gridText.setPosition(x + 3, flippedY - m_gridSize.y + 3);  // Position inside the cell
+            m_gridText.setFillColor(sf::Color::Green);
+            m_game->window().draw(m_gridText);
         }
     }
+}
     int currentHealth = playerPtr->getHealth();
    
   
