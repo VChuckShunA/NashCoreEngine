@@ -3,17 +3,18 @@
 #include "../SceneMenu.h"
 #include "../Vec2.h"
 #include "../Physics.h"
+#include "Agents/GreenAgent.h"
+#include "Agents/BlueAgent.h"
+#include "House/HouseGenerator.h"
+#include "Health.h"
+#include "Ammo.h"
+#include "Coin.h"
+#include "Item.h"
 #include <iostream>
 #include <fstream>
 #include <chrono>
 #include <math.h>
 #include<numbers>
-#include "Agents/GreenAgent.h"
-#include "Agents/BlueAgent.h"
-#include "Health.h"
-#include "Ammo.h"
-#include "Coin.h"
-#include "Item.h"
 #include <random>
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
@@ -44,13 +45,16 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
+    HouseGenerator::GenerateWareHouse(navmesh, *this);
+    HouseGenerator::GenerateLHouse(navmesh, *this);
+    HouseGenerator::GenerateEightHouse(navmesh, *this);
+    HouseGenerator::GenerateMansion(navmesh, *this);
    
-   
-    SpawnEnemies();
+   // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(2, 6, p1),
+        gridToMidPixel(24, 3, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -93,7 +97,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto item4 = m_entityManager.addEntity("ammo");
     item4->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
     item4->addComponent<CTransform>(
-        gridToMidPixel(19, 9, item4),
+        gridToMidPixel(19, 10, item4),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -1066,6 +1070,19 @@ Vec2 AIPlayroom::GetRandomWanderSpot()
     }
 }
 
+void AIPlayroom::CreateEntity(std::string tag, Vec2 position, std::string AnimationName)
+{
+    auto entity = m_entityManager.addEntity(tag);
+    entity->addComponent<CAnimation>(m_game->assets().getAnimation(AnimationName), true);
+    entity->addComponent<CTransform>(
+        gridToMidPixel(position.x,position.y, entity),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    entity->addComponent<CBoundingBox>(Vec2(64, 64));
+}
+
 
 void AIPlayroom::sLifespan() {
     // Check lifespan of entities that have them, and destroy them if they go over
@@ -1284,7 +1301,8 @@ void AIPlayroom::sRender() {
         }
     }
 
-    navmesh.DrawPath(m_game->window());
+    if(m_drawGrid)
+        navmesh.DrawPath(m_game->window());
     drawVisionCone();
     //// draw the grid 
     //if (m_drawGrid) {

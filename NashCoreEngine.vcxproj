@@ -174,6 +174,8 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="AI\Agents\GreenAgent.cpp" />
     <ClCompile Include="AI\Health.cpp" />
+    <ClCompile Include="AI\House\House.cpp" />
+    <ClCompile Include="AI\House\HouseGenerator.cpp" />
     <ClCompile Include="imgui\imgui-SFML.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -217,6 +219,8 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="AI\Agents\GreenAgent.h" />
     <ClInclude Include="AI\Health.h" />
+    <ClInclude Include="AI\House\House.h" />
+    <ClInclude Include="AI\House\HouseGenerator.h" />
     <ClInclude Include="imgui\imconfig-SFML.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui-SFML.h" />

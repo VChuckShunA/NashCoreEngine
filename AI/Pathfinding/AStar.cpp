@@ -1,6 +1,8 @@
 #include "AStar.h"
 #include <unordered_set>
+#include "../../EntityManager.h"
 #include <iostream>
+class EntityManager;
 void AStar::initializeNavMesh()
 {
 	navMesh.resize(NAVMESH_HEIGHT, std::vector<Node>(NAVMESH_WIDTH, Node({ Vec2(0,0)}, true)));
@@ -21,7 +23,8 @@ void AStar::initializeNavMesh()
 void AStar::markObstacles()
 {
 	
-	markObstacle(5,2);
+	
+	/*markObstacle(5,2);
 	markObstacle(5, 3);
 	markObstacle(5, 4);
 	markObstacle(5, 5);
@@ -79,7 +82,7 @@ void AStar::markObstacles()
 	markObstacle(8, 11);
 	markObstacle(9, 11);
 	markObstacle(10, 11);
-	markObstacle(11, 11);
+	markObstacle(11, 11);*/
 }
 
 void AStar::markObstacle(int x, int y)
@@ -183,7 +186,20 @@ void AStar::DrawPath(sf::RenderWindow& window)
 		for (int x = 0; x < NAVMESH_WIDTH; ++x) {
 			sf::RectangleShape cell(sf::Vector2f(64, 64));
 			cell.setPosition(x * 64, windowSize.y - (y + 1) * 64);
-			cell.setFillColor(navMesh[x][y].walkable ? sf::Color::Transparent : sf::Color::Red);
+			if (navMesh[x][y].walkable && !navMesh[x][y].insideHouse)
+			{
+				cell.setFillColor(sf::Color::Transparent);
+			}
+			if (navMesh[x][y].walkable && navMesh[x][y].insideHouse)
+			{
+				cell.setFillColor(sf::Color::White);
+			}
+			if (!navMesh[x][y].walkable)
+			{
+				cell.setFillColor(sf::Color::Red);
+			}
+			//cell.setFillColor(navMesh[x][y].walkable ? sf::Color::Transparent : sf::Color::Red);
+			//cell.setFillColor(navMesh[x][y].insideHouse ? sf::Color::White : sf::Color::Transparent);
 			window.draw(cell);
 		}
 	}

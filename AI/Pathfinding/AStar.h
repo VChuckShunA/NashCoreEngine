@@ -4,6 +4,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <array>
+class AIPlayroom;
 class AStar
 {
 public:
@@ -11,9 +12,14 @@ public:
 		Vec2 position;
 		int gCost, hCost, fCost;
 		bool walkable;
+		bool insideHouse;
+		bool scanned;
 		Node* parent;
 
-		Node(Vec2 pos,bool isWalkable) : position(pos),gCost(0),hCost(0),walkable(isWalkable),parent(nullptr){}
+		Node(Vec2 pos,bool isWalkable) : position(pos),gCost(0),hCost(0),walkable(isWalkable),parent(nullptr){
+			insideHouse = false;
+			scanned = false;
+		}
 		void CalculateCosts(Node* endNode)
 		{
 			hCost = std::abs(position.x - endNode->position.x) + std::abs(position.y - endNode->position.y);
@@ -23,7 +29,7 @@ public:
 
 
 
-	const int NAVMESH_WIDTH = 100, NAVMESH_HEIGHT = 100;
+	const int NAVMESH_WIDTH = 33, NAVMESH_HEIGHT = 33;
 	std::vector<std::vector<Node>> navMesh;
 
 	void initializeNavMesh();
