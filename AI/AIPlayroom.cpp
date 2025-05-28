@@ -54,7 +54,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(24, 3, p1),
+        gridToMidPixel(18, 8, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -308,7 +308,7 @@ void AIPlayroom::update() {
 
 bool AIPlayroom::LineOfSight(const Vec2& A, const Vec2& P)
 {
-    for (auto& brick : m_entityManager.getEntities("bricks")) {
+    for (auto& brick : m_entityManager.getEntities("Brick")) {
         auto& T = brick->getComponent<CTransform>();
         auto& B = brick->getComponent<CBoundingBox>();
         float xmin = T.pos.x - B.halfSize.x,

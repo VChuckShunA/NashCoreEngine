@@ -42,8 +42,6 @@ public:
 	void updateCurrentPath(const Vec2& Destination);
 
     void TakeDamage(std::shared_ptr<Entity> Instigator);
-	void shootEnemy();
-	void flee();
 	void enterHouse();
 	void searchHouse();
 	void consumeFood();

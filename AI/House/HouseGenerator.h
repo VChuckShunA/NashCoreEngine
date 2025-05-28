@@ -13,5 +13,6 @@ public:
 	static void GenerateVerticalWall(AStar& navmesh, AIPlayroom& room,int y1,int y2, int x);
 
 	static void GenerateHorizontalWall(AStar& navmesh, AIPlayroom& room, int x1, int x2, int y);
+	static void MarkAreaAsHouse(AStar& navmesh, int x1, int x2, int y1,int y2);
 };
 

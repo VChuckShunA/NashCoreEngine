@@ -341,7 +341,7 @@ Node::Status  FleeToSafePosition::update()
                 }
 }
 
-Wander::Wander(BaseAIAgent& ag):elapsed(0.0f), agent(ag),timeout(3.0f)
+Wander::Wander(BaseAIAgent& ag):elapsed(0.0f), agent(ag),timeout(10.0f)
 {
     Name = "Wandering";
 }
@@ -356,7 +356,7 @@ void Wander::onInitialize()
 void Wander::reset() 
 {
         elapsed = 0.0f;
-        timeout = 3.0f;
+        timeout = 10.0f;
         clock.restart();
         m_eStatus = BH_INVALID;
 }
