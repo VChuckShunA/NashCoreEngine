@@ -366,15 +366,15 @@ Node::Status Wander::update()
     elapsed = clock.getElapsedTime().asSeconds();
    
 
-    std::cout << "Wander Update: dt = " << 0 << ", elapsed = " << elapsed << ", timeout = " << timeout << std::endl;
+   // std::cout << "Wander Update: dt = " << 0 << ", elapsed = " << elapsed << ", timeout = " << timeout << std::endl;
 
 
     if (agent.destinationReached) {
-        std::cout << "Wander: Destination Reached. Returning BH_SUCCESS." << std::endl;
+    //    std::cout << "Wander: Destination Reached. Returning BH_SUCCESS." << std::endl;
         return BH_SUCCESS;
     }
     if (elapsed >= timeout) {
-        std::cout << "Wander: Timeout (" << elapsed << " >= " << timeout << "). Returning BH_SUCCESS." << std::endl;
+   //     std::cout << "Wander: Timeout (" << elapsed << " >= " << timeout << "). Returning BH_SUCCESS." << std::endl;
         return BH_SUCCESS;
     }
     if (
@@ -386,17 +386,17 @@ Node::Status Wander::update()
         agent.agent->getComponent<CVision>().seesCoin ||
         (agent.agent->getComponent<CVision>().seesAmmo && agent.needsAmmo()) ||
         agent.agent->getComponent<CVision>().Target) {
-        std::cout << "Wander: Interrupted by Perception. Returning BH_SUCCESS." << std::endl;
+       // std::cout << "Wander: Interrupted by Perception. Returning BH_SUCCESS." << std::endl;
         // You might want to log specifically *what* caused the interruption
-        if (agent.hasSeenAmmo) std::cout << "  - Saw Ammo" << std::endl;
+     /*   if (agent.hasSeenAmmo) std::cout << "  - Saw Ammo" << std::endl;
         if (agent.hasSeenCoin) std::cout << "  - Saw Coin" << std::endl;
         if (agent.hasSeenFood) std::cout << "  - Saw Food" << std::endl;
-        if (agent.agent->getComponent<CVision>().seesPlayer) std::cout << "  - Saw Player" << std::endl;
+        if (agent.agent->getComponent<CVision>().seesPlayer) std::cout << "  - Saw Player" << std::endl;*/
         return BH_SUCCESS; // Reached the point = success
     } 
 
     agent.MoveToPoint(wanderSpot);
-    std::cout << "Wandering (Still Running)" << std::endl;
+  //  std::cout << "Wandering (Still Running)" << std::endl;
         return BH_RUNNING; //Not reached destination 
     
 

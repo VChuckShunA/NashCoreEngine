@@ -13,7 +13,6 @@ class Scene {
 protected:
     friend class BaseAIAgent;
     GameEngine* m_game = nullptr;
-    EntityManager m_entityManager;
     ActionMap m_actionMap;
     bool m_paused = false;
     bool m_hasEnded = false;
@@ -25,6 +24,7 @@ protected:
 
 public:
 
+    EntityManager m_entityManager;
     Scene();
 
     explicit Scene(GameEngine* gameEngine);

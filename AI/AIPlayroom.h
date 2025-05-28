@@ -73,6 +73,7 @@ public:
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
     void ItemScanner();
+    void WallChecker();
     void EnemyScanner();
     void PlayerScanner();
     void drawVisionCone();
@@ -107,5 +108,7 @@ public:
     Vec2 GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition);
     Vec2 GetRandomWanderSpot();
     void CreateEntity(std::string tag, Vec2 position, std::string AnimationName);
-};
 
+
+    friend class BaseAIAgent;
+};

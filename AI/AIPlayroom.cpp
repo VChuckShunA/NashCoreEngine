@@ -455,6 +455,7 @@ void AIPlayroom::sVisionCone()
     PlayerScanner();
     EnemyScanner();
     ItemScanner();
+    WallChecker();
 }
 
 void AIPlayroom::ItemScanner()
@@ -520,6 +521,59 @@ void AIPlayroom::ItemScanner()
     }
 
 }
+
+
+void AIPlayroom::WallChecker()
+{
+
+    auto& vision = playerPtr->agent->getComponent<CVision>();
+    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    Vec2  eye = transform.pos;
+
+    // Reset visibility
+    vision.seesWall= false;
+
+
+    // Build look direction
+    float angRad = transform.angle * (std::numbers::pi / 180.0f);
+    Vec2  lookDir{ std::cos(angRad), std::sin(angRad) };
+
+    for (auto& brick : m_entityManager.getEntities("Brick"))
+    {
+        Vec2 P = brick->getComponent<CTransform>().pos;
+
+        //FOV + range test
+        if (vision.IsTargetInFOV(eye, lookDir, P))
+        {
+            // vision.Item = nullptr;
+            vision.seesWall = true;
+            std::cout << "WAAAAALLLLLLLLLLL" << std::endl;
+            return;
+
+        }
+        ////Occlusion test
+        //if (!LineOfSight(eye, P))
+        //{
+
+        //    std::cout << "NO WALL " << std::endl;
+        //    // vision.Item = nullptr;
+        //    continue;
+        //}
+
+        //Item Seen
+        //vision.Item = item->entity;
+        // Optionally set a generic Target pointer if you want to pick one
+
+
+        // If you only care about the *first* visible item, you can break here:
+         //break;
+    }
+
+}
+
+
+
+
 
 void AIPlayroom::EnemyScanner()
 {

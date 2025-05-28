@@ -9,7 +9,6 @@
 #include <SFML/System.hpp>
 
 class AIPlayroom;
-
 class BaseAIAgent
 {
 private:
@@ -266,6 +265,116 @@ public:
     Status update() override;
 };
 
+class IsNearWall : public Node {
+    IsNearWall(BaseAIAgent& ag) :agent(ag) {}
+
+private:
+    BaseAIAgent& agent;
+public:
+    Status update() override {
+        /*if (Physics::IsWallNearby(agent.transform.position)) {
+            return BH_SUCCESS;
+        }*/
+        
+        //for (auto& wall : agent.room->m_entityManager.getEntities("Brick")) {
+        //    if (Physics::GetOverlap(agent.agent, agent.getComponent<CBoundingBox>(),
+        //        wall->getComponent<CTransform>(), wall->getComponent<CBoundingBox>())) {
+        //        // Store wall normal for tracing (simplified to vector difference)
+        //        agent.wallNormal = (agent.getComponent<CTransform>().pos - wall->getComponent<CTransform>().pos).normalized();
+        //        return Status::Success;
+        //    }
+        //}
+        //return Status::Failure;
+        return BH_FAILURE;
+    }
+}; 
+
+class IsDoorVisible : public Node {
+    IsDoorVisible(BaseAIAgent& agent) {}
+    Status update() override {
+        /*if (Physics::IsWallNearby(agent.transform.position)) {
+            return BH_SUCCESS;
+        }*/
+        return BH_FAILURE;
+    }
+};
+
+
+class WallTrace : public Node
+{
+public:
+    WallTrace(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
+        Name = "Move To Point";
+        // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
+    }
+private:
+    BaseAIAgent& greenAgent;
+    Vec2& Waypoint;
+
+    virtual void onInitialize() override {
+
+        greenAgent.initializeMoveToPoint(Waypoint);
+    }
+
+    virtual Status update() override {
+        // std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
+        if (!greenAgent.destinationReached)
+        {
+            greenAgent.MoveToPoint(Waypoint);
+            return BH_RUNNING; //Not reached destination 
+        }
+        else if (greenAgent.destinationReached) {
+            return BH_SUCCESS; // Reached the point = success
+        }
+
+    }
+};
+
+class EnterThroughDoor : public Node
+{
+public:
+    EnterThroughDoor(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
+        Name = "Move To Point";
+        // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
+    }
+private:
+    BaseAIAgent& greenAgent;
+    Vec2& Waypoint;
+
+    virtual void onInitialize() override {
+
+        greenAgent.initializeMoveToPoint(Waypoint);
+    }
+
+    virtual Status update() override {
+        // std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
+        if (!greenAgent.destinationReached)
+        {
+            greenAgent.MoveToPoint(Waypoint);
+            return BH_RUNNING; //Not reached destination 
+        }
+        else if (greenAgent.destinationReached) {
+            return BH_SUCCESS; // Reached the point = success
+        }
+
+    }
+};
+
+
+class WallTraceToDoor : public Selector {
+public:
+    WallTraceToDoor(BaseAIAgent& ag) {
+        Sequence* isNearWall = new Sequence();
+    }
+};
+class HouseSearch : public Node {
+public:
+    BaseAIAgent& agent;
+    HouseSearch(BaseAIAgent& ag);
+    virtual void onInitialize() override;
+    virtual void reset() override;
+    Status update() override;
+};
 
 
 class BlueAgentCombatSequence : public Selector

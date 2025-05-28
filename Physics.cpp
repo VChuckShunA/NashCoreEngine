@@ -65,3 +65,9 @@ float Physics::getBottom(const std::shared_ptr<Entity>& entity)
     return entity->getComponent<CTransform>().pos.y - entity->getComponent<CBoundingBox>().halfSize.y;
 }
 
+bool Physics::GetOverlapPoint(const Vec2& point, const CTransform& boxTransform, const CBoundingBox& box) {
+    Vec2 min = boxTransform.pos - box.halfSize;
+    Vec2 max = boxTransform.pos + box.halfSize;
+    return (point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y);
+}
+
