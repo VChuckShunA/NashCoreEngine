@@ -323,8 +323,34 @@ private:
         Vec2 dir = { std::cos(agent.agent->getComponent<CTransform>().angle), std::sin(agent.agent->getComponent<CTransform>().angle) };
         // Calculate Vector from the wall
         bool wallRight = false;
-        bool wallUp = false;
-        Vec2 agentToWall = agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos - transform.pos;
+        bool wallUp = false; 
+        float xNormal;
+        float yNormal;
+        if (agent.agent->getComponent<CVision>().Wall)
+        {
+            xNormal = std::abs(agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.x - transform.pos.x);
+            yNormal = std::abs(agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.y - transform.pos.y);
+        }
+        if (agent.agent->getComponent<CVision>().Wall)
+        { 
+            if (agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.x > transform.pos.x)
+            {
+                wallRight = true;
+            }
+
+            if (agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.y < transform.pos.y)
+            {
+                wallUp = true;
+            }
+        }
+        /*
+        Vec2 agentToWall;
+        
+        if (agent.agent->getComponent<CVision>().Wall)
+        {
+
+            agentToWall = agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos - transform.pos;
+        }
         float side = dir.cross(agentToWall);
         agentToWall.normalize(); //NOTE: if anything happens, check if this is the problem.
         float dot = dir.dot(agentToWall);
@@ -346,12 +372,22 @@ private:
                 dir = dir.rotated(-smallAngle);
             }
 
+            */
+
             // Move agent
             //transform.pos += dir * speed;// *Time::deltaTime;
             //agent.MoveToPoint(Waypoint);
-            std::cout << "Right : " << wallRight << std::endl;
-            std::cout << "Up : " << wallUp << std::endl;
-            return BH_SUCCESS;
+        std::cout << "Right : " << wallRight << std::endl;
+        std::cout << "Up : " << wallUp << std::endl;
+        if (yNormal > xNormal)
+        {
+            std::cout << "Move Left/Right" << std::endl;
+        }
+        if (yNormal < xNormal)
+        {
+            std::cout << "Move Up/Down" << std::endl;
+        }
+            return BH_FAILURE;
  
 
     }

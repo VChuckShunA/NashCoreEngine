@@ -734,8 +734,22 @@ void AIPlayroom::ManageInventory()
         {
             if (0 <= overlap.x && pOverlap.x <= 0)
             {
-                item->AddToPlayer(this);
-                break;
+                if (item->type == Item::ITM_COIN)
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                {
+                    item->AddToPlayer(this);
+                    break;
+
+                }
 
             }
         }
@@ -744,9 +758,22 @@ void AIPlayroom::ManageInventory()
             if (0 <= overlap.y && pOverlap.y <= 0)
             {
 
-                item->AddToPlayer(this);
+                if (item->type == Item::ITM_COIN)
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                {
+                    item->AddToPlayer(this);
+                    break;
 
-                break;
+                }
                
             }
         }
@@ -756,9 +783,22 @@ void AIPlayroom::ManageInventory()
             if (0 <= overlap.y && pOverlap.y <= 0)
             {
 
-                item->AddToPlayer(this);
+                if (item->type == Item::ITM_COIN)
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                {
+                    item->AddToPlayer(this);
+                    break;
 
-                break;
+                }
               
             }
         }
@@ -767,10 +807,22 @@ void AIPlayroom::ManageInventory()
         {
             if (0 <= overlap.x && pOverlap.x <= 0)
             {
+                if (item->type == Item::ITM_COIN)
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                {
+                    item->AddToPlayer(this);
+                    break;
+                }
+                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                {
+                    item->AddToPlayer(this);
+                    break;
 
-                item->AddToPlayer(this);
-
-                break;
+                }
              
             }
         }
