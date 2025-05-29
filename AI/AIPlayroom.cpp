@@ -54,7 +54,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(18, 8, p1),
+        gridToMidPixel(20, 17, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -531,7 +531,7 @@ void AIPlayroom::WallChecker()
     Vec2  eye = transform.pos;
 
     // Reset visibility
-    vision.seesWall= false;
+   // vision.seesWall= false;
 
 
     // Build look direction
@@ -547,10 +547,13 @@ void AIPlayroom::WallChecker()
         {
             // vision.Item = nullptr;
             vision.seesWall = true;
-            std::cout << "WAAAAALLLLLLLLLLL" << std::endl;
+            vision.Wall = brick;
+            std::cout << "Wall at "<< positionToGridCordinates(brick).x << " , " << positionToGridCordinates(brick).y << std::endl;
             return;
 
         }
+        vision.seesWall = false;
+        vision.Wall = nullptr;
         ////Occlusion test
         //if (!LineOfSight(eye, P))
         //{

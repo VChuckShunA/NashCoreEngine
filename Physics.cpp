@@ -71,3 +71,16 @@ bool Physics::GetOverlapPoint(const Vec2& point, const CTransform& boxTransform,
     return (point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y);
 }
 
+Vec2 Physics::GetWallNormal(const Vec2& agentPos, const Vec2& wallPos)
+{
+    Vec2 delta = agentPos - wallPos;
+    Vec2 absDelta = Vec2(std::abs(delta.x), std::abs(delta.y));
+
+    if (absDelta.x > absDelta.y) {
+        return (delta.x > 0) ? Vec2(1, 0) : Vec2(-1, 0); // Right or Left
+    }
+    else {
+        return (delta.y > 0) ? Vec2(0, 1) : Vec2(0, -1); // Up or Down
+    }
+}
+

@@ -6,6 +6,7 @@
 #include "../BehaviourTrees/Sequence.h"
 #include "../BehaviourTrees/StatefulSequence.h"
 #include "../../EntityManager.h"
+#include "../../Physics.h"
 #include <SFML/System.hpp>
 
 class AIPlayroom;
@@ -26,6 +27,7 @@ public:
     bool hasSeenAmmo = false;
     bool hasSeenCoin = false;
 	bool destinationReached = false;
+    Vec2 wallNormal;
 	BaseAIAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
 
 	AIPlayroom* room;
@@ -266,25 +268,20 @@ public:
 };
 
 class IsNearWall : public Node {
-    IsNearWall(BaseAIAgent& ag) :agent(ag) {}
 
 private:
     BaseAIAgent& agent;
 public:
+
+    IsNearWall(BaseAIAgent& ag) :agent(ag) {}
     Status update() override {
-        /*if (Physics::IsWallNearby(agent.transform.position)) {
-            return BH_SUCCESS;
-        }*/
         
-        //for (auto& wall : agent.room->m_entityManager.getEntities("Brick")) {
-        //    if (Physics::GetOverlap(agent.agent, agent.getComponent<CBoundingBox>(),
-        //        wall->getComponent<CTransform>(), wall->getComponent<CBoundingBox>())) {
-        //        // Store wall normal for tracing (simplified to vector difference)
-        //        agent.wallNormal = (agent.getComponent<CTransform>().pos - wall->getComponent<CTransform>().pos).normalized();
-        //        return Status::Success;
-        //    }
-        //}
-        //return Status::Failure;
+            if (agent.agent->getComponent<CVision>().seesWall) {
+                // Store wall normal for tracing (simplified to vector difference)
+                agent.wallNormal = Physics::GetWallNormal(agent.agent->getComponent<CTransform>().pos, agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos);
+                std::cout << "Found Wall \n" << "Wall Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
+                return BH_SUCCESS;
+            }
         return BH_FAILURE;
     }
 }; 
@@ -361,10 +358,18 @@ private:
 };
 
 
-class WallTraceToDoor : public Selector {
+class WallTraceToDoorSequence : public Selector {
 public:
-    WallTraceToDoor(BaseAIAgent& ag) {
-        Sequence* isNearWall = new Sequence();
+    WallTraceToDoorSequence(BaseAIAgent& agent) {
+
+        StatefulSequence* wallTraceSequence = new StatefulSequence();
+        wallTraceSequence->addChild(new IsNearWall(agent));
+
+
+        StatefulSequence* houseSearchSequence = new StatefulSequence();
+
+        addChild(wallTraceSequence);
+        //addChild(fleeSequence);
     }
 };
 class HouseSearch : public Node {
@@ -535,6 +540,7 @@ public:
         addChild(new LowHealth(agent));  // First, try healing
         addChild(new BlueAgentCombatSequence(agent)); //If Enemy is in Range, Engage in Combat
         addChild(new ItemFetchSelector(agent)); //Check for items
+        addChild(new WallTraceToDoorSequence(agent)); //Check for items
         addChild(new Wander(agent)); //Patrol
     }
 };

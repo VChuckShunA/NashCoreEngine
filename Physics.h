@@ -12,5 +12,6 @@ public:
     static float getTop(const std::shared_ptr<Entity>& entity);
     static float getBottom(const std::shared_ptr<Entity>& entity);
     static  bool GetOverlapPoint(const Vec2& point, const CTransform& boxTransform, const CBoundingBox& box);
+    static Vec2 GetWallNormal(const Vec2& agentPos, const Vec2& wallPos);
 };
 
