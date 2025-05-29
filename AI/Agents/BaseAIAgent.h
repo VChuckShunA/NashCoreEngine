@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 #include <vector>
 #include <iostream>
+#include <numbers>
 #include "../BehaviourTrees/Node.h"
 #include "../BehaviourTrees/Selector.h"
 #include "../BehaviourTrees/Sequence.h"
@@ -8,6 +9,8 @@
 #include "../../EntityManager.h"
 #include "../../Physics.h"
 #include <SFML/System.hpp>
+
+constexpr float DEG2RAD = std::numbers::pi_v<float> / 180.0f;
 
 class AIPlayroom;
 class BaseAIAgent
@@ -300,29 +303,56 @@ class IsDoorVisible : public Node {
 class WallTrace : public Node
 {
 public:
-    WallTrace(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
+    WallTrace(BaseAIAgent& ag) :agent(ag){
         Name = "Move To Point";
         // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
     }
 private:
-    BaseAIAgent& greenAgent;
-    Vec2& Waypoint;
+    BaseAIAgent& agent;
+    float smallAngle = 5.0f * DEG2RAD;
+    float wallTraceOffset = 10.0f;
+    float speed = 2.0f;
 
     virtual void onInitialize() override {
 
-        greenAgent.initializeMoveToPoint(Waypoint);
+      //  agent.initializeMoveToPoint(Waypoint);
     }
 
     virtual Status update() override {
-        // std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
-        if (!greenAgent.destinationReached)
-        {
-            greenAgent.MoveToPoint(Waypoint);
-            return BH_RUNNING; //Not reached destination 
-        }
-        else if (greenAgent.destinationReached) {
-            return BH_SUCCESS; // Reached the point = success
-        }
+        auto& transform = agent.agent->getComponent<CTransform>();
+        Vec2 dir = { std::cos(agent.agent->getComponent<CTransform>().angle), std::sin(agent.agent->getComponent<CTransform>().angle) };
+        // Calculate Vector from the wall
+        bool wallRight = false;
+        bool wallUp = false;
+        Vec2 agentToWall = agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos - transform.pos;
+        float side = dir.cross(agentToWall);
+        agentToWall.normalize(); //NOTE: if anything happens, check if this is the problem.
+        float dot = dir.dot(agentToWall);
+            if (side<0) {
+                wallRight = true;
+            }
+            
+            if (dot > 0.5f)// Threshold: adjust if needed
+            { 
+                wallUp = true;
+            }
+            if (!wallRight) {
+                // No wall rotate right follow the edge
+                dir = dir.rotated(+smallAngle);
+
+            }
+            else {
+                // Wall detected → rotate left slightly to stay near
+                dir = dir.rotated(-smallAngle);
+            }
+
+            // Move agent
+            //transform.pos += dir * speed;// *Time::deltaTime;
+            //agent.MoveToPoint(Waypoint);
+            std::cout << "Right : " << wallRight << std::endl;
+            std::cout << "Up : " << wallUp << std::endl;
+            return BH_SUCCESS;
+ 
 
     }
 };
@@ -364,7 +394,7 @@ public:
 
         StatefulSequence* wallTraceSequence = new StatefulSequence();
         wallTraceSequence->addChild(new IsNearWall(agent));
-
+        wallTraceSequence->addChild(new WallTrace(agent));
 
         StatefulSequence* houseSearchSequence = new StatefulSequence();
 

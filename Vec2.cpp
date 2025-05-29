@@ -70,6 +70,14 @@ float Vec2::dist(const Vec2& rhs) const
 	return float(sqrt(pow(x - rhs.x, 2) + pow(y - rhs.y, 2)));
 }
 
+Vec2 Vec2::rotated(float angle) const
+{
+	return Vec2(
+		x * cos(angle) - y * sin(angle),
+		x * sin(angle) + y * cos(angle)
+	);
+}
+
 float Vec2::length() const
 {
 	return float(sqrt(x * x + y * y));
@@ -84,4 +92,9 @@ void Vec2::normalize()
 {
 	float len = this->length();
 	(*this) /= len;
+}
+
+float Vec2::cross(Vec2 vector)
+{
+	return x * vector.y - y * vector.x;
 }
