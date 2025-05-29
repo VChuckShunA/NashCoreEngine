@@ -382,6 +382,7 @@ Node::Status Wander::update()
         agent.hasSeenCoin  ||
         (agent.hasSeenFood && agent.needsFood()) ||
         agent.agent->getComponent<CVision>().seesPlayer ||
+        agent.agent->getComponent<CVision>().seesWall ||
         (agent.agent->getComponent<CVision>().seesFood && agent.needsFood()) ||
         agent.agent->getComponent<CVision>().seesCoin ||
         (agent.agent->getComponent<CVision>().seesAmmo && agent.needsAmmo()) ||

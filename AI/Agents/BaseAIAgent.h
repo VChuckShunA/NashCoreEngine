@@ -322,71 +322,43 @@ private:
         auto& transform = agent.agent->getComponent<CTransform>();
         Vec2 dir = { std::cos(agent.agent->getComponent<CTransform>().angle), std::sin(agent.agent->getComponent<CTransform>().angle) };
         // Calculate Vector from the wall
-        bool wallRight = false;
-        bool wallUp = false; 
-        float xNormal;
-        float yNormal;
-        if (agent.agent->getComponent<CVision>().Wall)
-        {
-            xNormal = std::abs(agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.x - transform.pos.x);
-            yNormal = std::abs(agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.y - transform.pos.y);
-        }
-        if (agent.agent->getComponent<CVision>().Wall)
-        { 
-            if (agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.x > transform.pos.x)
-            {
-                wallRight = true;
-            }
-
-            if (agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos.y < transform.pos.y)
-            {
-                wallUp = true;
-            }
-        }
-        /*
-        Vec2 agentToWall;
-        
+      
+        Vec2 agentToWall;;
         if (agent.agent->getComponent<CVision>().Wall)
         {
 
             agentToWall = agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos - transform.pos;
         }
         float side = dir.cross(agentToWall);
-        agentToWall.normalize(); //NOTE: if anything happens, check if this is the problem.
-        float dot = dir.dot(agentToWall);
-            if (side<0) {
-                wallRight = true;
-            }
-            
-            if (dot > 0.5f)// Threshold: adjust if needed
-            { 
-                wallUp = true;
-            }
-            if (!wallRight) {
-                // No wall rotate right follow the edge
-                dir = dir.rotated(+smallAngle);
-
+        bool wallRight = (side<0);
+        // WallUp detection based on relative position
+        bool wallUp = false;
+        if (abs(agentToWall.x) > abs(agentToWall.y)) {
+            // Wall is mostly left/right relative to agent
+            if (agentToWall.x > 0) {
+                // Wall is to the right → move right
+                std::cout << "Move to the Right" << std::endl;
             }
             else {
-                // Wall detected → rotate left slightly to stay near
-                dir = dir.rotated(-smallAngle);
+                // Wall is to the left → move left
+                std::cout << "Move to the Left" << std::endl;
             }
-
-            */
-
-            // Move agent
-            //transform.pos += dir * speed;// *Time::deltaTime;
-            //agent.MoveToPoint(Waypoint);
-        std::cout << "Right : " << wallRight << std::endl;
-        std::cout << "Up : " << wallUp << std::endl;
-        if (yNormal > xNormal)
-        {
-            std::cout << "Move Left/Right" << std::endl;
         }
-        if (yNormal < xNormal)
-        {
-            std::cout << "Move Up/Down" << std::endl;
+        else {
+            // Wall is mostly up/down relative to agent
+            if (agentToWall.y > 0) {
+                // Wall is above → move up
+
+                std::cout << "Move Up" << std::endl;
+            }
+            else {
+                // Wall is below → move down
+
+                std::cout << "Move Down" << std::endl;
+            }
         }
+
+        
             return BH_FAILURE;
  
 
