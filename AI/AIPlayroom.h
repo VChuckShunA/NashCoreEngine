@@ -103,12 +103,13 @@ public:
     float GetTurnAngle(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity>& Target);
     float GetTurnAngle(const Vec2& entity, const Vec2& Target);
     void TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const std::shared_ptr<Entity> Target, int randDev=0);
+    void TurnTowardsPosition(const std::shared_ptr<Entity>& entity, const Vec2& Position, int randDev = 0);
     void RunBehaviourTrees();
     Vec2 GetOppositeDirection(Vec2 targetPosition, Vec2 PlayerPosition);
     Vec2 GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition);
     Vec2 GetRandomWanderSpot();
     void CreateEntity(std::string tag, Vec2 position, std::string AnimationName);
-
+    void UpdateNearesBrick();
 
     friend class BaseAIAgent;
 };

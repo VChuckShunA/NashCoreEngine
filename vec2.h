@@ -24,6 +24,7 @@ public:
 	float dist(const Vec2& rhs) const;
 	Vec2 rotated(float angle) const;
 	float length() const;
+	float lengthSq() const;
 	float dot(Vec2 vector);
 	float cross(Vec2 vector);
 	void normalize();

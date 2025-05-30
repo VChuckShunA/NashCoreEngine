@@ -45,23 +45,23 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    HouseGenerator::GenerateWareHouse(navmesh, *this);
-    HouseGenerator::GenerateLHouse(navmesh, *this);
+    //HouseGenerator::GenerateWareHouse(navmesh, *this);
+    //HouseGenerator::GenerateLHouse(navmesh, *this);
     HouseGenerator::GenerateEightHouse(navmesh, *this);
-    HouseGenerator::GenerateMansion(navmesh, *this);
+   // HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(20, 17, p1),
+        gridToMidPixel(1, 19, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
     );
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
-    
+    /*
     auto item1 = m_entityManager.addEntity("health");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
@@ -134,17 +134,18 @@ void AIPlayroom::init(const std::string& levelPath) {
         0
     );
     item7->addComponent<CBoundingBox>(Vec2(64, 64));
-
+    */
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
+    /*
     items.emplace_back(std::make_shared<Health>(item1));
     items.emplace_back(std::make_shared<Ammo>(item2));
     items.emplace_back(std::make_shared<Coin>(item3));
     items.emplace_back(std::make_shared<Ammo>(item4));
     items.emplace_back(std::make_shared<Health>(item5));
     items.emplace_back(std::make_shared<Health>(item6));
-    items.emplace_back(std::make_shared<Health>(item7));
+    items.emplace_back(std::make_shared<Health>(item7));*/
 }
 
 
@@ -533,6 +534,9 @@ void AIPlayroom::WallChecker()
     // Reset visibility
    // vision.seesWall= false;
 
+    vision.seesWall = false;
+    vision.NearestBrick = nullptr;
+    
 
     // Build look direction
     float angRad = transform.angle * (std::numbers::pi / 180.0f);
@@ -547,29 +551,28 @@ void AIPlayroom::WallChecker()
         {
             // vision.Item = nullptr;
             vision.seesWall = true;
-            vision.Wall = brick;
+            //Add to Bricks
+            vision.LastKnownBrick = brick;
+            vision.visibleBricks.push_back(brick);
             std::cout << "Wall at "<< positionToGridCordinates(brick).x << " , " << positionToGridCordinates(brick).y << std::endl;
-            return;
+            UpdateNearesBrick();
 
         }
-        vision.seesWall = false;
-        vision.Wall = nullptr;
-        ////Occlusion test
-        //if (!LineOfSight(eye, P))
-        //{
-
-        //    std::cout << "NO WALL " << std::endl;
-        //    // vision.Item = nullptr;
-        //    continue;
-        //}
-
-        //Item Seen
-        //vision.Item = item->entity;
-        // Optionally set a generic Target pointer if you want to pick one
-
-
-        // If you only care about the *first* visible item, you can break here:
-         //break;
+        if (!vision.IsTargetInFOV(eye, lookDir, P))
+        {
+            vision.visibleBricks.erase(
+                std::remove_if(vision.visibleBricks.begin(), vision.visibleBricks.end(),
+                    [&](auto const& up) { return up == brick; }),
+                vision.visibleBricks.end()
+            );
+            UpdateNearesBrick();
+        }
+        if (vision.visibleBricks.empty())
+        {
+            vision.seesWall = false;
+            vision.NearestBrick = nullptr;
+        }
+       
     }
 
 }
@@ -1093,6 +1096,30 @@ void AIPlayroom::TurnTowardsTarget(const std::shared_ptr<Entity>& entity, const 
     }
 }
 
+void AIPlayroom::TurnTowardsPosition(const std::shared_ptr<Entity>& entity, const Vec2& Position, int randDev)
+{
+    
+        //Retrieve positions
+        const Vec2& shooterPos = entity->getComponent<CTransform>().pos;
+        const Vec2& targetPos = Position;
+
+        //Compute angle in radians
+        float deltaX = targetPos.x - shooterPos.x;
+        float deltaY = targetPos.y - shooterPos.y;
+        float angleRadians = std::atan2(deltaY, deltaX);  // correct quadrant :contentReference[oaicite:2]{index=2}
+
+        //Convert to degrees
+        float angleDegrees = angleRadians * (180.0f / std::numbers::pi);
+
+        //Assign to the transform’s angle
+        std::random_device rd;
+        std::mt19937 gen(rd());  // Mersenne Twister engine
+        std::uniform_int_distribution<> dis(-randDev, randDev);  // Uniform distribution in the range [min, max]
+
+        entity->getComponent<CTransform>().angle = angleDegrees + dis(gen);
+    
+}
+
 void AIPlayroom::RunBehaviourTrees()
 {
     for (auto& agent : agents) {
@@ -1190,6 +1217,30 @@ void AIPlayroom::CreateEntity(std::string tag, Vec2 position, std::string Animat
         0
     );
     entity->addComponent<CBoundingBox>(Vec2(64, 64));
+}
+
+void AIPlayroom::UpdateNearesBrick()
+{
+    auto& vision = playerPtr->agent->getComponent<CVision>();
+    auto& transform = playerPtr->agent->getComponent<CTransform>();
+
+    vision.NearestBrick = nullptr;
+    float minDist = std::numeric_limits<float>::max();
+
+    // Iterate through all visible bricks
+    for (const auto& brick : vision.visibleBricks)
+    {
+        if (!brick) continue; // Safety check
+
+        auto& brickTransform = brick->getComponent<CTransform>();
+
+        float distSq = (brickTransform.pos - transform.pos).lengthSq(); // Squared distance for efficiency
+        if (distSq < minDist)
+        {
+            minDist = distSq;
+            vision.NearestBrick = brick;
+        }
+    }
 }
 
 

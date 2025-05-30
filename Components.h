@@ -101,8 +101,10 @@ public:
     bool seesCoin = false;
     bool seesWall = false;
     std::shared_ptr<Entity> Target;
-    std::shared_ptr<Entity> Wall;
+    std::vector<std::shared_ptr<Entity>> visibleBricks;
     std::shared_ptr<Item> Item;
+    std::shared_ptr<Entity> NearestBrick;
+    std::shared_ptr<Entity> LastKnownBrick;
     CVision(float fov = 90.0f, float range = 300.0f)
         : fovAngle(fov), visionRange(range), seesPlayer(false) {
     }

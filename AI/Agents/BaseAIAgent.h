@@ -1,4 +1,4 @@
-﻿#pragma once
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            #pragma once
 #include <vector>
 #include <iostream>
 #include <numbers>
@@ -29,6 +29,7 @@ public:
     bool hasSeenFood = false;
     bool hasSeenAmmo = false;
     bool hasSeenCoin = false;
+    bool hasSeenWall = false;
 	bool destinationReached = false;
     Vec2 wallNormal;
 	BaseAIAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom);
@@ -279,12 +280,18 @@ public:
     IsNearWall(BaseAIAgent& ag) :agent(ag) {}
     Status update() override {
         
-            if (agent.agent->getComponent<CVision>().seesWall) {
+            if (!agent.agent->getComponent<CVision>().visibleBricks.empty()) {
+                agent.hasSeenWall = true;
                 // Store wall normal for tracing (simplified to vector difference)
-                agent.wallNormal = Physics::GetWallNormal(agent.agent->getComponent<CTransform>().pos, agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos);
-                std::cout << "Found Wall \n" << "Wall Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
+                agent.wallNormal = Physics::GetWallNormal(agent.agent->getComponent<CTransform>().pos, agent.agent->getComponent<CVision>().NearestBrick->getComponent<CTransform>().pos);
+               
+            }
+
+            if (agent.hasSeenWall)
+            {
                 return BH_SUCCESS;
             }
+            std::cout << "NO WALLL \n" << "Last known Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
         return BH_FAILURE;
     }
 }; 
@@ -303,66 +310,19 @@ class IsDoorVisible : public Node {
 class WallTrace : public Node
 {
 public:
-    WallTrace(BaseAIAgent& ag) :agent(ag){
-        Name = "Move To Point";
-        // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
-    }
+    WallTrace(BaseAIAgent& ag);
 private:
     BaseAIAgent& agent;
     float smallAngle = 5.0f * DEG2RAD;
     float wallTraceOffset = 10.0f;
+    float gridSize = 64;
     float speed = 2.0f;
+    int testInt = 0;
+    Vec2 upPosition, downPosition, leftPosition, rightPosition,targetPosition;
+    bool pathInitialized = false;
+    virtual void onInitialize() override;
 
-    virtual void onInitialize() override {
-
-      //  agent.initializeMoveToPoint(Waypoint);
-    }
-
-    virtual Status update() override {
-        auto& transform = agent.agent->getComponent<CTransform>();
-        Vec2 dir = { std::cos(agent.agent->getComponent<CTransform>().angle), std::sin(agent.agent->getComponent<CTransform>().angle) };
-        // Calculate Vector from the wall
-      
-        Vec2 agentToWall;;
-        if (agent.agent->getComponent<CVision>().Wall)
-        {
-
-            agentToWall = agent.agent->getComponent<CVision>().Wall->getComponent<CTransform>().pos - transform.pos;
-        }
-        float side = dir.cross(agentToWall);
-        bool wallRight = (side<0);
-        // WallUp detection based on relative position
-        bool wallUp = false;
-        if (abs(agentToWall.x) > abs(agentToWall.y)) {
-            // Wall is mostly left/right relative to agent
-            if (agentToWall.x > 0) {
-                // Wall is to the right → move right
-                std::cout << "Move to the Right" << std::endl;
-            }
-            else {
-                // Wall is to the left → move left
-                std::cout << "Move to the Left" << std::endl;
-            }
-        }
-        else {
-            // Wall is mostly up/down relative to agent
-            if (agentToWall.y > 0) {
-                // Wall is above → move up
-
-                std::cout << "Move Up" << std::endl;
-            }
-            else {
-                // Wall is below → move down
-
-                std::cout << "Move Down" << std::endl;
-            }
-        }
-
-        
-            return BH_FAILURE;
- 
-
-    }
+    virtual Status update() override;
 };
 
 class EnterThroughDoor : public Node
@@ -573,6 +533,7 @@ public:
 };
 class SurvivalSelector : public Selector {
 public:
+    Vec2 testPosition = { 16,17 };
     SurvivalSelector(){ Name = "Survival Selector"; }
     SurvivalSelector(BaseAIAgent& agent) {
         addChild(new LowHealth(agent));  // First, try healing
@@ -580,5 +541,7 @@ public:
         addChild(new ItemFetchSelector(agent)); //Check for items
         addChild(new WallTraceToDoorSequence(agent)); //Check for items
         addChild(new Wander(agent)); //Patrol
+       // addChild(new MoveToPoint(agent, testPosition));
     }
 };
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           

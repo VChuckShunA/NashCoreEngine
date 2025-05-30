@@ -83,6 +83,11 @@ float Vec2::length() const
 	return float(sqrt(x * x + y * y));
 }
 
+float Vec2::lengthSq() const
+{
+	return x * x + y * y;
+}
+
 float Vec2::dot(Vec2 vector)
 {
 	return float((x * vector.x) + (y * vector.y));
