@@ -214,6 +214,58 @@ void BaseAIAgent::MoveToPoint(const Vec2& Waypoint)
 
 void BaseAIAgent::steer(float targetAngle)
 {
+    constexpr float steerSpeed = 2.5f;
+    auto& T = agent->getComponent<CTransform>();
+    float current = fmod(T.angle + 360.0f, 360.0f);
+    float target = fmod(targetAngle + 360.0f, 360.0f);
+
+    if (current == target) return;
+
+    // Compute positive‐only turnAngle ∈ [0,360)
+    float turnAngle = fmod(target - current + 360.0f, 360.0f);
+
+    if (turnAngle < 180.0f)
+    {
+        // Clockwise: current→current+steerSpeed, but clamp at target
+        float nextAngle = current + steerSpeed;
+        // If that step would pass “target” (in the circular sense):
+        // Because turnAngle<180, target is “ahead” in the + direction.
+        if (fmod(nextAngle, 360.0f) > target && turnAngle < steerSpeed)
+        {
+            T.angle = target;
+            std::cout << "Clamped to target (clockwise)\n";
+        }
+        else
+        {
+            T.angle = nextAngle;
+            std::cout << "Rotated +steerSpeed (clockwise)\n";
+        }
+    }
+    else // turnAngle ≥ 180 → turn “the other way” (counter‐clockwise)
+    {
+        float nextAngle = current - steerSpeed;
+        // When turnAngle>180, the “short path” goes negative toward target.
+        // We check if we'd cross target by subtracting steerSpeed.
+        float wrappedNext = fmod(nextAngle + 360.0f, 360.0f);
+        // If the distance (in the CCW direction) is < steerSpeed, clamp:
+        float ccwDist = 360.0f - turnAngle; // how far “below” current the target is
+        if (ccwDist < steerSpeed)
+        {
+            T.angle = target;
+            std::cout << "Clamped to target (CCW)\n";
+        }
+        else
+        {
+            T.angle = nextAngle;
+            std::cout << "Rotated -steerSpeed (CCW)\n";
+        }
+    }
+
+    // Finally force [0,360)
+    T.angle = fmod(T.angle + 360.0f, 360.0f);
+    /*
+
+    float steerSpeed = 5;
     if (agent->getComponent<CTransform>().angle == targetAngle) return;
 
     float turnAngle = fmod(targetAngle - agent->getComponent<CTransform>().angle + 360, 360); // Normalize difference
@@ -221,14 +273,37 @@ void BaseAIAgent::steer(float targetAngle)
     if (turnAngle < 180)
     {
         //clockwise
-        agent->getComponent<CTransform>().angle++;
+        float turnedAngled = agent->getComponent<CTransform>().angle + steerSpeed;
+        if (turnedAngled > targetAngle)
+        {
+            float newSpeed = turnedAngled - agent->getComponent<CTransform>().angle;
+            agent->getComponent<CTransform>().angle += newSpeed;
+            std::cout << "Line 230" << std::endl;
+        }
+        else
+        {
+            agent->getComponent<CTransform>().angle += steerSpeed;
+            std::cout << "Line 236" << std::endl;
+        }
     }
     if (turnAngle > 180)
-    {
-        //counter clock wise
-        agent->getComponent<CTransform>().angle--;
+    {//counter clock wise
+        float turnedAngled = agent->getComponent<CTransform>().angle - steerSpeed;
+        if (turnedAngled < targetAngle)
+        {
+            float newSpeed = turnedAngled - agent->getComponent<CTransform>().angle;
+            agent->getComponent<CTransform>().angle -= newSpeed;
+            std::cout << "Line 246" << std::endl;
+        }
+        else
+        {
+
+            agent->getComponent<CTransform>().angle -= steerSpeed;
+
+            std::cout << "Line 253" << std::endl;
+        }
     }
-    agent->getComponent<CTransform>().angle = fmod(agent->getComponent<CTransform>().angle + 360, 360);
+    agent->getComponent<CTransform>().angle = fmod(agent->getComponent<CTransform>().angle + 360, 360);*/
 }
 
 bool BaseAIAgent::hasTarget()

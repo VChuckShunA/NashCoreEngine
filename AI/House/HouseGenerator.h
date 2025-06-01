@@ -1,4 +1,5 @@
 #pragma once
+#include <string> 
 class AStar;
 class AIPlayroom;
 class House;

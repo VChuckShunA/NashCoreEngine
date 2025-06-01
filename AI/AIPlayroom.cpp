@@ -47,7 +47,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     //Spawn AI
     //HouseGenerator::GenerateWareHouse(navmesh, *this);
     //HouseGenerator::GenerateLHouse(navmesh, *this);
-    HouseGenerator::GenerateEightHouse(navmesh, *this);
+   // HouseGenerator::GenerateEightHouse(navmesh, *this);
    // HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
