@@ -142,9 +142,12 @@ public:
 
     bool  tracingRight = true;      // Right-hand or left-hand rule
     bool  hasValidHit = false;      // Did any rays hit a wall?
-    Vec2  lastHitNormal;            // Normal of last wall hit
+    Vec2 lastHitNormalRight;        //Normal of Right rays
+    Vec2 lastHitNormalLeft;         //Normal of Left rays
 
-    std::vector<Vec2> lastRayDirs;  // Stores last frame’s ray directions
+    // Stores last frame’s ray directions
+    std::vector<Vec2> lastRightRayDirs;
+    std::vector<Vec2> lastLeftRayDirs;
 
     CWallTracker() = default;
 

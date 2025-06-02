@@ -45,10 +45,10 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    //HouseGenerator::GenerateWareHouse(navmesh, *this);
-    //HouseGenerator::GenerateLHouse(navmesh, *this);
-    //HouseGenerator::GenerateEightHouse(navmesh, *this);
-   // HouseGenerator::GenerateMansion(navmesh, *this);
+    HouseGenerator::GenerateWareHouse(navmesh, *this);
+    HouseGenerator::GenerateLHouse(navmesh, *this);
+    HouseGenerator::GenerateEightHouse(navmesh, *this);
+    HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
@@ -923,92 +923,132 @@ void AIPlayroom::ResizeInventory()
 
 void AIPlayroom::drawWallCheckerRays()
 {
+    //NOTE: The culprit turned out to be that we were feeding std::cos/std::sin a degrees instead of radians.
     auto& transform = playerPtr->agent->getComponent<CTransform>();
     auto& wallTracker = playerPtr->agent->getComponent<CWallTracker>();
-    wallTracker.lastRayDirs.clear();
-    wallTracker.lastRayDirs.reserve(wallTracker.numSideRays);
 
-    Vec2 forward = { std::cos(transform.angle), std::sin(transform.angle) };
-    Vec2 sideDir = wallTracker.tracingRight ? Vec2(-forward.y, forward.x)   // +90°
-        : Vec2(forward.y, -forward.x); // -90°
+    // Clear last frame’s data
+    wallTracker.lastRightRayDirs.clear();
+    wallTracker.lastLeftRayDirs.clear();
+    wallTracker.wallRight = false;
+    wallTracker.wallLeft = false;
 
-    wallTracker.hasValidHit = false;
-    Vec2  bestNormal = { 0,0 };
-    float bestDist = wallTracker.traceDistance + 1.0f;
+    // 1) Compute forward from agent’s angle (DEGREES → RADIANS)
+    float angleRad = transform.angle * (std::numbers::pi / 180.0f);
+    Vec2  forward = { std::cos(angleRad), std::sin(angleRad) };
 
+    // 2) Base “right” and “left” directions (unit vectors)
+    Vec2 sideDirRight = { -forward.y, forward.x };   // +90° from forward
+    Vec2 sideDirLeft = { forward.y, -forward.x };  // -90° from forward
+
+    // 3) Prepare fan parameters
     float halfArcRad = (wallTracker.sideArcAngle * 0.5f) * (std::numbers::pi / 180.0f);
+    int   N = wallTracker.numSideRays;
+    float maxDist = wallTracker.traceDistance;
 
-    for (int i = 0; i < wallTracker.numSideRays; ++i) {
-        float tLerp = (wallTracker.numSideRays == 1) ? 0.5f : (float)i / float(wallTracker.numSideRays - 1);
-        float angleOff = (tLerp * 2.0f - 1.0f) * halfArcRad;
+    // 4) CAST RIGHT-SIDE FAN
+    {
+        float baseAngleR = std::atan2(sideDirRight.y, sideDirRight.x);
+        float bestDistR = maxDist + 1.0f;
+        Vec2  bestNormR = { 0,0 };
 
-        float castAngle = std::atan2(sideDir.y, sideDir.x) + angleOff;
-        Vec2 castDir = { std::cos(castAngle), std::sin(castAngle) };
+        for (int i = 0; i < N; ++i) {
+            float tLerp = (N == 1) ? 0.5f : (float)i / float(N - 1);
+            float angleOff = (tLerp * 2.0f - 1.0f) * halfArcRad;
+            float castAngle = baseAngleR + angleOff;
+            Vec2 castDir = { std::cos(castAngle), std::sin(castAngle) };
 
-        RaycastHit hit = LineTrace(transform.pos, castDir, wallTracker.traceDistance);
-        if (hit.hit && hit.entity && hit.entity->tag() == "Brick") {
-            float d = (hit.point - transform.pos).length();
-            if (d < bestDist) {
-                bestDist = d;
-                bestNormal = hit.normal;
-                wallTracker.hasValidHit = true;
+            // Raycast
+            RaycastHit hit = LineTrace(transform.pos, castDir, maxDist);
+            if (hit.hit && hit.entity && hit.entity->tag() == "Brick") {
+                float d = (hit.point - transform.pos).length();
+                if (d < bestDistR) {
+                    bestDistR = d;
+                    bestNormR = hit.normal;
+                    wallTracker.wallRight = true;
+                }
             }
+
+            wallTracker.lastRightRayDirs.push_back(castDir);
         }
 
-        wallTracker.lastRayDirs.push_back(castDir);
+        if (wallTracker.wallRight) {
+            wallTracker.lastHitNormalRight = bestNormR;
+        }
     }
 
-    if (wallTracker.hasValidHit) {
-        wallTracker.lastHitNormal = bestNormal;
+    // 5) CAST LEFT-SIDE FAN
+    {
+        float baseAngleL = std::atan2(sideDirLeft.y, sideDirLeft.x);
+        float bestDistL = maxDist + 1.0f;
+        Vec2  bestNormL = { 0,0 };
+
+        for (int i = 0; i < N; ++i) {
+            float tLerp = (N == 1) ? 0.5f : (float)i / float(N - 1);
+            float angleOff = (tLerp * 2.0f - 1.0f) * halfArcRad;
+            float castAngle = baseAngleL + angleOff;
+            Vec2 castDir = { std::cos(castAngle), std::sin(castAngle) };
+
+            // Raycast
+            RaycastHit hit = LineTrace(transform.pos, castDir, maxDist);
+            if (hit.hit && hit.entity && hit.entity->tag() == "Brick") {
+                float d = (hit.point - transform.pos).length();
+                if (d < bestDistL) {
+                    bestDistL = d;
+                    bestNormL = hit.normal;
+                    wallTracker.wallLeft = true;
+                }
+            }
+
+            wallTracker.lastLeftRayDirs.push_back(castDir);
+        }
+
+        if (wallTracker.wallLeft) {
+            wallTracker.lastHitNormalLeft = bestNormL;
+        }
     }
 
-    for (auto& dir : wallTracker.lastRayDirs) {
-        Vec2 worldStart = transform.pos;
-        Vec2 worldEnd = transform.pos + dir * wallTracker.traceDistance;
-        Vec2 diff = worldEnd - worldStart;
-        float length = diff.length();
-        float angle = std::atan2(diff.y, diff.x) * 180.0f / 3.14;
+    // 6) DRAW BOTH SETS OF RAYS (right in cyan, left in magenta, for instance)
+    for (auto& dir : wallTracker.lastRightRayDirs) {
+        Vec2 start = transform.pos;
+        Vec2 end = transform.pos + dir * maxDist;
+        Vec2 d = end - start;
+        float len = d.length();
+        float ang = std::atan2(d.y, d.x) * (180.0f / std::numbers::pi);
 
-        sf::RectangleShape line(sf::Vector2f(length, 3));
-        line.setFillColor(sf::Color::Cyan);
-        line.setOrigin(0, 3 * 0.5f);
-        line.setPosition(worldStart.x, worldStart.y);
-        line.setRotation(angle);
+        sf::RectangleShape line(sf::Vector2f(len, 3.0f));
+        if (wallTracker.wallRight)
+        {
 
+            line.setFillColor(sf::Color::Red);
+        }
+        else line.setFillColor(sf::Color::Cyan);
+        line.setOrigin(0.0f, 1.5f);
+        line.setPosition(start.x, start.y);
+        line.setRotation(ang);
         m_game->window().draw(line);
-        /*
-        sf::Vertex line[2];
-        line[0].position = sf::Vector2f(worldStart.x, worldStart.y);
-        line[0].color = sf::Color::Red;
-        line[1].position = sf::Vector2f(worldEnd.x, worldEnd.y);
-        line[1].color = sf::Color::Red;
-
-        m_game->window().draw(line, 2, sf::Lines);*/
     }
-   // wallTracker.draw(m_game->window(), transform.pos);
 
-    //// If no rays were computed this frame, skip
-    //if (wallTracker.lastRayDirs.empty())
-    //    continue;
+    for (auto& dir : wallTracker.lastLeftRayDirs) {
+        Vec2 start = transform.pos;
+        Vec2 end = transform.pos + dir * maxDist;
+        Vec2 d = end - start;
+        float len = d.length();
+        float ang = std::atan2(d.y, d.x) * (180.0f / std::numbers::pi);
 
-    //// For each stored ray direction, draw a red line from agent to agent + dir*traceDistance
-    //for (auto& dir : wallTracker.lastRayDirs) {
-    //    Vec2 worldStart = transform.pos;
-    //    Vec2 worldEnd = transform.pos + dir * wallTracker.traceDistance;
+        sf::RectangleShape line(sf::Vector2f(len, 3.0f));
+        if (wallTracker.wallLeft)
+        {
 
-    //    // Convert to SFML points (assuming 1:1 world→screen)
-    //    sf::Vector2f p0{ worldStart.x, worldStart.y };
-    //    sf::Vector2f p1{ worldEnd.x,   worldEnd.y };
+            line.setFillColor(sf::Color::Red);
+        }
+        else line.setFillColor(sf::Color::Magenta);
+        line.setOrigin(0.0f, 1.5f);
+        line.setPosition(start.x, start.y);
+        line.setRotation(ang);
+        m_game->window().draw(line);
+    }
 
-    //    // Build a two‐vertex line
-    //    sf::Vertex line[2];
-    //    line[0].position = p0;
-    //    line[0].color = sf::Color::Red;
-    //    line[1].position = p1;
-    //    line[1].color = sf::Color::Red;
-
-    //    m_game->window().draw(line, 2, sf::Lines);
-    //}
 }
 
 bool AIPlayroom::RayIntersectsAABB(const Vec2& origin, const Vec2& direction, const Vec2& boxCenter, const Vec2& halfExtents, float maxDist, float& tHit, Vec2& hitNormal)
