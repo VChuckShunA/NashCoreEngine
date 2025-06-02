@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../Action.h"
 #include "../Entity.h"
 #include "../EntityManager.h"
@@ -15,6 +15,14 @@ class AIPlayroom :public Scene {
     struct PlayerConfig {
         float X, Y, CX, CY, SPEED, MAX_SPEED, JUMP, GRAVITY;
         std::string WEAPON;
+    };
+
+    struct RaycastHit {
+        bool    hit;             // true if hit something
+        Vec2    point;           // world‐space hit point
+        Vec2    normal;          // surface normal at the hit
+        Entity* entity;          // pointer to whatever you hit (nullptr if none)
+        float   distance;   // distance from ray origin to hit point
     };
 
 protected:
@@ -80,7 +88,18 @@ public:
     void ManageInventory();
     void UpdateInventoryUI();
     void ResizeInventory();
-   
+    void drawWallCheckerRays();
+    bool RayIntersectsAABB(
+        const Vec2& origin,           // Ray start point
+        const Vec2& direction,        // Normalized ray direction
+        const Vec2& boxCenter,        // Center of the box
+        const Vec2& halfExtents,      // Half-size of the box
+        float maxDist,                // Max distance for the ray
+        float& tHit,                  // Out: distance along the ray to the hit point
+        Vec2& hitNormal               // Out: normal of the box face that was hit
+    );
+
+    RaycastHit LineTrace(const Vec2& origin, const Vec2& direction, float maxDist);
     std::map<int, std::string> itemToString = {
      { 0, "NONE" },
      { 1, "Health" },

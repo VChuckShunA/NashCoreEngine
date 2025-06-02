@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Components.h"
 #include <memory>
 #include <string>
@@ -14,7 +14,8 @@ typedef std::tuple<
     CAnimation,
     CGravity,
     CState,
-    CVision
+    CVision,
+    CWallTracker
 > ComponentTuple;
 
 class Entity {

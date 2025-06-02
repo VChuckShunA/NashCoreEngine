@@ -47,7 +47,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     //Spawn AI
     //HouseGenerator::GenerateWareHouse(navmesh, *this);
     //HouseGenerator::GenerateLHouse(navmesh, *this);
-   // HouseGenerator::GenerateEightHouse(navmesh, *this);
+    //HouseGenerator::GenerateEightHouse(navmesh, *this);
    // HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
@@ -61,6 +61,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     );
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
+    p1->addComponent<CWallTracker>();
     /*
     auto item1 = m_entityManager.addEntity("health");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
@@ -457,6 +458,8 @@ void AIPlayroom::sVisionCone()
     EnemyScanner();
     ItemScanner();
     WallChecker();
+
+    drawWallCheckerRays();
 }
 
 void AIPlayroom::ItemScanner()
@@ -526,7 +529,6 @@ void AIPlayroom::ItemScanner()
 
 void AIPlayroom::WallChecker()
 {
-
     auto& vision = playerPtr->agent->getComponent<CVision>();
     auto& transform = playerPtr->agent->getComponent<CTransform>();
     Vec2  eye = transform.pos;
@@ -721,6 +723,7 @@ void AIPlayroom::drawVisionCone()
 
         m_game->window().draw(visionCone);
 
+        drawWallCheckerRays();
     }
 }
 
@@ -916,6 +919,178 @@ void AIPlayroom::ResizeInventory()
     //}
     //// Clear the now-duplicate last slot
     //inventory[inventory.size() - 1] = nullptr;
+}
+
+void AIPlayroom::drawWallCheckerRays()
+{
+    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    auto& wallTracker = playerPtr->agent->getComponent<CWallTracker>();
+    wallTracker.lastRayDirs.clear();
+    wallTracker.lastRayDirs.reserve(wallTracker.numSideRays);
+
+    Vec2 forward = { std::cos(transform.angle), std::sin(transform.angle) };
+    Vec2 sideDir = wallTracker.tracingRight ? Vec2(-forward.y, forward.x)   // +90°
+        : Vec2(forward.y, -forward.x); // -90°
+
+    wallTracker.hasValidHit = false;
+    Vec2  bestNormal = { 0,0 };
+    float bestDist = wallTracker.traceDistance + 1.0f;
+
+    float halfArcRad = (wallTracker.sideArcAngle * 0.5f) * (std::numbers::pi / 180.0f);
+
+    for (int i = 0; i < wallTracker.numSideRays; ++i) {
+        float tLerp = (wallTracker.numSideRays == 1) ? 0.5f : (float)i / float(wallTracker.numSideRays - 1);
+        float angleOff = (tLerp * 2.0f - 1.0f) * halfArcRad;
+
+        float castAngle = std::atan2(sideDir.y, sideDir.x) + angleOff;
+        Vec2 castDir = { std::cos(castAngle), std::sin(castAngle) };
+
+        RaycastHit hit = LineTrace(transform.pos, castDir, wallTracker.traceDistance);
+        if (hit.hit && hit.entity && hit.entity->tag() == "Brick") {
+            float d = (hit.point - transform.pos).length();
+            if (d < bestDist) {
+                bestDist = d;
+                bestNormal = hit.normal;
+                wallTracker.hasValidHit = true;
+            }
+        }
+
+        wallTracker.lastRayDirs.push_back(castDir);
+    }
+
+    if (wallTracker.hasValidHit) {
+        wallTracker.lastHitNormal = bestNormal;
+    }
+
+    for (auto& dir : wallTracker.lastRayDirs) {
+        Vec2 worldStart = transform.pos;
+        Vec2 worldEnd = transform.pos + dir * wallTracker.traceDistance;
+        Vec2 diff = worldEnd - worldStart;
+        float length = diff.length();
+        float angle = std::atan2(diff.y, diff.x) * 180.0f / 3.14;
+
+        sf::RectangleShape line(sf::Vector2f(length, 3));
+        line.setFillColor(sf::Color::Cyan);
+        line.setOrigin(0, 3 * 0.5f);
+        line.setPosition(worldStart.x, worldStart.y);
+        line.setRotation(angle);
+
+        m_game->window().draw(line);
+        /*
+        sf::Vertex line[2];
+        line[0].position = sf::Vector2f(worldStart.x, worldStart.y);
+        line[0].color = sf::Color::Red;
+        line[1].position = sf::Vector2f(worldEnd.x, worldEnd.y);
+        line[1].color = sf::Color::Red;
+
+        m_game->window().draw(line, 2, sf::Lines);*/
+    }
+   // wallTracker.draw(m_game->window(), transform.pos);
+
+    //// If no rays were computed this frame, skip
+    //if (wallTracker.lastRayDirs.empty())
+    //    continue;
+
+    //// For each stored ray direction, draw a red line from agent to agent + dir*traceDistance
+    //for (auto& dir : wallTracker.lastRayDirs) {
+    //    Vec2 worldStart = transform.pos;
+    //    Vec2 worldEnd = transform.pos + dir * wallTracker.traceDistance;
+
+    //    // Convert to SFML points (assuming 1:1 world→screen)
+    //    sf::Vector2f p0{ worldStart.x, worldStart.y };
+    //    sf::Vector2f p1{ worldEnd.x,   worldEnd.y };
+
+    //    // Build a two‐vertex line
+    //    sf::Vertex line[2];
+    //    line[0].position = p0;
+    //    line[0].color = sf::Color::Red;
+    //    line[1].position = p1;
+    //    line[1].color = sf::Color::Red;
+
+    //    m_game->window().draw(line, 2, sf::Lines);
+    //}
+}
+
+bool AIPlayroom::RayIntersectsAABB(const Vec2& origin, const Vec2& direction, const Vec2& boxCenter, const Vec2& halfExtents, float maxDist, float& tHit, Vec2& hitNormal)
+{
+    // Slab method: compute intersection times for x and y slabs
+    float tMin = 0.0f;
+    float tMax = maxDist;
+
+    hitNormal = Vec2(0, 0); // Default
+
+    for (int i = 0; i < 2; ++i) { // Loop for x and y
+        float rayOrig = (i == 0) ? origin.x : origin.y;
+        float rayDir = (i == 0) ? direction.x : direction.y;
+        float boxMin = (i == 0) ? boxCenter.x - halfExtents.x : boxCenter.y - halfExtents.y;
+        float boxMax = (i == 0) ? boxCenter.x + halfExtents.x : boxCenter.y + halfExtents.y;
+
+        if (std::abs(rayDir) < 1e-6f) {
+            // Ray is parallel to the slab. Check if origin is inside.
+            if (rayOrig < boxMin || rayOrig > boxMax) {
+                return false; // No intersection
+            }
+        }
+        else {
+            // Compute intersection distances with slab planes
+            float invDir = 1.0f / rayDir;
+            float t1 = (boxMin - rayOrig) * invDir;
+            float t2 = (boxMax - rayOrig) * invDir;
+
+            if (t1 > t2) std::swap(t1, t2); // Ensure t1 <= t2
+
+            if (t1 > tMin) {
+                tMin = t1;
+                hitNormal = Vec2(0, 0);
+                if (i == 0) hitNormal.x = (rayDir > 0) ? -1.0f : 1.0f;
+                else        hitNormal.y = (rayDir > 0) ? -1.0f : 1.0f;
+            }
+
+            if (t2 < tMax) tMax = t2;
+
+            if (tMin > tMax || tMax < 0.0f) {
+                return false; // No intersection
+            }
+        }
+    }
+
+    tHit = tMin;
+    return (tHit >= 0.0f && tHit <= maxDist);
+}
+
+AIPlayroom::RaycastHit AIPlayroom::LineTrace(const Vec2& origin, const Vec2& direction, float maxDist)
+{
+    RaycastHit bestHit;
+    bestHit.hit = false;
+    bestHit.distance = maxDist + 1.0f;  // anything bigger than maxDist
+
+    // Loop through all wall‐tagged entities
+    for (auto& wall : m_entityManager.getEntities("Brick")) {
+        // Each wall has a CTransform (position) and CBoundingBox (half‐size)
+        auto& wTransform = wall->getComponent<CTransform>();
+        auto& wBox = wall->getComponent<CBoundingBox>();
+
+        float tHit;
+        Vec2  hitNormal;
+        bool  ok = RayIntersectsAABB(
+            origin,
+            direction,
+            wTransform.pos,
+            wBox.halfSize,
+            maxDist,
+            tHit,
+            hitNormal
+        );
+        if (ok && tHit < bestHit.distance) {
+            bestHit.hit = true;
+            bestHit.entity = wall.get();            // raw pointer, or store shared_ptr
+            bestHit.distance = tHit;
+            bestHit.normal = hitNormal;
+            bestHit.point = origin + direction * tHit;
+        }
+    }
+
+    return bestHit;
 }
 
 void AIPlayroom::SpawnEnemies()
