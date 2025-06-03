@@ -318,7 +318,7 @@ private:
     float gridSize = 64;
     float speed = 2.0f;
     int testInt = 0;
-    Vec2 upPosition, downPosition, leftPosition, rightPosition,targetPosition;
+    Vec2 upPosition, downPosition, leftPosition, rightPosition,targetPosition,diagUpRight,diagUpLeft,diagDownRight,diagDownLeft;
     bool pathInitialized = false;
     virtual void onInitialize() override;
 
