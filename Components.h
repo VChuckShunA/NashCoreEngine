@@ -101,6 +101,7 @@ public:
     bool seesAmmo=false;
     bool seesCoin = false;
     bool seesWall = false;
+    bool seesDoor = false;
     std::shared_ptr<Entity> Target;
     std::vector<std::shared_ptr<Entity>> visibleBricks;
     std::shared_ptr<Item> Item;
@@ -136,7 +137,7 @@ public:
     bool wallRight = false;
     bool wallLeft = false;
 
-    float traceDistance = 150.0f;    // Ray length
+    float traceDistance = 129;    // Ray length
     int   numSideRays = 3;          // Number of rays in fan
     float sideArcAngle = 45.0f;     // Arc in degrees
 

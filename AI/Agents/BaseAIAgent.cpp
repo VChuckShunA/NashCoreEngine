@@ -488,193 +488,252 @@ void WallTrace::onInitialize()
     //agent.initializeMoveToPoint(upPosition);
 }
 
+Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
+{
+    // 1) Get the raw direction from agent to brick
+    Vec2 raw = wallTile - agentTile;
+    Vec2 lastHitNormal;
+    // 2) Decide if this is mostly a horizontal or vertical contact
+    if (std::abs(raw.x) > std::abs(raw.y)) {
+        // The brick lies directly to our LEFT or RIGHT
+        // Normal points from the brick toward the agent, i.e. opposite of raw.x
+        float sx = (raw.x > 0 ? -1.0f : +1.0f);
+        lastHitNormal = Vec2(sx, 0);   // (–1,0) if brick is to our right; (+1,0) if brick is to our left
+    }
+    else {
+        // The brick lies directly ABOVE or BELOW
+        float sy = (raw.y > 0 ? -1.0f : +1.0f);
+        lastHitNormal = Vec2(0, sy);   // (0,–1) if brick is above; (0,+1) if brick is below
+    }
+
+    return lastHitNormal;
+}
+
 Node::Status WallTrace::update()
 {
+    std::cout << "THIS SHIT IS RUNNING"<< std::endl;
     auto& transform = agent.agent->getComponent<CTransform>();
     auto& vision = agent.agent->getComponent<CVision>();
-    auto& tracker = agent.agent->getComponent<CWallTracker>(); 
-  //  Vec2 normal = tracker.lastHitNormal;
+    auto& tracker = agent.agent->getComponent<CWallTracker>();
 
+    //  Vec2 normal = tracker.lastHitNormal;
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     upPosition = agentTile + Vec2(0, 1);
     downPosition = agentTile + Vec2(0, -1);
     rightPosition = agentTile + Vec2(1, 0);
     leftPosition = agentTile + Vec2(-1, 0);
-    diagDownLeft = agentTile + Vec2(-1,-1);
+    diagDownLeft = agentTile + Vec2(-1, -1);
     diagDownRight = agentTile + Vec2(1, -1);
     diagUpLeft = agentTile + Vec2(-1, 1);
     diagUpRight = agentTile + Vec2(1, 1);
     float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-    Vec2  forward = { std::cos(angleRad), std::sin(angleRad) };
+    Vec2 forward = { std::cos(angleRad), std::sin(angleRad) };
     Vec2 dir = { std::cos(transform.angle), std::sin(transform.angle) };
     Vec2 wallTile;
     Vec2 agentToWall = wallTile - agentTile;
     float side = dir.cross(agentToWall);
     bool wallRight = (side < 0);
-    bool wallUp = false; 
+    bool wallUp = false;
     agentToWall.normalize();
     float dot = dir.dot(agentToWall);
+    
+    bool moveLeft = false;
+    bool moveRight = false;
+    bool moveUp = false;
+    bool moveDown = false;
 
-    if (abs(agentToWall.x) > abs(agentToWall.y)) {
-        // Horizontal relation → wall is mostly left/right
-        wallUp = false;
+    // Compute direction to wall
+    Vec2 dirToWall = wallTile - agentTile;
+    dirToWall.normalize();
+    if (vision.seesDoor) return BH_SUCCESS;
+
+    // Early-out if we see no wall
+    if (!vision.seesWall && !tracker.wallLeft &&tracker.wallRight) {
+        std::cout << "NO WALL OR BRICK" << std::endl;
+        return BH_RUNNING;
+    }
+
+
+
+    // If agent is currently not on navmesh, switch tracing direction
+    if (!agent.room->navmesh.navMesh[agentTile.x][agentTile.y].walkable) {
+        tracker.tracingRight = !tracker.tracingRight;
+    }
+
+    // Use right-hand or left-hand rule
+    std::vector<Vec2> traceDirs;
+
+    if (tracker.tracingRight) {
+        traceDirs = {
+            {  0,  1 }, // up
+            {  1,  0 }, // right
+            {  0, -1 }, // down
+            { -1,  0 }  // left
+        };
     }
     else {
-        // Vertical relation → wall is mostly up/down
-        wallUp = true;
+        traceDirs = {
+            {  0,  1 }, // up
+            { -1,  0 }, // left
+            {  0, -1 }, // down
+            {  1,  0 }  // right
+        };
     }
-    // Calculate Vector from the wall
-   // Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    if (vision.NearestBrick)
+
+    // Try each trace direction in order (clockwise/counterclockwise around wall)
+    for (Vec2 traceDir : traceDirs) {
+        Vec2 candidate = wallTile + traceDir;
+
+        if (!agent.room->isWallAt(candidate) &&agent.room->navmesh.navMesh[candidate.x][candidate.y].walkable) {
+            // Found a candidate tile to follow the contour of wall
+            std::cout << "canditat " << candidate.x << " , " << candidate.y << std::endl;
+            agent.MoveToPoint(candidate);
+            return BH_RUNNING;
+        }
+    }
+
+    // If none of the directions work, hold current position or fall back to A*
+    std::cout << "agentTile " << agentTile.x << " , " << agentTile.y << std::endl;
+    agent.MoveToPoint(agentTile); // Or consider fallback logic
+}
+
+
+
+
+
+
+    /*
+
+    if (vision.seesWall && !tracker.wallLeft && !tracker.wallRight)
     {
-        wallTile= agent.room->positionToGridCordinates(vision.NearestBrick);
+        std::cout << "target : "<<(agentTile + dir).x << " , "<< (agentTile + dir).y << std::endl;
+        agent.MoveToPoint(agentTile+ dir);
     }
+    else {
 
-
-    if (vision.seesWall ||tracker.wallLeft|| tracker.wallRight) {
-        std::cout << "Wall detected. Initiating trace!" << std::endl;
-        std::cout << "Sees Wall: " << vision.seesWall<<"\nwallLeft : "<<tracker.wallLeft<<"\nwallRight: "<<tracker.wallRight<< std::endl;
-        
-       
-
-        if (vision.seesWall && !(tracker.wallLeft || tracker.wallRight))
+        if (lastHitNormal.x == 0 && lastHitNormal.y == 0)
         {
-            //move towards the wall
-            Vec2 gridStep;
-            if (std::abs(forward.x) > std::abs(forward.y)) {
-                gridStep = (forward.x > 0) ? Vec2(1, 0) : Vec2(-1, 0);
-            }
-            else {
-                gridStep = (forward.y > 0) ? Vec2(0, 1) : Vec2(0, -1);
-            }
+            std::cout << "Case 1" << std::endl;
+        }
 
-            Vec2 targetTile = agentTile + gridStep;
-            if (agent.room->navmesh.navMesh[targetTile.x][targetTile.y].walkable)
+        if (lastHitNormal.x == 0 && lastHitNormal.y == 1)
+        {
+
+            std::cout << "Case 2" << std::endl;
+            if (tracker.wallLeft)
             {
-
-                agent.MoveToPoint(targetTile);
-                return BH_RUNNING;
+                agent.MoveToPoint(leftPosition);
+            }else if (tracker.wallRight)
+            {
+                agent.MoveToPoint(rightPosition);
             }
-        }
-        if (tracker.wallLeft || tracker.wallRight)
+            else
+            {
+                Vec2 agentWorld = transform.pos;                                                  // agent’s precise world‐pos
+                Vec2 wallWorld = vision.LastKnownBrick->getComponent<CTransform>().pos;          // brick’s world‐pos
+
+                // 2. Build the “to‐wall” vector in world space:
+                Vec2 worldToWall = wallWorld - agentWorld;
+
+                // 3. Normalize to get a unit‐length direction:
+                Vec2 dirToLastWall;
+                if (worldToWall.x != 0.0f || worldToWall.y != 0.0f) {
+                    worldToWall.normalize();
+                    dirToLastWall = worldToWall;  // (worldToWall / worldToWall.length())
+                }
+                else {
+                    dirToLastWall = Vec2(0, 0); // they occupy the same point
+                }
+                float angleRad = std::atan2(dirToLastWall.y, dirToLastWall.x);
+                agent.steer(angleRad);
+            }
+        }if (lastHitNormal.x == 0 && lastHitNormal.y == -1)
         {
 
-            std::cout << "Wall detected. On Left or RIght!" << std::endl;
-
-            std::cout << "Forward : " << forward.x<< " , "<< forward.y << std::endl;
-            std::cout << "Direction : " << dir.x<< " , " <<dir.y<< std::endl;
-            std::cout << "Wall Tile : " << wallTile.x<< " , "<< wallTile.y<<std::endl;
-            std::cout << "Agent To Wall : " <<agentToWall.x << " , "<<agentToWall.y << std::endl;
-            std::cout << "Wall to right of the agent (SIDE) : " << wallRight<< std::endl;
-            std::cout << "Wall ABOVE the agent (SIDE) : " << wallUp << std::endl;
-
-            if (abs(agentToWall.x) > abs(agentToWall.y)) {
-                // Wall is mostly left/right relative to agent
-                if (agentToWall.x > 0) {
-                    // Wall is to the right → move right
-                    agent.MoveToPoint(rightPosition);
-                    return BH_RUNNING;
-                }
-                else {
-                    // Wall is to the left → move left
-                    agent.MoveToPoint(leftPosition);
-                    return BH_RUNNING;
-                }
-            }
-            else {
-                // Wall is mostly up/down relative to agent
-                if (agentToWall.y > 0) {
-                    // Wall is above → move up
-                    agent.MoveToPoint(upPosition);
-                    return BH_RUNNING;
-                }
-                else {
-                    // Wall is below → move down
-
-                    agent.MoveToPoint(downPosition);
-                    return BH_RUNNING;
-                }
-            }
-            //return BH_RUNNING;
+            std::cout << "Case 3" << std::endl;
+            agent.MoveToPoint(diagUpLeft);
         }
-        //return BH_RUNNING;
-        agent.agent->getComponent<CVision>().NearestBrick = agent.agent->getComponent<CVision>().LastKnownBrick;
-       // return BH_SUCCESS;
+        if (lastHitNormal.x == 1 && lastHitNormal.y == 0)
+        {
+
+            std::cout << "Case 4" << std::endl; if (tracker.wallLeft)
+            {
+                agent.MoveToPoint(upPosition);
+            }
+            else if (tracker.wallRight)
+            {
+                agent.MoveToPoint(downPosition);
+            }
+        }
+
+        if (lastHitNormal.x == 1 && lastHitNormal.y == 1)
+        {
+
+            std::cout << "Case 5" << std::endl;
+        }
+        if (lastHitNormal.x == 1 && lastHitNormal.y == -1)
+        {
+
+            std::cout << "Case 6" << std::endl; 
+            if (tracker.wallLeft)
+            {
+                agent.MoveToPoint(upPosition);
+            }if (tracker.wallRight)
+            {
+                agent.MoveToPoint(downPosition);
+            }
+        }
+
+        if (lastHitNormal.x == -1 && lastHitNormal.y == 0)
+        {
+            std::cout << "Case 7" << std::endl;
+            if (tracker.wallLeft)
+            {
+                agent.MoveToPoint(downPosition);
+            }else if (tracker.wallRight)
+            {
+                agent.MoveToPoint(upPosition);
+            }
+            else
+            {
+                Vec2 agentWorld = transform.pos;                                                  // agent’s precise world‐pos
+                Vec2 wallWorld = vision.LastKnownBrick->getComponent<CTransform>().pos;          // brick’s world‐pos
+
+                // 2. Build the “to‐wall” vector in world space:
+                Vec2 worldToWall = wallWorld - agentWorld;
+
+                // 3. Normalize to get a unit‐length direction:
+                Vec2 dirToLastWall;
+                if (worldToWall.x != 0.0f || worldToWall.y != 0.0f) {
+                    worldToWall.normalize();
+                    dirToLastWall =worldToWall ;  // (worldToWall / worldToWall.length())
+                }
+                else {
+                    dirToLastWall = Vec2(0, 0); // they occupy the same point
+                }
+                float angleRad = std::atan2(dirToLastWall.y, dirToLastWall.x);
+                agent.steer(angleRad);
+
+                agent.MoveToPoint(agentTile + dir);
+            }
+        }
+
+        if (lastHitNormal.x == -1 && lastHitNormal.y == 1)
+        {
+
+            std::cout << "Case 8" << std::endl;
+        }if (lastHitNormal.x == -1 && lastHitNormal.y == -1)
+        {
+
+            std::cout << "Case 9" << std::endl;
+        }
+        
+
     }
+  
+    if (vision.seesDoor) return BH_SUCCESS;
+   
     
 
-    std::cout << "No Conditions are met, returning Failure!" << std::endl;
-    return BH_RUNNING;
-
-/*
-auto& transform = agent.agent->getComponent<CTransform>();
-auto& vision = agent.agent->getComponent<CVision>();
-auto& tracker = agent.agent->getComponent<CWallTracker>();
-Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-upPosition = agentTile + Vec2(0, 1);
-downPosition = agentTile + Vec2(0, -1);
-rightPosition = agentTile + Vec2(1, 0);
-leftPosition = agentTile + Vec2(-1, 0);
-float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-Vec2  forward = { std::cos(angleRad), std::sin(angleRad) };
-Vec2 dir = { std::cos(transform.angle), std::sin(transform.angle) };
-Vec2 wallTile;
-Vec2 agentToWall = wallTile - agentTile;
-float side = dir.cross(agentToWall);
-bool wallRight = (side < 0);
-bool wallUp = false;
-agentToWall.normalize();
-float dot = dir.dot(agentToWall);
-
-if (abs(agentToWall.x) > abs(agentToWall.y)) {
-    // Horizontal relation → wall is mostly left/right
-    wallUp = false;
-}
-else {
-    // Vertical relation → wall is mostly up/down
-    wallUp = true;
-}
-    // WallUp detection based on relative position
-    if (abs(agentToWall.x) >= abs(agentToWall.y)) {
-        std::cout << "line 439!" << std::endl;
-        if (agentToWall.x >= 0) {
-            transform.pos.x += speed;
-            std::cout << "Moving Right" << std::endl;
-            targetPosition = rightPosition;
-           // agent.initializeMoveToPoint(targetPosition);
-           // agent.room->TurnTowardsPosition(agent.agent,targetPosition, 0);
-            //agent.MoveToPoint(targetPosition);
-            return BH_RUNNING;
-        }
-        else {
-            transform.pos.x -= speed;
-            std::cout << "Moving Left" << std::endl;
-            targetPosition = leftPosition;
-         //   agent.initializeMoveToPoint(targetPosition);
-            //agent.room->TurnTowardsPosition(agent.agent, targetPosition, 0);
-           // agent.MoveToPoint(targetPosition);
-            return BH_RUNNING;
-        }
-    }
-    else {
-        std::cout << "line 456!" << std::endl;
-        if (agentToWall.y >= 0) {
-            transform.pos.y += speed;
-            std::cout << "Moving Up" << std::endl;
-            targetPosition = upPosition;
-           // agent.initializeMoveToPoint(targetPosition);
-            //agent.room->TurnTowardsPosition(agent.agent, targetPosition, 0);
-            //agent.MoveToPoint(targetPosition);
-            return BH_RUNNING;
-        }
-        else {
-            transform.pos.y -= speed;
-            std::cout << "Moving Down" << std::endl;
-            targetPosition = downPosition;
-            //agent.initializeMoveToPoint(targetPosition);
-            //agent.room->TurnTowardsPosition(agent.agent, targetPosition, 0);
-            //agent.MoveToPoint(targetPosition);
-            return BH_RUNNING;
-        }
-    }*/
-}
+  */
+   

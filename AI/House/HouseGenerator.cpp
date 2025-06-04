@@ -5,7 +5,13 @@
 
 void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 {
-
+	//Patching the doors for now
+	navmesh.markObstacle(12, 22);
+	navmesh.markObstacle(25, 28);
+	navmesh.markObstacle(13, 5);
+	room.CreateEntity("Brick", Vec2(12, 22), "Brick");
+	room.CreateEntity("Brick", Vec2(25, 28), "Brick");
+	room.CreateEntity("Brick", Vec2(13, 5), "Brick");
 	//Warehouse
 	House* Warehouse = new House();
 	GenerateHorizontalWall("WarehouseBrick", navmesh, room, 0, 15, 32);

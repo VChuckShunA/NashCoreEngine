@@ -45,16 +45,16 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-  //  HouseGenerator::GenerateWareHouse(navmesh, *this);
-  //  HouseGenerator::GenerateLHouse(navmesh, *this);
+    HouseGenerator::GenerateWareHouse(navmesh, *this);
+    HouseGenerator::GenerateLHouse(navmesh, *this);
     HouseGenerator::GenerateEightHouse(navmesh, *this);
- //   HouseGenerator::GenerateMansion(navmesh, *this);
+    HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(1, 19, p1),
+        gridToMidPixel(20, 17, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -349,6 +349,12 @@ Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
     return { (entity->getComponent<CTransform>().pos.x / 64) ,
         ((m_game->window().getSize().y - (entity->getComponent<CTransform>().pos.y - 1)) / 64) };
   
+}
+
+Vec2 AIPlayroom::positionToGridCordinates(const Vec2& cordinates)
+{
+    return { (cordinates.x / 64) ,
+        ((m_game->window().getSize().y - (cordinates.y - 1)) / 64) };
 }
 
 void AIPlayroom::MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path)
@@ -703,6 +709,7 @@ void AIPlayroom::drawVisionCone()
         if (vision.seesFood) { visionCone[0].color = sf::Color(0, 255, 0, 100); }
         if (vision.seesCoin) { visionCone[0].color = sf::Color(255, 255, 0, 100); }
 
+        if (vision.seesWall) { visionCone[0].color = sf::Color(255, 255, 0, 100); }
       
 
 
@@ -718,7 +725,7 @@ void AIPlayroom::drawVisionCone()
             if (vision.seesFood) { visionCone[i + 1].color = sf::Color(0, 255, 0, 100); }
             if (vision.seesCoin) { visionCone[i + 1].color = sf::Color(255, 255, 0, 100); }
 
-
+            if (vision.seesWall) { visionCone[i + 1].color = sf::Color(255, 255, 0, 100); }
         }
 
         m_game->window().draw(visionCone);
@@ -1096,6 +1103,17 @@ bool AIPlayroom::RayIntersectsAABB(const Vec2& origin, const Vec2& direction, co
 
     tHit = tMin;
     return (tHit >= 0.0f && tHit <= maxDist);
+}
+
+bool AIPlayroom::isWallAt(const Vec2& tile)
+{
+    // Additional helper to check if a tile is a wall
+        Vec2 pos = gridToMidPixel(tile.x, tile.y, playerPtr->agent); // Position in world coordinates
+        for (auto& wall : m_entityManager.getEntities("Brick")) {
+            Vec2 eTile = positionToGridCordinates(wall);
+            if (eTile == tile) return true;
+        }
+        return false;
 }
 
 AIPlayroom::RaycastHit AIPlayroom::LineTrace(const Vec2& origin, const Vec2& direction, float maxDist)

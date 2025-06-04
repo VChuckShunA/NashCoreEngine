@@ -78,6 +78,7 @@ public:
     const size_t INVENTORY_SIZE = 5;
     std::array<std::shared_ptr<Item>, 5> inventory;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
+    Vec2 positionToGridCordinates(const Vec2& cordinates);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
     void sVisionCone();
     void ItemScanner();
@@ -98,7 +99,8 @@ public:
         float& tHit,                  // Out: distance along the ray to the hit point
         Vec2& hitNormal               // Out: normal of the box face that was hit
     );
-
+    // Additional helper to check if a tile is a wall
+    bool isWallAt(const Vec2& tile);
     RaycastHit LineTrace(const Vec2& origin, const Vec2& direction, float maxDist);
     std::map<int, std::string> itemToString = {
      { 0, "NONE" },
