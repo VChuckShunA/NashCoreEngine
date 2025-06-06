@@ -129,7 +129,7 @@ public:
     Vec2 GetOppositeDirection(Vec2 targetPosition, Vec2 PlayerPosition);
     Vec2 GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition);
     Vec2 GetRandomWanderSpot();
-    void CreateEntity(std::string tag, Vec2 position, std::string AnimationName);
+    void CreateEntity(std::string tag, Vec2 position, std::string AnimationName,int houseID);
     void UpdateNearesBrick();
 
     friend class BaseAIAgent;

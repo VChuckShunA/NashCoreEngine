@@ -8,8 +8,9 @@ private:
 	struct Door
 	{
 		bool scanned = false;
-		Vec2 entryPoint1;
-		Vec2 entryPoint2;
+		/*Vec2 entryPoint1;
+		Vec2 entryPoint2;*/
+		Vec2 doorPosition;
 		Vec2 GetEntryPoint(Vec2 position);
 		void ResetDoor();
 	};
@@ -28,10 +29,10 @@ private:
 public:
 	int houseID;
 	std::string houseLabel; //L House, 8House,Warehouse, Mansion
-	Vec2 GetClosestMainDoor();
+	Vec2 GetClosestMainDoor(Vec2& agentPosition);
 	Vec2 GetClosestEntryPoint();
 	void ResetAndPopulateHouse();
-	void AddMainDoor(Vec2& mainDoorCords);
+	void AddMainDoor(Vec2 mainDoorCords);
 	void AddRoom(Vec2& topleft, Vec2& topRight, Vec2& Bottomleft, Vec2& BottomRight, std::vector<std::shared_ptr<Door>> doors);
 
 

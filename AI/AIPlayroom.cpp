@@ -45,23 +45,23 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    HouseGenerator::GenerateWareHouse(navmesh, *this);
-    HouseGenerator::GenerateLHouse(navmesh, *this);
+  //  HouseGenerator::GenerateWareHouse(navmesh, *this);
+  //  HouseGenerator::GenerateLHouse(navmesh, *this);
     HouseGenerator::GenerateEightHouse(navmesh, *this);
-    HouseGenerator::GenerateMansion(navmesh, *this);
+  //  HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(20, 17, p1),
+        gridToMidPixel(2, 17, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
     );
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
-    p1->addComponent<CWallTracker>();
+   // p1->addComponent<CWallTracker>();
     /*
     auto item1 = m_entityManager.addEntity("health");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
@@ -465,7 +465,7 @@ void AIPlayroom::sVisionCone()
     ItemScanner();
     WallChecker();
 
-    drawWallCheckerRays();
+    //drawWallCheckerRays();
 }
 
 void AIPlayroom::ItemScanner()
@@ -1439,7 +1439,7 @@ Vec2 AIPlayroom::GetRandomWanderSpot()
     }
 }
 
-void AIPlayroom::CreateEntity(std::string tag, Vec2 position, std::string AnimationName)
+void AIPlayroom::CreateEntity(std::string tag, Vec2 position, std::string AnimationName,int houseID)
 {
     auto entity = m_entityManager.addEntity(tag);
     entity->addComponent<CAnimation>(m_game->assets().getAnimation(AnimationName), true);
@@ -1450,6 +1450,7 @@ void AIPlayroom::CreateEntity(std::string tag, Vec2 position, std::string Animat
         0
     );
     entity->addComponent<CBoundingBox>(Vec2(64, 64));
+    entity->m_buildingID = houseID;
 }
 
 void AIPlayroom::UpdateNearesBrick()

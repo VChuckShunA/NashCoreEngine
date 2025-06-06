@@ -33,6 +33,7 @@ public:
 
     std::weak_ptr<Entity> Instigator;
     const size_t m_id = 0;
+    int m_buildingID = NULL;
     [[nodiscard]] size_t id() const;
 
     [[nodiscard]] bool isActive() const;

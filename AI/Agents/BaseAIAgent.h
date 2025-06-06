@@ -60,6 +60,13 @@ public:
     virtual bool hasFood();
     virtual bool needsFood();
     virtual bool needsAmmo();
+
+    // Rotate the agent continually in place to the left (CCW) at a fixed rate:
+    void turnLeft();
+
+    // Rotate the agent continually in place to the right (CW) at a fixed rate:
+    void turnRight();
+
 protected:
 
 
@@ -322,8 +329,10 @@ private:
     bool pathInitialized = false;
     bool followingRight = false;
     bool followingLeft = false;
+    bool canMove = true;
     virtual void onInitialize() override;
     Vec2 getLastHitNormal(Vec2 wallTile, Vec2 AgentTile);
+    Vec2 doorPosition;
     virtual Status update() override;
 };
 

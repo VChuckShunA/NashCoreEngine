@@ -2,91 +2,105 @@
 #include "../Pathfinding/AStar.h"
 #include "../AIPlayroom.h"
 #include "House.h"
-
+std::vector<std::shared_ptr<House>> generatedHouses;
 void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 {
-	//Patching the doors for now
-	navmesh.markObstacle(12, 22);
-	navmesh.markObstacle(25, 28);
-	navmesh.markObstacle(13, 5);
-	room.CreateEntity("Brick", Vec2(12, 22), "Brick");
-	room.CreateEntity("Brick", Vec2(25, 28), "Brick");
-	room.CreateEntity("Brick", Vec2(13, 5), "Brick");
+	////Patching the doors for now
+	//navmesh.markObstacle(12, 22);
+	//navmesh.markObstacle(25, 28);
+	//navmesh.markObstacle(13, 5);
+	//room.CreateEntity("Brick", Vec2(12, 22), "Brick");
+	//room.CreateEntity("Brick", Vec2(25, 28), "Brick");
+	//room.CreateEntity("Brick", Vec2(13, 5), "Brick");
 	//Warehouse
-	House* Warehouse = new House();
-	GenerateHorizontalWall("WarehouseBrick", navmesh, room, 0, 15, 32);
-	GenerateHorizontalWall("WarehouseBrick", navmesh, room, 0, 15, 27);
-	GenerateVerticalWall("WarehouseBrick", navmesh, room, 14, 25, 29);
-	GenerateVerticalWall("WarehouseBrick", navmesh, room, 28, 31, 0);
+	auto Warehouse = std::make_shared<House>();
+	Warehouse->houseID = 1;
+	Warehouse->houseLabel = "Warehouse";
+	GenerateHorizontalWall(1, navmesh, room, 0, 15, 32);
+	GenerateHorizontalWall(1, navmesh, room, 0, 15, 27);
+	GenerateVerticalWall(1, navmesh, room, 14, 25, 29);
+	GenerateVerticalWall(1, navmesh, room, 28, 31, 0);
 	navmesh.markObstacle(15, 31);
 	navmesh.markObstacle(15, 29);
 	navmesh.markObstacle(15, 28);
-	room.CreateEntity("WarehouseBrick", Vec2(15, 31), "Brick");
-	room.CreateEntity("WarehouseBrick", Vec2(15, 29), "Brick");
-	room.CreateEntity("WarehouseBrick", Vec2(15, 28), "Brick");
+	room.CreateEntity("WarehouseBrick", Vec2(15, 31), "Brick", 1);
+	room.CreateEntity("WarehouseBrick", Vec2(15, 29), "Brick", 1);
+	room.CreateEntity("WarehouseBrick", Vec2(15, 28), "Brick", 1);
 	MarkAreaAsHouse(navmesh, 1, 14, 28, 31);
 	navmesh.navMesh[15][30].insideHouse = true;
+	generatedHouses.push_back(Warehouse);
 }
 
 void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 {
 	//25,30 - 32,30
-	House* LHouse = new House();
-	GenerateHorizontalWall("LHouseBrick", navmesh, room, 25, 32, 30);
+	auto LHouse = std::make_shared<House>();
+	LHouse->houseID = 2;
+	LHouse->houseLabel = "LHouse";
+	GenerateHorizontalWall(2, navmesh, room, 25, 32, 30);
 	// 25,29
 	// 25,27
 	navmesh.markObstacle(25, 29);
 	navmesh.markObstacle(25, 27);
-	room.CreateEntity("LHouseBrick", Vec2(25, 29), "Brick");
-	room.CreateEntity("LHouseBrick", Vec2(25, 27), "Brick");
+	room.CreateEntity("LHouseBrick", Vec2(25, 29), "Brick",2);
+	room.CreateEntity("LHouseBrick", Vec2(25, 27), "Brick",2);
 	//25, 36 - 29, 26
 	//29,35 - 29,14
-	GenerateVerticalWall("LHouseBrick", navmesh, room, 14, 25, 29);
+	GenerateVerticalWall(2, navmesh, room, 14, 25, 29);
 	//30,14
 	//31,14
 	navmesh.markObstacle(30, 14);
 	navmesh.markObstacle(31, 14);
-	room.CreateEntity("LHouseBrick", Vec2(30, 14), "Brick");
-	room.CreateEntity("LHouseBrick", Vec2(31, 14), "Brick");
+	room.CreateEntity("Brick", Vec2(30, 14), "Brick", 2);
+	room.CreateEntity("Brick", Vec2(31, 14), "Brick", 2);
 	//32,29 - 32,14
-	GenerateVerticalWall("LHouseBrick", navmesh, room, 14, 29, 32);
+	GenerateVerticalWall(2, navmesh, room, 14, 29, 32);
 	MarkAreaAsHouse(navmesh, 26, 31, 27, 29);
 	navmesh.navMesh[25][28].insideHouse = true;
 	MarkAreaAsHouse(navmesh, 30, 31, 15, 26);
-	GenerateHorizontalWall("LHouseBrick", navmesh, room, 25, 29, 26);
+	GenerateHorizontalWall(2, navmesh, room, 25, 29, 26);
+
+	generatedHouses.push_back(LHouse);
 }
 
 void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 {
-	House* EightHouse = new House();
-	GenerateHorizontalWall("EightHouseBrick", navmesh, room, 8, 11, 22);
-	GenerateHorizontalWall("EightHouseBrick", navmesh, room, 8, 13, 13);
-	GenerateHorizontalWall("EightHouseBrick", navmesh, room, 10, 12, 18);
-	GenerateVerticalWall("EightHouseBrick", navmesh, room, 14, 22, 8);
-	GenerateVerticalWall("EightHouseBrick", navmesh, room, 14, 22, 13);
+	auto EightHouse = std::make_shared<House>();
+	EightHouse->houseID = 3;
+	EightHouse->houseLabel = "EightHouse";
+	GenerateHorizontalWall(3, navmesh, room, 8, 11, 22);
+	GenerateHorizontalWall(3, navmesh, room, 8, 13, 13);
+	GenerateHorizontalWall(3, navmesh, room, 10, 12, 18);
+	GenerateVerticalWall(3, navmesh, room, 14, 22, 8);
+	GenerateVerticalWall(3, navmesh, room, 14, 22, 13);
 
 	MarkAreaAsHouse(navmesh, 9, 12, 19, 21);
 	MarkAreaAsHouse(navmesh, 9, 12, 14, 17);
 
 	navmesh.navMesh[9][18].insideHouse = true;
 	navmesh.navMesh[12][22].insideHouse = true;
+	EightHouse->AddMainDoor(Vec2(12, 22));
+	generatedHouses.push_back(EightHouse);
+
 }
 
 void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 {
-	House* Mansion = new House();
-	GenerateHorizontalWall("MansionBrick", navmesh, room, 13, 32, 9);
-	GenerateHorizontalWall("MansionBrick", navmesh, room, 13, 32, 0);
-	GenerateHorizontalWall("MansionBrick", navmesh, room, 19, 24, 5);
-	GenerateHorizontalWall("MansionBrick", navmesh, room, 26, 28, 5);
-	GenerateHorizontalWall("MansionBrick", navmesh, room, 30, 31, 5);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 6, 8, 13);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 1, 4, 13);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 1, 3, 19);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 6, 8, 19);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 6, 8, 26);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 2, 4, 28);
-	GenerateVerticalWall("MansionBrick", navmesh, room, 1, 8, 32);
+	auto Mansion = std::make_shared<House>();
+	Mansion->houseID = 4;
+	Mansion->houseLabel = "Mansion";
+	GenerateHorizontalWall(4, navmesh, room, 13, 32, 9);
+	GenerateHorizontalWall(4, navmesh, room, 13, 32, 0);
+	GenerateHorizontalWall(4, navmesh, room, 19, 24, 5);
+	GenerateHorizontalWall(4, navmesh, room, 26, 28, 5);
+	GenerateHorizontalWall(4, navmesh, room, 30, 31, 5);
+	GenerateVerticalWall(4, navmesh, room, 6, 8, 13);
+	GenerateVerticalWall(4, navmesh, room, 1, 4, 13);
+	GenerateVerticalWall(4, navmesh, room, 1, 3, 19);
+	GenerateVerticalWall(4, navmesh, room, 6, 8, 19);
+	GenerateVerticalWall(4, navmesh, room, 6, 8, 26);
+	GenerateVerticalWall(4, navmesh, room, 2, 4, 28);
+	GenerateVerticalWall(4, navmesh, room, 1, 8, 32);
 
 
 	MarkAreaAsHouse(navmesh, 14, 18, 1, 8);
@@ -101,23 +115,24 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[25][5].insideHouse = true;
 	navmesh.navMesh[28][1].insideHouse = true;
 	navmesh.navMesh[29][5].insideHouse = true;
+	generatedHouses.push_back(Mansion);
 }
 
-void HouseGenerator::GenerateVerticalWall(std::string tag, AStar& navmesh, AIPlayroom& room,int y1, int y2, int x)
+void HouseGenerator::GenerateVerticalWall(int id, AStar& navmesh, AIPlayroom& room,int y1, int y2, int x)
 {
 	for (int y = y1; y <= y2; y++)
 	{
 		navmesh.markObstacle(x, y);
-		room.CreateEntity("Brick", Vec2(x, y), "Brick");
+		room.CreateEntity("Brick", Vec2(x, y), "Brick",id);
 	}
 }
 
-void HouseGenerator::GenerateHorizontalWall(std::string tag, AStar& navmesh, AIPlayroom& room, int x1, int x2, int y)
+void HouseGenerator::GenerateHorizontalWall(int id, AStar& navmesh, AIPlayroom& room, int x1, int x2, int y)
 {
 	for (int x = x1; x <= x2; x++)
 	{
 		navmesh.markObstacle(x, y);
-		room.CreateEntity("Brick", Vec2(x, y), "Brick");
+		room.CreateEntity("Brick", Vec2(x, y), "Brick",id);
 	}
 }
 
@@ -130,4 +145,14 @@ void HouseGenerator::MarkAreaAsHouse(AStar& navmesh, int x1, int x2, int y1, int
 			navmesh.navMesh[x][y].insideHouse = true;
 		}
 	}
+}
+
+House* HouseGenerator::FindHouseByID(int id)
+{
+	for (auto& house : generatedHouses)
+	{
+		if (house->houseID == id)
+			return house.get();
+	}
+	return nullptr;
 }

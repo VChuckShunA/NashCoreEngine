@@ -138,7 +138,7 @@ public:
     bool wallLeft = false;
 
     float traceDistance = 129;    // Ray length
-    int   numSideRays = 3;          // Number of rays in fan
+    int   numSideRays = 1;          // Number of rays in fan
     float sideArcAngle = 45.0f;     // Arc in degrees
 
     bool  tracingRight = true;      // Right-hand or left-hand rule
