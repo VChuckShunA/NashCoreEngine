@@ -5,6 +5,7 @@
 #include "../Health.h"
 #include "../House/HouseGenerator.h"
 #include "../House/House.h"
+#include "../Pathfinding/BoustrophedonPathfinder.h"
 BaseAIAgent::BaseAIAgent() : agent(nullptr), room(nullptr) {
 }
 
@@ -112,7 +113,7 @@ void BaseAIAgent::initializeMoveToPoint(const Vec2& Destination)
    // std::cout << "Path Updated: " << Destination.x << " , " << Destination.y << std::endl;
 }
 
-void BaseAIAgent::MoveToPoint(const Vec2& Waypoint)
+void BaseAIAgent::FollowPath()
 {
     int AISpeed = 2;
     Vec2& AgentCTransform = agent->getComponent<CTransform>().pos;
@@ -388,7 +389,7 @@ Node::Status  FleeToSafePosition::update()
 {
     if (!agent.destinationReached)
                 {
-                    agent.MoveToPoint(safeSpot);
+                    agent.FollowPath();
                     std::cout << "Fleeing to " << safeSpot.x << " , "<< safeSpot.y << std::endl;
                     return BH_RUNNING; //Not reached destination 
                 }
@@ -452,7 +453,7 @@ Node::Status Wander::update()
         return BH_SUCCESS; // Reached the point = success
     } 
 
-    agent.MoveToPoint(wanderSpot);
+    agent.FollowPath();
   //  std::cout << "Wandering (Still Running)" << std::endl;
         return BH_RUNNING; //Not reached destination 
     
@@ -460,15 +461,15 @@ Node::Status Wander::update()
 }
 
 WallTrace::WallTrace(BaseAIAgent& ag) :agent(ag) {
-    Name = "Move To Point";
+    Name = "Wall Trace";
     // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
 }
 
 void WallTrace::onInitialize()
 {
-    House* house = HouseGenerator::FindHouseByID(agent.agent->getComponent<CVision>().NearestBrick->m_buildingID);
+    agent.currentHouse = HouseGenerator::FindHouseByID(agent.agent->getComponent<CVision>().NearestBrick->m_buildingID);
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    doorPosition = house->GetClosestMainDoor(agentTile);
+    doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile);
     agent.initializeMoveToPoint(doorPosition);
 }
 
@@ -508,7 +509,7 @@ Node::Status WallTrace::update()
         return BH_SUCCESS;
     }
 
-    agent.MoveToPoint(doorPosition);
+    agent.FollowPath();
     //  std::cout << "Wandering (Still Running)" << std::endl;
     return BH_RUNNING; //Not reached destination 
 
@@ -549,7 +550,35 @@ Node::Status WallTrace::update()
 
 }
 
+HouseSearch::HouseSearch(BaseAIAgent& ag) :agent(ag)
+{
+}
 
+void HouseSearch::onInitialize()
+{
+    if (agent.currentHouse)
+    {
 
+        agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+        agent.destinationReached = false;
+    }
+}
 
+void HouseSearch::reset()
+{
+}
 
+Node::Status HouseSearch::update()
+{
+    std::cout << "Generated path size: " << agent.currentpath.size() << std::endl;
+
+    if (!agent.destinationReached)
+    {
+        std::cout << "We are RUNNING" << std::endl;
+        agent.FollowPath();
+        return BH_RUNNING; //Not reached destination 
+    }
+    else if (agent.destinationReached) {
+        return BH_SUCCESS; // Reached the point = success
+    }
+}

@@ -23,18 +23,21 @@ private:
 		void ResetAndPopulateRoom();
 	};
 
+
 	bool Searched = false;
 	std::vector<std::shared_ptr<Room>> rooms;
 	std::vector<std::shared_ptr<Door>> mainDoors;
 public:
 	int houseID;
+	sf::IntRect bounds;
 	std::string houseLabel; //L House, 8House,Warehouse, Mansion
 	Vec2 GetClosestMainDoor(Vec2& agentPosition);
 	Vec2 GetClosestEntryPoint();
 	void ResetAndPopulateHouse();
 	void AddMainDoor(Vec2 mainDoorCords);
 	void AddRoom(Vec2& topleft, Vec2& topRight, Vec2& Bottomleft, Vec2& BottomRight, std::vector<std::shared_ptr<Door>> doors);
-
-
+	void AddBounds(int top, int left, int width, int height);
+	
+	bool IsBoundsSet();
 };
 

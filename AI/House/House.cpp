@@ -40,3 +40,13 @@ void House::AddRoom(Vec2& topleft, Vec2& topRight, Vec2& Bottomleft, Vec2& Botto
 {
 	//Room* newRoom=new Room()
 }
+
+void House::AddBounds(int top, int left, int width, int height)
+{
+    bounds= sf::IntRect(left, top, width, height);
+}
+
+bool House::IsBoundsSet()
+{
+    return bounds.width > 0 && bounds.height > 0;
+}

@@ -1,5 +1,6 @@
 #include "BoustrophedonPathfinder.h"
 #include "../../vec2.h"
+#include <iostream>
 
 std::vector<Vec2> BoustrophedonPathfinder::GeneratePath(const sf::IntRect& areaBounds, const std::vector<std::vector<AStar::Node>>& navMesh)
 {
@@ -30,5 +31,6 @@ std::vector<Vec2> BoustrophedonPathfinder::GeneratePath(const sf::IntRect& areaB
 
 bool BoustrophedonPathfinder::IsCellWalkableAndUnscanned(const std::vector<std::vector<AStar::Node>>& navMesh, const Vec2& cell)
 {
-    return navMesh[cell.x][cell.y].walkable && navMesh[cell.x][cell.y].scannable;
+    std::cout << "staradasd" << std::endl;
+    return navMesh[cell.x][cell.y].walkable && navMesh[cell.x][cell.y].insideHouse;
 }

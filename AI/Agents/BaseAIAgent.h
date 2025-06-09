@@ -13,12 +13,14 @@
 constexpr float DEG2RAD = std::numbers::pi_v<float> / 180.0f;
 
 class AIPlayroom;
+class House;
 class BaseAIAgent
 {
 private:
 public:
 	BaseAIAgent();//Default Concstructor
 	std::unique_ptr<Node> BehaviourTree;
+    House* currentHouse = nullptr;
 	//bool hasAmmo = true;
 	//bool hasFood = false;
 	int maxHealth = 100;
@@ -53,7 +55,7 @@ public:
     void UpdateItemPosition();
     virtual void HandleDeath();
 	void initializeMoveToPoint(const Vec2& Destination);
-	void MoveToPoint(const Vec2& Waypoint);
+	void FollowPath();
 	void steer(float targetAngle);
     bool hasTarget();
     virtual bool hasAmmo();
@@ -156,7 +158,7 @@ private:
        // std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
         if (!greenAgent.destinationReached)
         {
-            greenAgent.MoveToPoint(Waypoint);
+            greenAgent.FollowPath();
             return BH_RUNNING; //Not reached destination 
         }
         else if (greenAgent.destinationReached) {
@@ -356,7 +358,7 @@ private:
         // std::cout << "Moving to " << Waypoint.x<< " , " << Waypoint.y << std::endl;
         if (!greenAgent.destinationReached)
         {
-            greenAgent.MoveToPoint(Waypoint);
+            greenAgent.FollowPath();
             return BH_RUNNING; //Not reached destination 
         }
         else if (greenAgent.destinationReached) {
@@ -364,6 +366,15 @@ private:
         }
 
     }
+};
+
+class HouseSearch : public Node {
+public:
+    BaseAIAgent& agent;
+    HouseSearch(BaseAIAgent& ag);
+    virtual void onInitialize() override;
+    virtual void reset() override;
+    Status update() override;
 };
 
 
@@ -374,22 +385,15 @@ public:
         StatefulSequence* wallTraceSequence = new StatefulSequence();
         wallTraceSequence->addChild(new IsNearWall(agent));
         wallTraceSequence->addChild(new WallTrace(agent));
+        wallTraceSequence->addChild(new HouseSearch(agent));
 
-        StatefulSequence* houseSearchSequence = new StatefulSequence();
+       // StatefulSequence* houseSearchSequence = new StatefulSequence();
+       // houseSearchSequence->addChild(new HouseSearch(agent));
 
         addChild(wallTraceSequence);
-        addChild(houseSearchSequence);
+       // addChild(houseSearchSequence);
     }
 };
-class HouseSearch : public Node {
-public:
-    BaseAIAgent& agent;
-    HouseSearch(BaseAIAgent& ag);
-    virtual void onInitialize() override;
-    virtual void reset() override;
-    Status update() override;
-};
-
 
 class BlueAgentCombatSequence : public Selector
 {

@@ -29,6 +29,7 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 	navmesh.navMesh[15][30].insideHouse = true;
 	navmesh.navMesh[15][30].scannable = true;
 	Warehouse->AddMainDoor(Vec2(15, 30));
+	Warehouse->AddBounds(1,31,14,4);
 	generatedHouses.push_back(Warehouse);
 }
 
@@ -62,6 +63,7 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 	MarkAreaAsHouse(navmesh, 30, 31, 15, 26);
 	GenerateHorizontalWall(2, navmesh, room, 25, 29, 26);
 	LHouse->AddMainDoor(Vec2(25, 28));
+	LHouse->AddBounds(26, 29, 6, 15);
 	generatedHouses.push_back(LHouse);
 }
 
@@ -87,6 +89,7 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[12][22].scannable = true;
 
 	EightHouse->AddMainDoor(Vec2(12, 22));
+	EightHouse->AddBounds(9, 21, 4, 8);
 	generatedHouses.push_back(EightHouse);
 
 }
@@ -130,6 +133,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[29][5].scannable = true;
 
 	Mansion->AddMainDoor(Vec2(13, 5));
+	Mansion->AddBounds(14, 8, 17, 8);
 	generatedHouses.push_back(Mansion);
 }
 

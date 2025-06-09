@@ -11,7 +11,6 @@
 #include <SFML/System.hpp>
 
 
-
 class BlueAgent : public BaseAIAgent
 {
 
