@@ -190,7 +190,7 @@ void AStar::DrawPath(sf::RenderWindow& window)
 			{
 				cell.setFillColor(sf::Color::Transparent);
 			}
-			if (navMesh[x][y].walkable && navMesh[x][y].insideHouse)
+			if (navMesh[x][y].walkable && navMesh[x][y].scannable)
 			{
 				cell.setFillColor(sf::Color::White);
 			}

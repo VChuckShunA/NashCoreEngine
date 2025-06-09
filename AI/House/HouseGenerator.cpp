@@ -18,7 +18,6 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 	Warehouse->houseLabel = "Warehouse";
 	GenerateHorizontalWall(1, navmesh, room, 0, 15, 32);
 	GenerateHorizontalWall(1, navmesh, room, 0, 15, 27);
-	GenerateVerticalWall(1, navmesh, room, 14, 25, 29);
 	GenerateVerticalWall(1, navmesh, room, 28, 31, 0);
 	navmesh.markObstacle(15, 31);
 	navmesh.markObstacle(15, 29);
@@ -28,6 +27,8 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 	room.CreateEntity("WarehouseBrick", Vec2(15, 28), "Brick", 1);
 	MarkAreaAsHouse(navmesh, 1, 14, 28, 31);
 	navmesh.navMesh[15][30].insideHouse = true;
+	navmesh.navMesh[15][30].scannable = true;
+	Warehouse->AddMainDoor(Vec2(15, 30));
 	generatedHouses.push_back(Warehouse);
 }
 
@@ -57,9 +58,10 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 	GenerateVerticalWall(2, navmesh, room, 14, 29, 32);
 	MarkAreaAsHouse(navmesh, 26, 31, 27, 29);
 	navmesh.navMesh[25][28].insideHouse = true;
+	navmesh.navMesh[25][28].scannable = true;
 	MarkAreaAsHouse(navmesh, 30, 31, 15, 26);
 	GenerateHorizontalWall(2, navmesh, room, 25, 29, 26);
-
+	LHouse->AddMainDoor(Vec2(25, 28));
 	generatedHouses.push_back(LHouse);
 }
 
@@ -79,6 +81,11 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 
 	navmesh.navMesh[9][18].insideHouse = true;
 	navmesh.navMesh[12][22].insideHouse = true;
+
+
+	navmesh.navMesh[9][18].scannable = true;
+	navmesh.navMesh[12][22].scannable = true;
+
 	EightHouse->AddMainDoor(Vec2(12, 22));
 	generatedHouses.push_back(EightHouse);
 
@@ -115,6 +122,14 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[25][5].insideHouse = true;
 	navmesh.navMesh[28][1].insideHouse = true;
 	navmesh.navMesh[29][5].insideHouse = true;
+
+	navmesh.navMesh[13][5].scannable = true;
+	navmesh.navMesh[19][4].scannable = true;
+	navmesh.navMesh[25][5].scannable = true;
+	navmesh.navMesh[28][1].scannable = true;
+	navmesh.navMesh[29][5].scannable = true;
+
+	Mansion->AddMainDoor(Vec2(13, 5));
 	generatedHouses.push_back(Mansion);
 }
 
@@ -143,6 +158,7 @@ void HouseGenerator::MarkAreaAsHouse(AStar& navmesh, int x1, int x2, int y1, int
 		for (int y = y1; y <= y2; y++)
 		{
 			navmesh.navMesh[x][y].insideHouse = true;
+			navmesh.navMesh[x][y].scannable = true;
 		}
 	}
 }

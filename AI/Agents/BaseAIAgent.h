@@ -378,7 +378,7 @@ public:
         StatefulSequence* houseSearchSequence = new StatefulSequence();
 
         addChild(wallTraceSequence);
-        //addChild(fleeSequence);
+        addChild(houseSearchSequence);
     }
 };
 class HouseSearch : public Node {

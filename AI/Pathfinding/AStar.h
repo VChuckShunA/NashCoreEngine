@@ -13,12 +13,12 @@ public:
 		int gCost, hCost, fCost;
 		bool walkable;
 		bool insideHouse;
-		bool scanned;
+		bool scannable;
 		Node* parent;
 
 		Node(Vec2 pos,bool isWalkable) : position(pos),gCost(0),hCost(0),walkable(isWalkable),parent(nullptr){
 			insideHouse = false;
-			scanned = false;
+			scannable = false;
 		}
 		void CalculateCosts(Node* endNode)
 		{
