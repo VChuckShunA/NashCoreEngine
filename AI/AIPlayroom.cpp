@@ -46,15 +46,15 @@ void AIPlayroom::init(const std::string& levelPath) {
     navmesh.initializeNavMesh();
     //Spawn AI
     HouseGenerator::GenerateWareHouse(navmesh, *this);
-    HouseGenerator::GenerateLHouse(navmesh, *this);
-    HouseGenerator::GenerateEightHouse(navmesh, *this);
-    HouseGenerator::GenerateMansion(navmesh, *this);
+//    HouseGenerator::GenerateLHouse(navmesh, *this);
+  //  HouseGenerator::GenerateEightHouse(navmesh, *this);
+ //   HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(20, 17, p1),
+        gridToMidPixel(20, 29, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -291,7 +291,7 @@ void AIPlayroom::update() {
         sCollision();
         sVisionCone();
         RunBehaviourTrees();
-        std::cout << "Ammo Count : " << ammoCount << std::endl;
+       // std::cout << "Ammo Count : " << ammoCount << std::endl;
         ////sVisionCone();
         //std::cout << "Has Seen Food : " << playerPtr->hasSeenFood << std::endl;
         //std::cout << "Has Seen Ammo : " << playerPtr->hasSeenAmmo << std::endl;
@@ -463,7 +463,11 @@ void AIPlayroom::sVisionCone()
     PlayerScanner();
     EnemyScanner();
     ItemScanner();
-    WallChecker();
+
+    if (isScanningWalls)
+    {
+        WallChecker();
+    }
 
     //drawWallCheckerRays();
 }

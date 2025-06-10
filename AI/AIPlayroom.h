@@ -69,6 +69,7 @@ public:
     void update() override;
     //AI
     AStar navmesh;
+    bool isScanningWalls = true;
     bool LineOfSight(const Vec2& A, const Vec2& P);
     bool liangBarsky(float x0, float y0, float x1, float y1,
         float xmin, float ymin, float xmax, float ymax);

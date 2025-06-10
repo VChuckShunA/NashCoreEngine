@@ -236,12 +236,12 @@ void BaseAIAgent::steer(float targetAngle)
         if (fmod(nextAngle, 360.0f) > target && turnAngle < steerSpeed)
         {
             T.angle = target;
-            std::cout << "Clamped to target (clockwise)\n";
+          //  std::cout << "Clamped to target (clockwise)\n";
         }
         else
         {
             T.angle = nextAngle;
-            std::cout << "Rotated +steerSpeed (clockwise)\n";
+          //  std::cout << "Rotated +steerSpeed (clockwise)\n";
         }
     }
     else // turnAngle ≥ 180 → turn “the other way” (counter‐clockwise)
@@ -255,12 +255,12 @@ void BaseAIAgent::steer(float targetAngle)
         if (ccwDist < steerSpeed)
         {
             T.angle = target;
-            std::cout << "Clamped to target (CCW)\n";
+          // std::cout << "Clamped to target (CCW)\n";
         }
         else
         {
             T.angle = nextAngle;
-            std::cout << "Rotated -steerSpeed (CCW)\n";
+         //   std::cout << "Rotated -steerSpeed (CCW)\n";
         }
     }
 
@@ -423,7 +423,7 @@ Node::Status Wander::update()
     elapsed = clock.getElapsedTime().asSeconds();
    
 
-    std::cout << "Wander Update: dt = " << 0 << ", elapsed = " << elapsed << ", timeout = " << timeout << std::endl;
+  //  std::cout << "Wander Update: dt = " << 0 << ", elapsed = " << elapsed << ", timeout = " << timeout << std::endl;
 
 
     if (agent.destinationReached) {
@@ -470,6 +470,7 @@ void WallTrace::onInitialize()
     agent.currentHouse = HouseGenerator::FindHouseByID(agent.agent->getComponent<CVision>().NearestBrick->m_buildingID);
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile);
+    agent.room->isScanningWalls = false;
     agent.initializeMoveToPoint(doorPosition);
 }
 
@@ -496,7 +497,11 @@ Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
 
 Node::Status WallTrace::update()
 {
-    std::cout << "THIS SHIT IS RUNNING"<< std::endl;/*
+    std::cout << "Wall Trace: Update" << testInt++ << std::endl;
+    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    agent.room->isScanningWalls = false;
+    if(agent.room->navmesh.navMesh[agentTile.x][agentTile.y].insideHouse) return BH_SUCCESS;
+    /*  std::cout << "THIS SHIT IS RUNNING"<< std::endl;
     auto& transform = agent.agent->getComponent<CTransform>();
     auto& vision = agent.agent->getComponent<CVision>();
     auto& tracker = agent.agent->getComponent<CWallTracker>();
@@ -561,6 +566,11 @@ void HouseSearch::onInitialize()
 
         agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
         agent.destinationReached = false;
+
+        for (const Vec2& point : agent.currentpath)
+        {
+            std::cout << "Path : "<< point.x<< " , " << point.y<< std::endl;
+        }
     }
 }
 
@@ -570,7 +580,36 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
+    std::cout << "House Search Update" << std::endl;
+    if (!agent.currentHouse)
+    {
+        std::cout << "No Current House" << std::endl;
+        return BH_FAILURE;
+    } if (agent.currentHouse)
+    {
+        std::cout << "Current House exists" << std::endl;
+        std::cout << "Bounds \nLeft :"<< agent.currentHouse->bounds.left << 
+            " \nTop : "<< agent.currentHouse->bounds.top<< 
+            " \nWidth : " << agent.currentHouse->bounds.width<<" \nHeight : "<< agent.currentHouse->bounds.height << std::endl;
+        std::cout << "Current House exists" << std::endl;
+        agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+        agent.destinationReached = false;
+
+        for (const Vec2& point : agent.currentpath)
+        {
+            std::cout << "Path : " << point.x << " , " << point.y << std::endl;
+        }
+    }
+   /* agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+    agent.destinationReached = false;*/
+
+    for (const Vec2& point : agent.currentpath)
+    {
+        std::cout << "Path : " << point.x << " , " << point.y << std::endl;
+    }
+
     std::cout << "Generated path size: " << agent.currentpath.size() << std::endl;
+    std::cout << "Timer: " << timer++ << std::endl;
 
     if (!agent.destinationReached)
     {

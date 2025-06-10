@@ -300,7 +300,7 @@ public:
             {
                 return BH_SUCCESS;
             }
-            std::cout << "NO WALLL \n" << "Last known Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
+           // std::cout << "NO WALLL \n" << "Last known Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
         return BH_FAILURE;
     }
 }; 
@@ -370,6 +370,7 @@ private:
 
 class HouseSearch : public Node {
 public:
+    int timer = 0;
     BaseAIAgent& agent;
     HouseSearch(BaseAIAgent& ag);
     virtual void onInitialize() override;
@@ -387,11 +388,11 @@ public:
         wallTraceSequence->addChild(new WallTrace(agent));
         wallTraceSequence->addChild(new HouseSearch(agent));
 
-       // StatefulSequence* houseSearchSequence = new StatefulSequence();
-       // houseSearchSequence->addChild(new HouseSearch(agent));
+      //  StatefulSequence* houseSearchSequence = new StatefulSequence();
+      //  houseSearchSequence->addChild(new HouseSearch(agent));
 
         addChild(wallTraceSequence);
-       // addChild(houseSearchSequence);
+        //addChild(houseSearchSequence);
     }
 };
 
