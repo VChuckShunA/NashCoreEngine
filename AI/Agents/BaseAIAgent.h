@@ -371,7 +371,9 @@ private:
 class HouseSearch : public Node {
 public:
     int timer = 0;
-    BaseAIAgent& agent;
+    BaseAIAgent& agent; 
+    bool pathGenerated = false;
+
     HouseSearch(BaseAIAgent& ag);
     virtual void onInitialize() override;
     virtual void reset() override;

@@ -128,19 +128,21 @@ void BaseAIAgent::FollowPath()
 
             if (distanceBetween.x < 5 && distanceBetween.y < 5)
             {
+                std::cout << "131" << std::endl;
                 currentpath.erase(currentpath.begin());
             }
             //TODO: Find a cleaner a way to do this
             if (AgentCTransform.x < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
                 //move right
-
+                std::cout << "137" << std::endl;
                 AgentCTransform.x = AgentCTransform.x + AISpeed;
                 left = false;
                 right = true;
             }if (AgentCTransform.x > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
                 //move left
+                std::cout << "144" << std::endl;
 
                 AgentCTransform.x = AgentCTransform.x - AISpeed;
                 left = true;
@@ -150,6 +152,7 @@ void BaseAIAgent::FollowPath()
             {
                 //move Down
 
+                std::cout << "155" << std::endl;
                 AgentCTransform.y = AgentCTransform.y + AISpeed;
                 down = true;
                 up = false;
@@ -158,6 +161,7 @@ void BaseAIAgent::FollowPath()
             {
                 //move Up
 
+                std::cout << "162" << std::endl;
 
                 AgentCTransform.y = AgentCTransform.y - AISpeed;
                 up = true;
@@ -168,41 +172,51 @@ void BaseAIAgent::FollowPath()
             if (up && left)
             {
                 //entity->getComponent<CTransform>().angle = 225;
+                std::cout << "174" << std::endl;
                 steer(225);
             }
             if (up && right)
             {
                 //entity->getComponent<CTransform>().angle = 315;
+                std::cout << "180" << std::endl;
                 steer(315);
             }
             if (down && left)
             {
                 // entity->getComponent<CTransform>().angle = 135;
+                std::cout << "186" << std::endl;
                 steer(135);
             }
             if (down && right)
             {
                 // entity->getComponent<CTransform>().angle = 45;
+                std::cout << "192" << std::endl;
                 steer(45);
             }
             if (up)
             {
                 //entity->getComponent<CTransform>().angle = 270;
+                std::cout << "198" << std::endl;
                 steer(270);
             }
             if (down)
             {
                 //entity->getComponent<CTransform>().angle = 90;
+
+                std::cout << "205" << std::endl;
                 steer(90);
             }
             if (left)
             {
                 // entity->getComponent<CTransform>().angle = 180;
+
+                std::cout << "212" << std::endl;
                 steer(180);
             }
             if (right)
             {
                 // entity->getComponent<CTransform>().angle = 0;
+                std::cout << "218" << std::endl;
                 steer(0);
             }
 
@@ -210,6 +224,7 @@ void BaseAIAgent::FollowPath()
         if (currentpath.empty())
         {
             //     std::cout << "GreenAgent 164" << std::endl;
+            std::cout << "226" << std::endl;
             destinationReached = true;
         }
     }
@@ -497,7 +512,7 @@ Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
 
 Node::Status WallTrace::update()
 {
-    std::cout << "Wall Trace: Update" << testInt++ << std::endl;
+    //std::cout << "Wall Trace: Update" << testInt++ << std::endl;
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     agent.room->isScanningWalls = false;
     if(agent.room->navmesh.navMesh[agentTile.x][agentTile.y].insideHouse) return BH_SUCCESS;
@@ -561,6 +576,8 @@ HouseSearch::HouseSearch(BaseAIAgent& ag) :agent(ag)
 
 void HouseSearch::onInitialize()
 {
+    pathGenerated = false;   // reset flag
+    agent.destinationReached = false;
     if (agent.currentHouse)
     {
 
@@ -571,6 +588,7 @@ void HouseSearch::onInitialize()
         {
             std::cout << "Path : "<< point.x<< " , " << point.y<< std::endl;
         }
+        pathGenerated = true;
     }
 }
 
@@ -580,20 +598,26 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
-    std::cout << "House Search Update" << std::endl;
+  //  std::cout << "House Search Update" << std::endl;
     if (!agent.currentHouse)
     {
-        std::cout << "No Current House" << std::endl;
+  //      std::cout << "No Current House" << std::endl;
         return BH_FAILURE;
     } if (agent.currentHouse)
     {
-        std::cout << "Current House exists" << std::endl;
-        std::cout << "Bounds \nLeft :"<< agent.currentHouse->bounds.left << 
-            " \nTop : "<< agent.currentHouse->bounds.top<< 
-            " \nWidth : " << agent.currentHouse->bounds.width<<" \nHeight : "<< agent.currentHouse->bounds.height << std::endl;
-        std::cout << "Current House exists" << std::endl;
-        agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
-        agent.destinationReached = false;
+     //   std::cout << "Current House exists" << std::endl;
+     //   std::cout << "Bounds \nLeft :"<< agent.currentHouse->bounds.left << 
+    //        " \nTop : "<< agent.currentHouse->bounds.top<< 
+     //       " \nWidth : " << agent.currentHouse->bounds.width<<" \nHeight : "<< agent.currentHouse->bounds.height << std::endl;
+   //     std::cout << "Current House exists" << std::endl;
+        if (!pathGenerated) {
+            agent.currentpath = BoustrophedonPathfinder::GeneratePath(
+                agent.currentHouse->bounds,
+                agent.room->navmesh.navMesh
+            );
+            pathGenerated = true;
+            std::cout << "Generated path of size " << agent.currentpath.size() << "\n";
+        }
 
         for (const Vec2& point : agent.currentpath)
         {
@@ -608,8 +632,8 @@ Node::Status HouseSearch::update()
         std::cout << "Path : " << point.x << " , " << point.y << std::endl;
     }
 
-    std::cout << "Generated path size: " << agent.currentpath.size() << std::endl;
-    std::cout << "Timer: " << timer++ << std::endl;
+ //   std::cout << "Generated path size: " << agent.currentpath.size() << std::endl;
+ //   std::cout << "Timer: " << timer++ << std::endl;
 
     if (!agent.destinationReached)
     {
