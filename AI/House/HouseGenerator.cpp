@@ -63,7 +63,7 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 	MarkAreaAsHouse(navmesh, 30, 31, 15, 26);
 	GenerateHorizontalWall(2, navmesh, room, 25, 29, 26);
 	LHouse->AddMainDoor(Vec2(25, 28));
-	LHouse->AddBounds(26, 29, 6, 15);
+	LHouse->AddBounds(29, 26, 6, 15);
 	generatedHouses.push_back(LHouse);
 }
 

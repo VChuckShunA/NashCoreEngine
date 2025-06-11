@@ -7,15 +7,17 @@ class House
 private:
 	struct Door
 	{
-		bool scanned = false;
+		//bool scanned = false;
 		/*Vec2 entryPoint1;
 		Vec2 entryPoint2;*/
+		bool scanned;
 		Vec2 doorPosition;
 		Vec2 GetEntryPoint(Vec2 position);
 		void ResetDoor();
 	};
 	struct Room
 	{
+		int roomID;
 		bool scanned = false;
 		std::vector<Vec2> roomSpace;
 		std::vector<Vec2> roomDoors;

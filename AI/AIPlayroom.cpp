@@ -45,10 +45,10 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-    HouseGenerator::GenerateWareHouse(navmesh, *this);
+   // HouseGenerator::GenerateWareHouse(navmesh, *this);
     HouseGenerator::GenerateLHouse(navmesh, *this);
-    HouseGenerator::GenerateEightHouse(navmesh, *this);
-    HouseGenerator::GenerateMansion(navmesh, *this);
+  //  HouseGenerator::GenerateEightHouse(navmesh, *this);
+   // HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
