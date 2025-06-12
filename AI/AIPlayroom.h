@@ -50,7 +50,6 @@ protected:
 
     void onEnd() override;
 
-    void changePlayerStateTo(const std::string& state);
 
     void spawnCoinSpin(const std::shared_ptr<Entity>& tile);
 

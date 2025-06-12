@@ -36,9 +36,13 @@ void House::AddMainDoor(Vec2 mainDoorCords)
     mainDoors.push_back(door);
 }
 
-void House::AddRoom(Vec2& topleft, Vec2& topRight, Vec2& Bottomleft, Vec2& BottomRight, std::vector<std::shared_ptr<Door>> doors)
+void House::AddRoom(int top, int left, int width, int height, std::vector<std::shared_ptr<Door>> doors, House* house, int roomID)
 {
-	//Room* newRoom=new Room()
+    Room newRoom;
+    newRoom.bounds = sf::IntRect(left, top, width, height);
+    newRoom.roomID = roomID;
+    newRoom.doors = doors;
+    house->rooms.push_back(newRoom);
 }
 
 void House::AddBounds(int top, int left, int width, int height)

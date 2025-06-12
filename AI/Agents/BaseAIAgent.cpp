@@ -611,7 +611,7 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
-  //  std::cout << "House Search Update" << std::endl;
+    std::cout << "House Search Room count : " << agent.currentHouse->rooms.size() << std::endl;
     if (!agent.currentHouse)
     {
   //      std::cout << "No Current House" << std::endl;

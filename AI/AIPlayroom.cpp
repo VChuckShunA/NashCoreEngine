@@ -46,9 +46,9 @@ void AIPlayroom::init(const std::string& levelPath) {
     navmesh.initializeNavMesh();
     //Spawn AI
    // HouseGenerator::GenerateWareHouse(navmesh, *this);
-    HouseGenerator::GenerateLHouse(navmesh, *this);
-  //  HouseGenerator::GenerateEightHouse(navmesh, *this);
-   // HouseGenerator::GenerateMansion(navmesh, *this);
+  //  HouseGenerator::GenerateLHouse(navmesh, *this);
+   // HouseGenerator::GenerateEightHouse(navmesh, *this);
+    HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
@@ -1772,17 +1772,6 @@ void AIPlayroom::sRender() {
     m_game->window().draw(HUD);
 }
 
-void AIPlayroom::changePlayerStateTo(const std::string& state) {
-  /*  auto& prev = AIAgent->getComponent<CState>().previousState;
-    if (prev != state) {
-        prev = AIAgent->getComponent<CState>().state;
-        AIAgent->getComponent<CState>().state = state;
-        AIAgent->getComponent<CState>().changeAnimation = true;
-    }
-    else {
-        AIAgent->getComponent<CState>().changeAnimation = false;
-    }*/
-}
 
 void AIPlayroom::spawnBrickDebris(const std::shared_ptr<Entity>& tile) {
     auto debris = m_entityManager.addEntity("debris");
