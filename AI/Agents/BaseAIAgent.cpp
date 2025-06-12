@@ -581,7 +581,12 @@ void HouseSearch::onInitialize()
    
     if (agent.currentHouse)
     {
-        auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+      //  auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+
+        
+        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+        if(!agent.currentHouse->FindCurrentRoom(agentTile))return;
+        auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->FindCurrentRoom(agentTile)->bounds, agent.room->navmesh.navMesh);
         std::vector<Vec2> fullPath;
         fullPath.clear();
         Vec2 last = agent.room->positionToGridCordinates(agent.agent);
@@ -597,10 +602,10 @@ void HouseSearch::onInitialize()
         agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
         agent.destinationReached = false;*/
 
-        for (const Vec2& point : agent.currentpath)
+       /* for (const Vec2& point : agent.currentpath)
         {
             std::cout << "Path : "<< point.x<< " , " << point.y<< std::endl;
-        }
+        }*/
         pathGenerated = true;
     }
 }
@@ -611,20 +616,31 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
-    std::cout << "House Search Room count : " << agent.currentHouse->rooms.size() << std::endl;
+   
     if (!agent.currentHouse)
     {
   //      std::cout << "No Current House" << std::endl;
         return BH_FAILURE;
-    } if (agent.currentHouse)
+    } 
+    
+    if (agent.currentHouse)
     {
-     //   std::cout << "Current House exists" << std::endl;
-     //   std::cout << "Bounds \nLeft :"<< agent.currentHouse->bounds.left << 
-    //        " \nTop : "<< agent.currentHouse->bounds.top<< 
-     //       " \nWidth : " << agent.currentHouse->bounds.width<<" \nHeight : "<< agent.currentHouse->bounds.height << std::endl;
-   //     std::cout << "Current House exists" << std::endl;
-        if (!pathGenerated) {
-            auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+        auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
+        std::cout << "agent Tile " << agentTile.x << " , " << agentTile.y << std::endl;
+        std::cout << "Current House ID " << agent.currentHouse->houseLabel << std::endl;
+       // if (!agent.currentHouse->FindCurrentRoom(agentTile)) return BH_RUNNING;
+        if(agent.currentHouse->FindCurrentRoom(agentTile))  
+            std::cout << "CURRENT ROOM ID : " << agent.currentHouse->FindCurrentRoom(agentTile)->roomID << std::endl;
+
+
+        if (!pathGenerated && agent.currentHouse->FindCurrentRoom(agentTile)!=nullptr) {
+            //auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+
+            Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+            std::cout << "aasdddddddddddddddddddddddddddddddddddddddddd" << std::endl;
+            auto coverCells = BoustrophedonPathfinder::GeneratePath(bounds, agent.room->navmesh.navMesh);
+
             std::vector<Vec2> fullPath;
             fullPath.clear();
             Vec2 last = agent.room->positionToGridCordinates(agent.agent);
@@ -636,39 +652,16 @@ Node::Status HouseSearch::update()
                 }
             }
             agent.currentpath = fullPath;
-            /*
-            agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
-            agent.destinationReached = false;*/
-
-            for (const Vec2& point : agent.currentpath)
-            {
-                std::cout << "Path : " << point.x << " , " << point.y << std::endl;
-            }
+         
             pathGenerated = true;
            
-           /* agent.currentpath = BoustrophedonPathfinder::GeneratePath(
-                agent.currentHouse->bounds,
-                agent.room->navmesh.navMesh
-            );*/
+         
             std::cout << "Generated path of size " << agent.currentpath.size() << "\n";
         }
 
-        for (const Vec2& point : agent.currentpath)
-        {
-            std::cout << "Path : " << point.x << " , " << point.y << std::endl;
-        }
+       
     }
-   /* agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
-    agent.destinationReached = false;*/
-
-    for (const Vec2& point : agent.currentpath)
-    {
-        std::cout << "Path : " << point.x << " , " << point.y << std::endl;
-    }
-
- //   std::cout << "Generated path size: " << agent.currentpath.size() << std::endl;
- //   std::cout << "Timer: " << timer++ << std::endl;
-
+ 
     if (!agent.destinationReached)
     {
         std::cout << "We are RUNNING" << std::endl;

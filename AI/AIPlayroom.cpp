@@ -54,7 +54,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(20, 22, p1),
+        gridToMidPixel(20, 15, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0

@@ -139,7 +139,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	door1->doorPosition = Vec2(19,4);
 	std::vector<std::shared_ptr<House::Door>> room1Doors;
 	room1Doors.push_back(door1);
-	Mansion->AddRoom(8,14,5,8, room1Doors,Mansion.get(), 1);
+	Mansion->AddRoom(9,13,6,10, room1Doors,Mansion.get(), 1);
 
 	//Room 2
 	auto door2 = std::make_shared<House::Door>();

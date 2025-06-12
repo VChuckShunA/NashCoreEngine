@@ -38,7 +38,7 @@ private:
 public:
 	int houseID;
 	sf::IntRect bounds;
-	std::vector<Room> rooms;
+	std::vector<std::shared_ptr<Room>> rooms;
 	std::string houseLabel; //L House, 8House,Warehouse, Mansion
 	Vec2 GetClosestMainDoor(Vec2& agentPosition);
 	Vec2 GetClosestEntryPoint();
@@ -46,7 +46,7 @@ public:
 	void AddMainDoor(Vec2 mainDoorCords);
 	void AddRoom(int top, int left, int width, int height, std::vector<std::shared_ptr<Door>> doors, House* house, int roomID);
 	void AddBounds(int top, int left, int width, int height);
-	
+	std::shared_ptr<House::Room> FindCurrentRoom(Vec2 agentPosition);
 	bool IsBoundsSet();
 };
 

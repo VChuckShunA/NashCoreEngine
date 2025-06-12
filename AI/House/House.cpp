@@ -38,16 +38,36 @@ void House::AddMainDoor(Vec2 mainDoorCords)
 
 void House::AddRoom(int top, int left, int width, int height, std::vector<std::shared_ptr<Door>> doors, House* house, int roomID)
 {
-    Room newRoom;
-    newRoom.bounds = sf::IntRect(left, top, width, height);
-    newRoom.roomID = roomID;
-    newRoom.doors = doors;
+    auto newRoom = std::make_shared<House::Room>();
+    newRoom->bounds = sf::IntRect(left, top, width, height);
+    newRoom->roomID = roomID;
+    newRoom->doors = doors;
     house->rooms.push_back(newRoom);
 }
 
 void House::AddBounds(int top, int left, int width, int height)
 {
     bounds= sf::IntRect(left, top, width, height);
+}
+
+std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
+{
+    int gridX = int(std::floor(agentPosition.x));
+    int gridY = int(std::floor(agentPosition.y));
+
+    std::cout << "Floored : " << gridX <<" , "<< gridY << std::endl;
+    for (auto& room : rooms)
+    {
+       if((agentPosition.x>= room->bounds.left && agentPosition.x <= room->bounds.left +room->bounds.width) &&
+           (agentPosition.y <= room->bounds.top && agentPosition.y >= room->bounds.top - room->bounds.height)
+           )
+        {
+            std::cout << "Found Room" << std::endl;
+            return room;
+        }
+    }
+    std::cout << "DID NOT FIND ROOM " << std::endl;
+    return nullptr; // not found
 }
 
 bool House::IsBoundsSet()
