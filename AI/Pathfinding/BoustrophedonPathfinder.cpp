@@ -3,7 +3,7 @@
 #include "AStar.h" 
 #include <iostream>
 
-std::vector<Vec2> BoustrophedonPathfinder::GeneratePath(const sf::IntRect& areaBounds, const std::vector<std::vector<AStar::Node>>& navMesh)
+std::vector<Vec2> BoustrophedonPathfinder::GeneratePath(const sf::FloatRect& areaBounds, const std::vector<std::vector<AStar::Node>>& navMesh)
 {
     std::cout << "Funcation Called, Line 8 : " << std::endl;
     std::vector<Vec2> path;

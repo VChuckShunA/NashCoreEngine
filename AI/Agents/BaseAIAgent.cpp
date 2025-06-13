@@ -579,43 +579,47 @@ void HouseSearch::onInitialize()
     pathGenerated = false;   // reset flag
     agent.destinationReached = false;
    
-    if (agent.currentHouse)
-    {
-      //  auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+    //if (agent.currentHouse)
+    //{
+    //  //  auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
 
-        
-        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-        if(!agent.currentHouse->FindCurrentRoom(agentTile))return;
-        auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->FindCurrentRoom(agentTile)->bounds, agent.room->navmesh.navMesh);
-        std::vector<Vec2> fullPath;
-        fullPath.clear();
-        Vec2 last = agent.room->positionToGridCordinates(agent.agent);
-        for (auto& target : coverCells) {
-            auto sub = agent.room->navmesh.FindPath(last, target);
-            if (!sub.empty()) {
-                fullPath.insert(fullPath.end(), sub.begin() + 1, sub.end());
-                last = target;
-            }
-        }
-        agent.currentpath = fullPath;
-        /*
-        agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
-        agent.destinationReached = false;*/
+    //    
+    //    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    //    if(!agent.currentHouse->FindCurrentRoom(agentTile))return;
+    //    auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->FindCurrentRoom(agentTile)->bounds, agent.room->navmesh.navMesh);
+    //    std::vector<Vec2> fullPath;
+    //    fullPath.clear();
+    //    Vec2 last = agent.room->positionToGridCordinates(agent.agent);
+    //    for (auto& target : coverCells) {
+    //        auto sub = agent.room->navmesh.FindPath(last, target);
+    //        if (!sub.empty()) {
+    //            fullPath.insert(fullPath.end(), sub.begin() + 1, sub.end());
+    //            last = target;
+    //        }
+    //    }
+    //    agent.currentpath = fullPath;
+    //    /*
+    ////    agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
+    ////    agent.destinationReached = false;*/
 
-       /* for (const Vec2& point : agent.currentpath)
-        {
-            std::cout << "Path : "<< point.x<< " , " << point.y<< std::endl;
-        }*/
-        pathGenerated = true;
-    }
+    //   /* for (const Vec2& point : agent.currentpath)
+    ////    {
+    ////        std::cout << "Path : "<< point.x<< " , " << point.y<< std::endl;
+    ////    }*/
+    //    pathGenerated = true;
+   // }
 }
 
 void HouseSearch::reset()
 {
+    pathGenerated = false;
+     agent.destinationReached = false;
+     agent.currentpath.clear();
 }
 
 Node::Status HouseSearch::update()
 {
+    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
    
     if (!agent.currentHouse)
     {
@@ -625,7 +629,6 @@ Node::Status HouseSearch::update()
     
     if (agent.currentHouse)
     {
-        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
         auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
         std::cout << "agent Tile " << agentTile.x << " , " << agentTile.y << std::endl;
         std::cout << "Current House ID " << agent.currentHouse->houseLabel << std::endl;
@@ -661,14 +664,64 @@ Node::Status HouseSearch::update()
 
        
     }
- 
+
+   
     if (!agent.destinationReached)
     {
-        std::cout << "We are RUNNING" << std::endl;
+       // if (agent.currentHouse->FindCurrentRoom(agentTile)->searched) return  BH_SUCCESS;
+       
         agent.FollowPath();
         return BH_RUNNING; //Not reached destination 
     }
     else if (agent.destinationReached) {
+        if (pathGenerated)
+        {
+            std::cout << "Resetting" << std::endl;
+            pathGenerated = false;
+            agent.currentHouse->FindCurrentRoom(agentTile)->searched = true;
+            this->reset();
+            return BH_SUCCESS; // Reached the point = success
+        }
         return BH_SUCCESS; // Reached the point = success
     }
+}
+
+GoToNextRoom::GoToNextRoom(BaseAIAgent& ag):agent(ag)
+{
+}
+
+void GoToNextRoom::onInitialize()
+{
+    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    if (agent.currentHouse->FindCurrentRoom(agentTile))
+    {
+        agent.currentHouse->FindCurrentRoom(agentTile)->searched=true;
+        auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile).get();
+        auto closestDoor = currentRoom->GetClosestRoomDoor(agentTile);
+        //find current room
+        Vec2 doorLocation = closestDoor->GetEntryPoint(agentTile);
+        agent.initializeMoveToPoint(doorLocation);
+    }
+}
+
+Node::Status GoToNextRoom::update()
+{
+    std::cout << "GoToNextRoom RUNNING" << std::endl;
+    //agent tile
+    
+    if (!agent.destinationReached)
+    {
+        agent.FollowPath();
+        return BH_RUNNING; //Not reached destination 
+    }
+    else if (agent.destinationReached) {
+        /*Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+        if (agent.currentHouse->FindCurrentRoom(agentTile))
+        {
+            return BH_FAILURE;
+        }*/
+        return BH_SUCCESS; // Reached the point = success
+    }
+
+    std::cout << "GoToNextRoom END OF UPDATE" << std::endl;
 }

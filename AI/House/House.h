@@ -27,7 +27,7 @@ private:
 		friend class House;
 		int roomID; 
 		House* house;
-		sf::IntRect bounds;
+		sf::FloatRect bounds;
 		std::vector<std::shared_ptr<Door>> doors;
 		bool searched = false;
 		std::vector<Vec2> roomSpace;
@@ -43,7 +43,7 @@ private:
 public:
 	int houseID;
 	bool Searched = false;
-	sf::IntRect bounds;
+	sf::FloatRect bounds;
 	std::vector<std::shared_ptr<Room>> rooms;
 	std::string houseLabel; //L House, 8House,Warehouse, Mansion
 	House::Door* GetClosestMainDoor(Vec2& agentPosition);

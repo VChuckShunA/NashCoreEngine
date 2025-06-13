@@ -143,13 +143,13 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	Mansion->rooms.back()->AddRoomDoor(Vec2(19,4));
 
 	//Room 2
-	auto door2 = std::make_shared<House::Door>();
+	/*auto door2 = std::make_shared<House::Door>();
 	door2->doorPosition = Vec2(25, 5);
 	auto door3 = std::make_shared<House::Door>();
 	door3->doorPosition = Vec2(28, 1);
 	std::vector<std::shared_ptr<House::Door>> room2Doors;
 	room2Doors.push_back(door2);
-	room2Doors.push_back(door3);
+	room2Doors.push_back(door3);*/
 	Mansion->AddRoom(4, 20, 8, 4, Mansion.get(), 2);
 	Mansion->rooms.back()->AddRoomDoor(Vec2(28, 1));
 	Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5),false);
@@ -157,6 +157,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	////Room 3
 	//std::vector<std::shared_ptr<House::Door>> room3Doors;
 	Mansion->AddRoom(8, 20, 6, 3, Mansion.get(), 3);
+	Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5), false);
 
 	//Room 4
 	/*auto door4 = std::make_shared<House::Door>();
@@ -169,6 +170,15 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	//std::vector<std::shared_ptr<House::Door>> room5Doors;
 	Mansion->AddRoom(8, 27, 5, 3, Mansion.get(), 5);
 	generatedHouses.push_back(Mansion);
+
+	Mansion->rooms[0]->doors[0]->connectedRoom = Mansion->rooms[1];
+
+	Mansion->rooms[1]->doors[0]->connectedRoom = Mansion->rooms[3]; //28,1
+	Mansion->rooms[1]->doors[1]->connectedRoom = Mansion->rooms[2]; //25,5
+
+	Mansion->rooms[2]->doors[0]->connectedRoom = Mansion->rooms[1]; //25,5
+
+	Mansion->rooms[3]->doors[0]->connectedRoom = Mansion->rooms[4];
 }
 
 void HouseGenerator::GenerateVerticalWall(int id, AStar& navmesh, AIPlayroom& room,int y1, int y2, int x)

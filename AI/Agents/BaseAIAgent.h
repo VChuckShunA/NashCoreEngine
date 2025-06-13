@@ -319,7 +319,15 @@ class IsDoorVisible : public Node {
     }
 };
 
-
+class GoToNextRoom : public Node
+{
+public:
+    GoToNextRoom(BaseAIAgent& ag);
+private:
+    BaseAIAgent& agent;
+    virtual void onInitialize() override;
+    virtual Status update() override;
+};
 class WallTrace : public Node
 {
 public:
@@ -393,6 +401,7 @@ public:
         wallTraceSequence->addChild(new IsNearWall(agent));
         wallTraceSequence->addChild(new WallTrace(agent));
         wallTraceSequence->addChild(new HouseSearch(agent));
+        wallTraceSequence->addChild(new GoToNextRoom(agent));
 
       //  StatefulSequence* houseSearchSequence = new StatefulSequence();
       //  houseSearchSequence->addChild(new HouseSearch(agent));
