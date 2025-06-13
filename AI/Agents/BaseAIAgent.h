@@ -21,7 +21,7 @@ private:
 public:
 	BaseAIAgent();//Default Concstructor
     std::stack<class Room*> roomStack;
-    Room* currentRoom = nullptr;
+    std::shared_ptr<Room> currentRoom = nullptr;
     bool scanningComplete = false;
 	std::unique_ptr<Node> BehaviourTree;
     House* currentHouse = nullptr;

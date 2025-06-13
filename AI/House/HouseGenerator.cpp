@@ -134,12 +134,13 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 
 	Mansion->AddMainDoor(Vec2(13, 5));
 	Mansion->AddBounds(8, 14, 18, 8);
-	//Room 1
-	auto door1 = std::make_shared<House::Door>();
-	door1->doorPosition = Vec2(19,4);
-	std::vector<std::shared_ptr<House::Door>> room1Doors;
-	room1Doors.push_back(door1);
-	Mansion->AddRoom(9,13,6,10, room1Doors,Mansion.get(), 1);
+	////Room 1
+	//auto door1 = std::make_shared<House::Door>();
+	//door1->doorPosition = Vec2(19,4);
+	//std::vector<std::shared_ptr<House::Door>> room1Doors;
+	//room1Doors.push_back(door1);
+	Mansion->AddRoom(8,14,5,8, Mansion.get(), 1);
+	Mansion->rooms.back()->AddRoomDoor(Vec2(19,4));
 
 	//Room 2
 	auto door2 = std::make_shared<House::Door>();
@@ -149,21 +150,24 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	std::vector<std::shared_ptr<House::Door>> room2Doors;
 	room2Doors.push_back(door2);
 	room2Doors.push_back(door3);
-	Mansion->AddRoom(4, 20, 8, 4, room2Doors, Mansion.get(), 2);
+	Mansion->AddRoom(4, 20, 8, 4, Mansion.get(), 2);
+	Mansion->rooms.back()->AddRoomDoor(Vec2(28, 1));
+	Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5),false);
 
-	//Room 3
-	std::vector<std::shared_ptr<House::Door>> room3Doors;
-	Mansion->AddRoom(8, 20, 6, 3, room3Doors, Mansion.get(), 3);
+	////Room 3
+	//std::vector<std::shared_ptr<House::Door>> room3Doors;
+	Mansion->AddRoom(8, 20, 6, 3, Mansion.get(), 3);
 
 	//Room 4
-	auto door4 = std::make_shared<House::Door>();
+	/*auto door4 = std::make_shared<House::Door>();
 	door4->doorPosition = Vec2(29, 5);
-	std::vector<std::shared_ptr<House::Door>> room4Doors;
-	Mansion->AddRoom(4, 29, 3, 4, room4Doors, Mansion.get(), 4);
+	std::vector<std::shared_ptr<House::Door>> room4Doors;*/
+	Mansion->AddRoom(4, 29, 3, 4, Mansion.get(), 4);
+	Mansion->rooms.back()->AddRoomDoor(Vec2(29, 5), false);
 
-	//Room 5
-	std::vector<std::shared_ptr<House::Door>> room5Doors;
-	Mansion->AddRoom(8, 27, 5, 3, room5Doors, Mansion.get(), 5);
+	////Room 5
+	//std::vector<std::shared_ptr<House::Door>> room5Doors;
+	Mansion->AddRoom(8, 27, 5, 3, Mansion.get(), 5);
 	generatedHouses.push_back(Mansion);
 }
 

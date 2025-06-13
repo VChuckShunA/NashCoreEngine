@@ -484,7 +484,7 @@ void WallTrace::onInitialize()
 {
     agent.currentHouse = HouseGenerator::FindHouseByID(agent.agent->getComponent<CVision>().NearestBrick->m_buildingID);
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile);
+    doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
     agent.room->isScanningWalls = false;
     agent.initializeMoveToPoint(doorPosition);
 }

@@ -2,9 +2,12 @@
 #include <vector>
 #include "../../vec2.h"
 #include "../AIPlayroom.h"
+
 class House
 {
+	struct Room; //forward declare
 	friend class HouseGenerator;
+	friend class BaseAIAgent;
 private:
 	struct Door
 	{
@@ -15,36 +18,39 @@ private:
 		Vec2 doorPosition;
 		std::shared_ptr<class Room> connectedRoom;
 		Vec2 GetEntryPoint(Vec2 position);
+		Vec2 GetExitPoint(Vec2 position);
 		void ResetDoor();
 		void AddRoom(std::shared_ptr<Room> room);
 	};
 	struct Room
 	{
+		friend class House;
 		int roomID; 
 		House* house;
 		sf::IntRect bounds;
 		std::vector<std::shared_ptr<Door>> doors;
 		bool searched = false;
 		std::vector<Vec2> roomSpace;
-		Vec2 GetClosestRoom(Vec2 position);
+		House::Door* GetClosestRoomDoor(Vec2 position);
 		void ResetAndPopulateRoom();
 		void AddDoor(Door* door);
 		House* GetHouse() { return house; }
+		void AddRoomDoor(Vec2 mainDoorCords, bool horizontal = true);
 	};
 
 
-	bool Searched = false;
 	std::vector<std::shared_ptr<Door>> mainDoors;
 public:
 	int houseID;
+	bool Searched = false;
 	sf::IntRect bounds;
 	std::vector<std::shared_ptr<Room>> rooms;
 	std::string houseLabel; //L House, 8House,Warehouse, Mansion
-	Vec2 GetClosestMainDoor(Vec2& agentPosition);
+	House::Door* GetClosestMainDoor(Vec2& agentPosition);
 	Vec2 GetClosestEntryPoint();
 	void ResetAndPopulateHouse();
-	void AddMainDoor(Vec2 mainDoorCords);
-	void AddRoom(int top, int left, int width, int height, std::vector<std::shared_ptr<Door>> doors, House* house, int roomID);
+	void AddMainDoor(Vec2 mainDoorCords,bool horizontal=true);
+	void AddRoom(int top, int left, int width, int height, House* house, int roomID);
 	void AddBounds(int top, int left, int width, int height);
 	std::shared_ptr<House::Room> FindCurrentRoom(Vec2 agentPosition);
 	bool IsBoundsSet();
