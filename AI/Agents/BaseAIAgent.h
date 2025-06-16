@@ -7,6 +7,7 @@
 #include "../BehaviourTrees/Selector.h"
 #include "../BehaviourTrees/Sequence.h"
 #include "../BehaviourTrees/StatefulSequence.h"
+#include "../BehaviourNodes/HouseSearchDFS.h"
 #include "../../EntityManager.h"
 #include "../../Physics.h"
 #include <SFML/System.hpp>
@@ -21,7 +22,7 @@ private:
 public:
 	BaseAIAgent();//Default Concstructor
     std::stack<class Room*> roomStack;
-    std::shared_ptr<Room> currentRoom = nullptr;
+   // std::shared_ptr<Room> currentRoom = nullptr;
     bool scanningComplete = false;
 	std::unique_ptr<Node> BehaviourTree;
     House* currentHouse = nullptr;
@@ -391,6 +392,20 @@ public:
     virtual void reset() override;
     Status update() override;
 };
+class HouseSearchDFS : public Node
+{
+public:
+    HouseSearchDFS(BaseAIAgent& ag);
+    virtual void onInitialize() override;
+    virtual void reset() override;
+    Status update() override;
+    std::set<int> visitedRooms;
+    std::stack<std::shared_ptr<class House::Room>> roomStack;
+    std::shared_ptr<class House::Room> currentRoom;
+    BaseAIAgent& agent;
+    bool pathGenerated = false;
+};
+
 
 
 class WallTraceToDoorSequence : public Selector {
@@ -400,8 +415,9 @@ public:
         StatefulSequence* wallTraceSequence = new StatefulSequence();
         wallTraceSequence->addChild(new IsNearWall(agent));
         wallTraceSequence->addChild(new WallTrace(agent));
-        wallTraceSequence->addChild(new HouseSearch(agent));
-        wallTraceSequence->addChild(new GoToNextRoom(agent));
+        wallTraceSequence->addChild(new HouseSearchDFS(agent));
+       // wallTraceSequence->addChild(new HouseSearch(agent));
+       // wallTraceSequence->addChild(new GoToNextRoom(agent));
 
       //  StatefulSequence* houseSearchSequence = new StatefulSequence();
       //  houseSearchSequence->addChild(new HouseSearch(agent));
