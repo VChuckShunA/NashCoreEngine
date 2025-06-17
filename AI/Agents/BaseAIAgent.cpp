@@ -486,6 +486,7 @@ void WallTrace::onInitialize()
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
     agent.room->isScanningWalls = false;
+    std::cout << "door Position <<" << doorPosition.x << " , " << doorPosition.y << std::endl;
     agent.initializeMoveToPoint(doorPosition);
 }
 
@@ -512,6 +513,7 @@ Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
 
 Node::Status WallTrace::update()
 {
+    std::cout << "door Position <<" << doorPosition.x << " , " << doorPosition.y << std::endl;
     //std::cout << "Wall Trace: Update" << testInt++ << std::endl;
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     agent.room->isScanningWalls = false;
@@ -579,35 +581,6 @@ void HouseSearch::onInitialize()
     pathGenerated = false;   // reset flag
     agent.destinationReached = false;
    
-    //if (agent.currentHouse)
-    //{
-    //  //  auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
-
-    //    
-    //    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    //    if(!agent.currentHouse->FindCurrentRoom(agentTile))return;
-    //    auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->FindCurrentRoom(agentTile)->bounds, agent.room->navmesh.navMesh);
-    //    std::vector<Vec2> fullPath;
-    //    fullPath.clear();
-    //    Vec2 last = agent.room->positionToGridCordinates(agent.agent);
-    //    for (auto& target : coverCells) {
-    //        auto sub = agent.room->navmesh.FindPath(last, target);
-    //        if (!sub.empty()) {
-    //            fullPath.insert(fullPath.end(), sub.begin() + 1, sub.end());
-    //            last = target;
-    //        }
-    //    }
-    //    agent.currentpath = fullPath;
-    //    /*
-    ////    agent.currentpath = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
-    ////    agent.destinationReached = false;*/
-
-    //   /* for (const Vec2& point : agent.currentpath)
-    ////    {
-    ////        std::cout << "Path : "<< point.x<< " , " << point.y<< std::endl;
-    ////    }*/
-    //    pathGenerated = true;
-   // }
 }
 
 void HouseSearch::reset()
@@ -623,7 +596,6 @@ Node::Status HouseSearch::update()
    
     if (!agent.currentHouse)
     {
-  //      std::cout << "No Current House" << std::endl;
         return BH_FAILURE;
     } 
     
@@ -640,8 +612,7 @@ Node::Status HouseSearch::update()
         if (!pathGenerated && agent.currentHouse->FindCurrentRoom(agentTile)!=nullptr) {
             //auto coverCells = BoustrophedonPathfinder::GeneratePath(agent.currentHouse->bounds, agent.room->navmesh.navMesh);
 
-            Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-            std::cout << "aasdddddddddddddddddddddddddddddddddddddddddd" << std::endl;
+            Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);\
             auto coverCells = BoustrophedonPathfinder::GeneratePath(bounds, agent.room->navmesh.navMesh);
 
             std::vector<Vec2> fullPath;
@@ -724,4 +695,93 @@ Node::Status GoToNextRoom::update()
     }
 
     std::cout << "GoToNextRoom END OF UPDATE" << std::endl;
+}
+
+HouseSearchDFS::HouseSearchDFS(BaseAIAgent& ag):agent(ag)
+{
+}
+
+void HouseSearchDFS::onInitialize()
+{
+    pathGenerated = false;   // reset flag
+    agent.destinationReached = false;
+
+}
+
+void HouseSearchDFS::reset()
+{
+    pathGenerated = false;
+    agent.destinationReached = false;
+    agent.currentpath.clear();
+}
+
+Node::Status HouseSearchDFS::update()
+{
+    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    auto roomPtr = agent.currentHouse->FindCurrentRoom(agentTile);
+   
+   
+    if (!roomPtr)
+    {
+        std::cout << "Did not find room" << std::endl;
+        std::cout << agent.currentHouse->houseID << std::endl;
+        agent.currentpath = agent.room->navmesh.FindPath(agentTile, agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile));
+        std::cout << "Did not find room" << std::endl;
+        std::cout << "Did not find room" << std::endl;
+        agent.FollowPath();
+        return BH_RUNNING;
+    }
+    if (!roomPtr->searched) {
+        auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
+        if (agent.currentHouse->FindCurrentRoom(agentTile))
+
+
+        if (!pathGenerated && agent.currentHouse->FindCurrentRoom(agentTile) != nullptr) {
+
+            Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+            auto coverCells = BoustrophedonPathfinder::GeneratePath(bounds, agent.room->navmesh.navMesh);
+
+            std::vector<Vec2> fullPath;
+            fullPath.clear();
+            Vec2 last = agent.room->positionToGridCordinates(agent.agent);
+            for (auto& target : coverCells) {
+                auto sub = agent.room->navmesh.FindPath(last, target);
+                if (!sub.empty()) {
+                    fullPath.insert(fullPath.end(), sub.begin() + 1, sub.end());
+                    last = target;
+                }
+            }
+            agent.currentpath = fullPath;
+
+            pathGenerated = true;
+
+        }
+        agent.FollowPath();
+        return BH_RUNNING;
+    }
+
+    for (auto& door : roomPtr->doors) {
+        auto nr = door->connectedRoom;
+        if (nr && !nr->searched) {
+            agent.room->roomStack.push(roomPtr.get());
+            agent.currentpath = agent.room->navmesh.FindPath(agentTile, door->GetEntryPoint(agentTile));
+            agent.destinationReached = false;
+            agent.FollowPath();
+            return BH_RUNNING;
+        }
+    }
+
+
+    if (!agent.room->roomStack.empty()) {
+        auto back = agent.room->roomStack.top(); agent.room->roomStack.pop();
+        // pick a door or entry point back into `back`
+        Vec2 entry = back->GetClosestRoomDoor(agentTile)->GetEntryPoint(agentTile);
+        agent.currentpath = agent.room->navmesh.FindPath(agentTile, entry);
+        agent.destinationReached = false;
+        agent.FollowPath();
+        return BH_RUNNING;
+    }
+
+    return BH_SUCCESS;
+
 }

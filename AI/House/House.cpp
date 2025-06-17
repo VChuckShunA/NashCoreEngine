@@ -1,9 +1,10 @@
 #include "House.h"
-
+#include <iostream>
+#include <memory>
+#include <SFML/Graphics.hpp>
 Vec2 House::Door::GetEntryPoint(Vec2 position)
 {
     //Compare entry points with position and get the furthest point
-
     float dist1 = (entryPoint1 - position).length();  // If you have a Vec2::length() function
     float dist2 = (entryPoint2 - position).length();
 
@@ -30,7 +31,7 @@ House::Door* House::GetClosestMainDoor(Vec2& agentPosition)
     if (mainDoors.empty()) return nullptr; // No doors
 
     float minDistSq = std::numeric_limits<float>::max();
-    Door* closestDoor=nullptr;
+    Door* closestDoor = nullptr;
 
     for (const auto& door : mainDoors)
     {
@@ -104,7 +105,7 @@ std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
             return room;
         }
     }
-    std::cout << "DID NOT FIND ROOM " << std::endl;
+  //  std::cout << "DID NOT FIND ROOM " << std::endl;
     return nullptr; // not found
 }
 

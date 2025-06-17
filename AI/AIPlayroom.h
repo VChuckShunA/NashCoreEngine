@@ -7,7 +7,9 @@
 #include "Agents/BaseAIAgent.h"
 #include "Agents/BlueAgent.h"
 #include "Item.h"
+#include "../AI/House/House.h"
 #include <vector>
+class House::Room;
 class GreenAgent;
 class Item;
 class AIPlayroom :public Scene {
@@ -56,6 +58,8 @@ protected:
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:
+    std::stack<House::Room*> roomStack;
+    std::shared_ptr<House::Room> currentRoom = nullptr;
     int ammoCount = 0;
     std::string behaviourName = "None";
     std::string behaviourSTatus = "None";

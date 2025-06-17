@@ -1,14 +1,18 @@
 #pragma once
 #include <vector>
 #include "../../vec2.h"
-#include "../AIPlayroom.h"
+#include <iostream>
+#include <memory>
+#include <SFML/Graphics.hpp>
+using namespace std;
+//#include "../AIPlayroom.h"
 
 class House
 {
 	struct Room; //forward declare
 	friend class HouseGenerator;
 	friend class BaseAIAgent;
-private:
+public:
 	struct Door
 	{
 		//bool scanned = false;
