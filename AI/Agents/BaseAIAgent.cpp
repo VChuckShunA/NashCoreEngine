@@ -723,11 +723,12 @@ Node::Status HouseSearchDFS::update()
    
     if (!roomPtr)
     {
-        std::cout << "Did not find room" << std::endl;
-        std::cout << agent.currentHouse->houseID << std::endl;
-        agent.currentpath = agent.room->navmesh.FindPath(agentTile, agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile));
-        std::cout << "Did not find room" << std::endl;
-        std::cout << "Did not find room" << std::endl;
+        Vec2 frontDoor = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
+        if (agent.currentpath.empty())
+        {
+            agent.currentpath = agent.room->navmesh.FindPath(agentTile, frontDoor);
+            agent.destinationReached = false;
+        }
         agent.FollowPath();
         return BH_RUNNING;
     }
@@ -757,6 +758,13 @@ Node::Status HouseSearchDFS::update()
 
         }
         agent.FollowPath();
+
+        if (agent.destinationReached)
+        {
+            roomPtr->searched = true;
+            pathGenerated = false;
+            return BH_RUNNING;
+        }
         return BH_RUNNING;
     }
 
@@ -774,13 +782,14 @@ Node::Status HouseSearchDFS::update()
 
     if (!agent.room->roomStack.empty()) {
         auto back = agent.room->roomStack.top(); agent.room->roomStack.pop();
-        // pick a door or entry point back into `back`
+        // pick a door/ entry point back into `back`
         Vec2 entry = back->GetClosestRoomDoor(agentTile)->GetEntryPoint(agentTile);
         agent.currentpath = agent.room->navmesh.FindPath(agentTile, entry);
         agent.destinationReached = false;
         agent.FollowPath();
         return BH_RUNNING;
     }
+
 
     return BH_SUCCESS;
 
