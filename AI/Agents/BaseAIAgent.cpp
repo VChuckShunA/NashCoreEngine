@@ -698,7 +698,8 @@ void GoToNextRoom::onInitialize()
 Node::Status GoToNextRoom::update()
 {
     std::cout << "GoToNextRoom RUNNING" << std::endl;
-    //agent tile
+    // Once the agent reaches the destination (the door),
+    // we need to wait until the agent actually enters the next room
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
     if (!currentRoom)
@@ -713,14 +714,12 @@ Node::Status GoToNextRoom::update()
         agent.FollowPath();
         return BH_RUNNING;
     }
-
-    std::cout << "Door count " << currentRoom->doors.size() << std::endl;
-    std::cout << "Room ID " << currentRoom->roomID << std::endl;
     if (!agent.destinationReached)
     {
         agent.FollowPath();
-        return BH_RUNNING; //Not reached destination 
+        return BH_RUNNING;
     }
+
 
     if (currentRoom && !currentRoom->searched)
     {

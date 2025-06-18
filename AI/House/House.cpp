@@ -1,4 +1,4 @@
-#include "House.h"
+﻿#include "House.h"
 #include <iostream>
 #include <memory>
 #include <SFML/Graphics.hpp>
@@ -81,21 +81,29 @@ void House::AddBounds(int top, int left, int width, int height)
 
 std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
 {
+    int cellX = static_cast<int>(std::floor(agentPosition.x));
+    int cellY = static_cast<int>(std::floor(agentPosition.y));
+
  
     for (auto& room : rooms)
     {
       
-        bool insideX = agentPosition.x >= room->bounds.left && agentPosition.x <= room->bounds.left + room->bounds.width;
-        bool insideY = agentPosition.y <= room->bounds.top && agentPosition.y+1 >= room->bounds.top - room->bounds.height;
+        bool insideX = cellX >= room->bounds.left && cellX <= room->bounds.left + room->bounds.width;
+        bool insideY = cellY <= room->bounds.top && cellY >= room->bounds.top - room->bounds.height-1;
 
        if((insideX) &&
            (insideY))
         {
-            //std::cout << "Found Room" << std::endl;
+            std::cout << "Found Room "<<room->roomID << std::endl;
+            std::cout << "Agent Position " << cellX <<" , "<< cellY << std::endl;
+            std::cout << "room->bounds.left " << room->bounds.left  << std::endl;
+            std::cout << "room->bounds.left + room->bounds.width " << room->bounds.left + room->bounds.width << std::endl;
+            std::cout << "room->bounds.top " << room->bounds.top << std::endl;
+            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl;
             return room;
         }
     }
-  //  std::cout << "DID NOT FIND ROOM " << std::endl;
+    std::cout << "DID NOT FIND ROOM " << std::endl;
     return nullptr; // not found
 }
 
