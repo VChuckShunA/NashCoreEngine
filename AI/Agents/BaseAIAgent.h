@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <stack>
+#include <set>
 #include <numbers>
 #include "../BehaviourTrees/Node.h"
 #include "../BehaviourTrees/Selector.h"
@@ -396,6 +397,10 @@ class HouseSearchDFS : public Node {
 public:
     BaseAIAgent& agent;
     bool pathGenerated = false;
+    std::set<int> visitedRooms;
+    std::vector<std::vector<int>> adjacencyList;
+    void buildAdjacencyList();
+    void dfsTraversal(int start);
 
     HouseSearchDFS(BaseAIAgent& ag);
     virtual void onInitialize() override;
@@ -411,12 +416,13 @@ public:
         StatefulSequence* wallTraceSequence = new StatefulSequence();
         wallTraceSequence->addChild(new IsNearWall(agent));
         wallTraceSequence->addChild(new WallTrace(agent));
-        wallTraceSequence->addChild(new HouseSearchDFS(agent));
-       // wallTraceSequence->addChild(new HouseSearch(agent));
-        //wallTraceSequence->addChild(new GoToNextRoom(agent));
+       // wallTraceSequence->addChild(new HouseSearchDFS(agent));
+        wallTraceSequence->addChild(new HouseSearch(agent));
+        wallTraceSequence->addChild(new GoToNextRoom(agent));
 
-      //  StatefulSequence* houseSearchSequence = new StatefulSequence();
-      //  houseSearchSequence->addChild(new HouseSearch(agent));
+       /* StatefulSequence* houseSearchSequence = new StatefulSequence();
+        houseSearchSequence->addChild(new HouseSearch(agent));
+        houseSearchSequence->addChild(new GoToNextRoom(agent));*/
 
         addChild(wallTraceSequence);
         //addChild(houseSearchSequence);

@@ -128,21 +128,18 @@ void BaseAIAgent::FollowPath()
 
             if (distanceBetween.x < 5 && distanceBetween.y < 5)
             {
-                std::cout << "131" << std::endl;
                 currentpath.erase(currentpath.begin());
             }
             //TODO: Find a cleaner a way to do this
             if (AgentCTransform.x < room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
                 //move right
-                std::cout << "137" << std::endl;
                 AgentCTransform.x = AgentCTransform.x + AISpeed;
                 left = false;
                 right = true;
             }if (AgentCTransform.x > room->gridToMidPixel(currentpath.front().x, currentpath.front().y, agent).x)
             {
                 //move left
-                std::cout << "144" << std::endl;
 
                 AgentCTransform.x = AgentCTransform.x - AISpeed;
                 left = true;
@@ -152,7 +149,6 @@ void BaseAIAgent::FollowPath()
             {
                 //move Down
 
-                std::cout << "155" << std::endl;
                 AgentCTransform.y = AgentCTransform.y + AISpeed;
                 down = true;
                 up = false;
@@ -161,7 +157,6 @@ void BaseAIAgent::FollowPath()
             {
                 //move Up
 
-                std::cout << "162" << std::endl;
 
                 AgentCTransform.y = AgentCTransform.y - AISpeed;
                 up = true;
@@ -172,51 +167,44 @@ void BaseAIAgent::FollowPath()
             if (up && left)
             {
                 //entity->getComponent<CTransform>().angle = 225;
-                std::cout << "174" << std::endl;
+                
                 steer(225);
             }
             if (up && right)
             {
                 //entity->getComponent<CTransform>().angle = 315;
-                std::cout << "180" << std::endl;
                 steer(315);
             }
             if (down && left)
             {
                 // entity->getComponent<CTransform>().angle = 135;
-                std::cout << "186" << std::endl;
                 steer(135);
             }
             if (down && right)
             {
                 // entity->getComponent<CTransform>().angle = 45;
-                std::cout << "192" << std::endl;
                 steer(45);
             }
             if (up)
             {
                 //entity->getComponent<CTransform>().angle = 270;
-                std::cout << "198" << std::endl;
                 steer(270);
             }
             if (down)
             {
                 //entity->getComponent<CTransform>().angle = 90;
 
-                std::cout << "205" << std::endl;
                 steer(90);
             }
             if (left)
             {
                 // entity->getComponent<CTransform>().angle = 180;
 
-                std::cout << "212" << std::endl;
                 steer(180);
             }
             if (right)
             {
                 // entity->getComponent<CTransform>().angle = 0;
-                std::cout << "218" << std::endl;
                 steer(0);
             }
 
@@ -224,7 +212,6 @@ void BaseAIAgent::FollowPath()
         if (currentpath.empty())
         {
             //     std::cout << "GreenAgent 164" << std::endl;
-            std::cout << "226" << std::endl;
             destinationReached = true;
         }
     }
@@ -486,7 +473,6 @@ void WallTrace::onInitialize()
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
     agent.room->isScanningWalls = false;
-    std::cout << "door Position <<" << doorPosition.x << " , " << doorPosition.y << std::endl;
     agent.initializeMoveToPoint(doorPosition);
 }
 
@@ -513,7 +499,7 @@ Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
 
 Node::Status WallTrace::update()
 {
-    std::cout << "door Position <<" << doorPosition.x << " , " << doorPosition.y << std::endl;
+    
     //std::cout << "Wall Trace: Update" << testInt++ << std::endl;
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     agent.room->isScanningWalls = false;
@@ -592,6 +578,7 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
+    std::cout << "House Searcg Update" << std::endl;
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
    
     if (!agent.currentHouse)
@@ -602,11 +589,8 @@ Node::Status HouseSearch::update()
     if (agent.currentHouse)
     {
         auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
-        std::cout << "agent Tile " << agentTile.x << " , " << agentTile.y << std::endl;
-        std::cout << "Current House ID " << agent.currentHouse->houseLabel << std::endl;
        // if (!agent.currentHouse->FindCurrentRoom(agentTile)) return BH_RUNNING;
-        if(agent.currentHouse->FindCurrentRoom(agentTile))  
-            std::cout << "CURRENT ROOM ID : " << agent.currentHouse->FindCurrentRoom(agentTile)->roomID << std::endl;
+        if(agent.currentHouse->FindCurrentRoom(agentTile))  std::cout << "CURRENT ROOM ID : " << agent.currentHouse->FindCurrentRoom(agentTile)->roomID << std::endl;
 
 
         if (!pathGenerated && agent.currentHouse->FindCurrentRoom(agentTile)!=nullptr) {
@@ -647,13 +631,12 @@ Node::Status HouseSearch::update()
     else if (agent.destinationReached) {
         if (pathGenerated)
         {
-            std::cout << "Resetting" << std::endl;
             pathGenerated = false;
             agent.currentHouse->FindCurrentRoom(agentTile)->searched = true;
             this->reset();
             return BH_SUCCESS; // Reached the point = success
         }
-        return BH_SUCCESS; // Reached the point = success
+        return BH_SUCCESS;
     }
 }
 
@@ -664,37 +647,111 @@ GoToNextRoom::GoToNextRoom(BaseAIAgent& ag):agent(ag)
 void GoToNextRoom::onInitialize()
 {
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    if (agent.currentHouse->FindCurrentRoom(agentTile))
-    {
-        agent.currentHouse->FindCurrentRoom(agentTile)->searched=true;
-        auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile).get();
-        auto closestDoor = currentRoom->GetClosestRoomDoor(agentTile);
-        //find current room
-        Vec2 doorLocation = closestDoor->GetEntryPoint(agentTile);
-        agent.initializeMoveToPoint(doorLocation);
+    auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
+
+    if (!currentRoom) {
+        std::cout << "Agent not in a valid room!\n";
+        return;
     }
+
+    // Check for unsearched adjacent rooms first (DFS-style forward move)
+    for (auto& door : currentRoom->doors) {
+        auto nextRoom = door->connectedRoom;
+        if (nextRoom && !nextRoom->searched) {
+            std::cout << "Found unsearched adjacent room: " << nextRoom->roomID << "\n";
+
+            // Push current room onto DFS stack for potential backtrack
+            agent.room->roomStack.push(currentRoom);
+
+            // Navigate to the door leading to the next room
+            Vec2 doorEntry = door->GetEntryPoint(agentTile);
+            agent.initializeMoveToPoint(doorEntry);
+            return;
+        }
+    }
+
+    // No forward move available — try backtracking
+    if (!agent.room->roomStack.empty()) {
+        auto backtrackRoom = agent.room->roomStack.top();
+        agent.room->roomStack.pop();
+
+        std::cout << "Backtracking to room: " << backtrackRoom->roomID << "\n";
+        Vec2 backtrackEntry = backtrackRoom->GetClosestRoomDoor(agentTile)->GetEntryPoint(agentTile);
+        agent.initializeMoveToPoint(backtrackEntry);
+        return;
+    }
+
+    // Nowhere to go: exploration complete
+    std::cout << "No more rooms to explore.\n";
+    //Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    //if (agent.currentHouse->FindCurrentRoom(agentTile))
+    //{
+    //    agent.currentHouse->FindCurrentRoom(agentTile)->searched=true;
+    //    auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile).get();
+    //    auto closestDoor = currentRoom->GetClosestRoomDoor(agentTile);
+    //    //find current room
+    //    Vec2 doorLocation = closestDoor->GetEntryPoint(agentTile);
+    //    agent.initializeMoveToPoint(doorLocation);
+    //}
 }
 
 Node::Status GoToNextRoom::update()
 {
     std::cout << "GoToNextRoom RUNNING" << std::endl;
     //agent tile
-    
+    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
+    if (!currentRoom)
+    {
+        Vec2 frontDoor = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
+        if (agent.currentpath.empty())
+        {
+            agent.currentpath = agent.room->navmesh.FindPath(agentTile, frontDoor);
+            agent.destinationReached = false;
+        }
+
+        agent.FollowPath();
+        return BH_RUNNING;
+    }
+
+    std::cout << "Door count " << currentRoom->doors.size() << std::endl;
+    std::cout << "Room ID " << currentRoom->roomID << std::endl;
     if (!agent.destinationReached)
     {
         agent.FollowPath();
         return BH_RUNNING; //Not reached destination 
     }
-    else if (agent.destinationReached) {
-        /*Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-        if (agent.currentHouse->FindCurrentRoom(agentTile))
-        {
-            return BH_FAILURE;
-        }*/
-        return BH_SUCCESS; // Reached the point = success
+
+    if (currentRoom && !currentRoom->searched)
+    {
+        std::cout << "Agent has entered new room: " << currentRoom->roomID << std::endl;
+        return BH_SUCCESS; // Let HouseSearch handle this room
     }
 
-    std::cout << "GoToNextRoom END OF UPDATE" << std::endl;
+    // Agent hasn't fully entered next room yet
+    return BH_RUNNING;
+
+
+
+   /* else
+    {
+        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+        if (agent.currentHouse->FindCurrentRoom(agentTile).get())
+        {
+            std::cout << "GoToNextRoom END OF UPDATE" << std::endl;
+            return BH_FAILURE;
+        }
+        return BH_SUCCESS;
+    }*/
+    //else if (agent.destinationReached) {
+    //    /*Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    //    if (agent.currentHouse->FindCurrentRoom(agentTile))
+    //    {
+    //        return BH_FAILURE;
+    //    }*/
+    //    return BH_SUCCESS; // Reached the point = success
+    //}
+
 }
 
 HouseSearchDFS::HouseSearchDFS(BaseAIAgent& ag):agent(ag)
@@ -703,9 +760,12 @@ HouseSearchDFS::HouseSearchDFS(BaseAIAgent& ag):agent(ag)
 
 void HouseSearchDFS::onInitialize()
 {
-    pathGenerated = false;   // reset flag
+    pathGenerated = false;
     agent.destinationReached = false;
-
+    agent.currentpath.clear();
+    visitedRooms.clear();
+    agent.room->roomStack = std::stack<std::shared_ptr<House::Room>>();
+    //buildAdjacencyList();
 }
 
 void HouseSearchDFS::reset()
@@ -715,12 +775,46 @@ void HouseSearchDFS::reset()
     agent.currentpath.clear();
 }
 
+void HouseSearchDFS::buildAdjacencyList() {
+    int n = agent.currentHouse->rooms.size();
+    adjacencyList = std::vector<std::vector<int>>(n);
+    for (const auto& room : agent.currentHouse->rooms) {
+        for (const auto& door : room->doors) {
+            if (door->connectedRoom) {
+                adjacencyList[room->roomID].push_back(door->connectedRoom->roomID);
+            }
+        }
+    }
+}
+
+
+void HouseSearchDFS::dfsTraversal(int start) {
+    std::vector<bool> visited(adjacencyList.size(), false);
+    std::stack<int> stack;
+    stack.push(start);
+    while (!stack.empty()) {
+        int roomID = stack.top();
+        stack.pop();
+        if (!visited[roomID]) {
+            visited[roomID] = true;
+            visitedRooms.insert(roomID);
+            for (int neighbor : adjacencyList[roomID]) {
+                if (!visited[neighbor]) {
+                    stack.push(neighbor);
+                }
+            }
+        }
+    }
+}
+
+
 Node::Status HouseSearchDFS::update()
 {
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     auto roomPtr = agent.currentHouse->FindCurrentRoom(agentTile);
    
    
+    //Move into Room if you're not 
     if (!roomPtr)
     {
         Vec2 frontDoor = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
@@ -729,9 +823,12 @@ Node::Status HouseSearchDFS::update()
             agent.currentpath = agent.room->navmesh.FindPath(agentTile, frontDoor);
             agent.destinationReached = false;
         }
+
         agent.FollowPath();
         return BH_RUNNING;
     }
+
+  
     if (!roomPtr->searched) {
         auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
         if (agent.currentHouse->FindCurrentRoom(agentTile))
@@ -757,9 +854,10 @@ Node::Status HouseSearchDFS::update()
             pathGenerated = true;
 
         }
+
         agent.FollowPath();
 
-        if (agent.destinationReached)
+        if (agent.destinationReached && !roomPtr->searched)
         {
             roomPtr->searched = true;
             pathGenerated = false;
@@ -768,24 +866,48 @@ Node::Status HouseSearchDFS::update()
         return BH_RUNNING;
     }
 
-    for (auto& door : roomPtr->doors) {
+    if (roomPtr->searched)
+    {
+        return BH_SUCCESS;
+        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+        if (agent.currentHouse->FindCurrentRoom(agentTile))
+        {
+            agent.currentHouse->FindCurrentRoom(agentTile)->searched = true;
+            auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile).get();
+            auto closestDoor = currentRoom->GetClosestRoomDoor(agentTile);
+            //find current room
+            Vec2 doorLocation = closestDoor->GetEntryPoint(agentTile);
+            agent.initializeMoveToPoint(doorLocation);
+        }agent.FollowPath();
+        return BH_RUNNING;
+       /* for (auto& door : roomPtr->doors) {
+
+        std::cout << "Iterating Doors" << std::endl;
         auto nr = door->connectedRoom;
         if (nr && !nr->searched) {
-            agent.room->roomStack.push(roomPtr.get());
+
+            std::cout << "Connected ROom is not searched" << std::endl;
+            agent.room->roomStack.push(roomPtr);
             agent.currentpath = agent.room->navmesh.FindPath(agentTile, door->GetEntryPoint(agentTile));
             agent.destinationReached = false;
+
+            std::cout << "Following Path4" << std::endl;
             agent.FollowPath();
             return BH_RUNNING;
-        }
+      
+    }  }*/
     }
 
 
     if (!agent.room->roomStack.empty()) {
+
         auto back = agent.room->roomStack.top(); agent.room->roomStack.pop();
         // pick a door/ entry point back into `back`
+
         Vec2 entry = back->GetClosestRoomDoor(agentTile)->GetEntryPoint(agentTile);
         agent.currentpath = agent.room->navmesh.FindPath(agentTile, entry);
         agent.destinationReached = false;
+
         agent.FollowPath();
         return BH_RUNNING;
     }

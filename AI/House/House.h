@@ -28,6 +28,7 @@ public:
 	};
 	struct Room
 	{
+
 		friend class House;
 		int roomID; 
 		House* house;
@@ -39,7 +40,7 @@ public:
 		void ResetAndPopulateRoom();
 		void AddDoor(Door* door);
 		House* GetHouse() { return house; }
-		void AddRoomDoor(Vec2 mainDoorCords, bool horizontal = true);
+		std::shared_ptr<House::Door> AddRoomDoor(Vec2 mainDoorCords, bool horizontal = true);
 	};
 
 
@@ -54,7 +55,7 @@ public:
 	Vec2 GetClosestEntryPoint();
 	void ResetAndPopulateHouse();
 	void AddMainDoor(Vec2 mainDoorCords,bool horizontal=true);
-	void AddRoom(int top, int left, int width, int height, House* house, int roomID);
+	std::shared_ptr<House::Room> AddRoom(int top, int left, int width, int height, House* house, int roomID);
 	void AddBounds(int top, int left, int width, int height);
 	std::shared_ptr<House::Room> FindCurrentRoom(Vec2 agentPosition);
 	bool IsBoundsSet();

@@ -134,51 +134,109 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 
 	Mansion->AddMainDoor(Vec2(13, 5));
 	Mansion->AddBounds(8, 14, 18, 8);
-	////Room 1
-	//auto door1 = std::make_shared<House::Door>();
-	//door1->doorPosition = Vec2(19,4);
-	//std::vector<std::shared_ptr<House::Door>> room1Doors;
-	//room1Doors.push_back(door1);
-	Mansion->AddRoom(8,14,5,8, Mansion.get(), 1);
-	Mansion->rooms.back()->AddRoomDoor(Vec2(19,4));
+	//////Room 1
+	////auto door1 = std::make_shared<House::Door>();
+	////door1->doorPosition = Vec2(19,4);
+	////std::vector<std::shared_ptr<House::Door>> room1Doors;
+	////room1Doors.push_back(door1);
+	//Mansion->AddRoom(8,14,5,8, Mansion.get(), 1);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(19,4));
 
-	//Room 2
-	/*auto door2 = std::make_shared<House::Door>();
-	door2->doorPosition = Vec2(25, 5);
-	auto door3 = std::make_shared<House::Door>();
-	door3->doorPosition = Vec2(28, 1);
-	std::vector<std::shared_ptr<House::Door>> room2Doors;
-	room2Doors.push_back(door2);
-	room2Doors.push_back(door3);*/
-	Mansion->AddRoom(4, 20, 8, 4, Mansion.get(), 2);
-	Mansion->rooms.back()->AddRoomDoor(Vec2(28, 1));
-	Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5),false);
+	////Room 2
+	///*auto door2 = std::make_shared<House::Door>();
+	//door2->doorPosition = Vec2(25, 5);
+	//auto door3 = std::make_shared<House::Door>();
+	//door3->doorPosition = Vec2(28, 1);
+	//std::vector<std::shared_ptr<House::Door>> room2Doors;
+	//room2Doors.push_back(door2);
+	//room2Doors.push_back(door3);*/
+	//Mansion->AddRoom(4, 20, 8, 4, Mansion.get(), 2);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(28, 1));
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5),false);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(19, 4));
 
-	////Room 3
-	//std::vector<std::shared_ptr<House::Door>> room3Doors;
-	Mansion->AddRoom(8, 20, 6, 3, Mansion.get(), 3);
-	Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5), false);
+	//////Room 3
+	////std::vector<std::shared_ptr<House::Door>> room3Doors;
+	//Mansion->AddRoom(8, 20, 6, 3, Mansion.get(), 3);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(25, 5), false);
 
-	//Room 4
-	/*auto door4 = std::make_shared<House::Door>();
-	door4->doorPosition = Vec2(29, 5);
-	std::vector<std::shared_ptr<House::Door>> room4Doors;*/
-	Mansion->AddRoom(4, 29, 3, 4, Mansion.get(), 4);
-	Mansion->rooms.back()->AddRoomDoor(Vec2(29, 5), false);
+	////Room 4
+	///*auto door4 = std::make_shared<House::Door>();
+	//door4->doorPosition = Vec2(29, 5);
+	//std::vector<std::shared_ptr<House::Door>> room4Doors;*/
+	//Mansion->AddRoom(4, 29, 3, 4, Mansion.get(), 4);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(29, 5), false);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(28, 1));
 
-	////Room 5
-	//std::vector<std::shared_ptr<House::Door>> room5Doors;
-	Mansion->AddRoom(8, 27, 5, 3, Mansion.get(), 5);
+	//////Room 5
+	////std::vector<std::shared_ptr<House::Door>> room5Doors;
+	//Mansion->AddRoom(8, 27, 5, 3, Mansion.get(), 5);
+	//Mansion->rooms.back()->AddRoomDoor(Vec2(29, 5), false);
+	//generatedHouses.push_back(Mansion);
+
+	//Mansion->rooms[0]->doors[0]->connectedRoom = Mansion->rooms[1];
+
+	//Mansion->rooms[1]->doors[0]->connectedRoom = Mansion->rooms[3]; //28,1
+	//Mansion->rooms[1]->doors[1]->connectedRoom = Mansion->rooms[2]; //25,5
+	//Mansion->rooms[1]->doors[1]->connectedRoom = Mansion->rooms[0]; //19,4
+
+	//Mansion->rooms[2]->doors[0]->connectedRoom = Mansion->rooms[1]; //25,5
+
+	//Mansion->rooms[3]->doors[0]->connectedRoom = Mansion->rooms[4];
+
+	//Mansion->rooms[3]->doors[0]->connectedRoom = Mansion->rooms[3];
+	
+	auto r1 = Mansion->AddRoom(8,14,5,8, Mansion.get(), 1);
+	auto doorR1 = r1->AddRoomDoor(Vec2(19, 4));  // door into r2
+
+	auto r2 = Mansion->AddRoom(4, 20, 8, 4, Mansion.get(), 2);
+	auto doorR2a = r2->AddRoomDoor(Vec2(19, 4)); // matches doorR1
+	auto doorR2b = r2->AddRoomDoor(Vec2(25, 5)); // into room3
+	auto doorR2c = r2->AddRoomDoor(Vec2(28, 1)); // into room4
+
+	auto r3 = Mansion->AddRoom(8, 20, 6, 3, Mansion.get(), 3);
+	auto doorR3a = r3->AddRoomDoor(Vec2(25, 5)); // matches doorR1
+
+	auto r4 = Mansion->AddRoom(4, 29, 3, 4, Mansion.get(), 4);
+	auto doorR4a = r4->AddRoomDoor(Vec2(28, 1));
+	auto doorR4b = r4->AddRoomDoor(Vec2(29, 5));
+
+
+	auto r5 = Mansion->AddRoom(8, 27, 5, 3, Mansion.get(), 5);
+	auto doorR5a = r5->AddRoomDoor(Vec2(29, 5));
+
+	doorR1->connectedRoom = r2;
+
+	doorR2a->connectedRoom = r1;
+	doorR2b->connectedRoom = r3;
+	doorR2c->connectedRoom = r4;
+
+	doorR3a->connectedRoom = r2;
+
+	doorR4a->connectedRoom = r2;
+	doorR4b->connectedRoom = r5;
+
+	doorR5a->connectedRoom = r4;
 	generatedHouses.push_back(Mansion);
+	std::cout << "Room 1 doors " << Mansion->rooms[0]->doors.size() << std::endl;
+	std::cout << "Room 1 ID " << Mansion->rooms[0]->roomID<< std::endl;
+	std::cout << "Room 2 doors " << Mansion->rooms[1]->doors.size() << std::endl;
+	std::cout << "Room 2 ID " << Mansion->rooms[1]->roomID << std::endl;
+	std::cout << "Room 3 doors " << Mansion->rooms[2]->doors.size() << std::endl;
+	std::cout << "Room 3 ID " << Mansion->rooms[2]->roomID << std::endl;
+	std::cout << "Room 4 doors " << Mansion->rooms[3]->doors.size() << std::endl;
+	std::cout << "Room 4 ID " << Mansion->rooms[3]->roomID << std::endl;
+	std::cout << "Room 5 doors " << Mansion->rooms[4]->doors.size() << std::endl;
+	std::cout << "Room 5 ID " << Mansion->rooms[4]->roomID << std::endl;
+	
+	for (auto& room : Mansion->rooms) {
+		std::cout << "Room " << room->roomID << " connects via doors to: ";
+		for (auto& d : room->doors) {
+			std::cout << d->connectedRoom->roomID << " ";
+		}
+		std::cout << "\n";
+	}
 
-	Mansion->rooms[0]->doors[0]->connectedRoom = Mansion->rooms[1];
-
-	Mansion->rooms[1]->doors[0]->connectedRoom = Mansion->rooms[3]; //28,1
-	Mansion->rooms[1]->doors[1]->connectedRoom = Mansion->rooms[2]; //25,5
-
-	Mansion->rooms[2]->doors[0]->connectedRoom = Mansion->rooms[1]; //25,5
-
-	Mansion->rooms[3]->doors[0]->connectedRoom = Mansion->rooms[4];
 }
 
 void HouseGenerator::GenerateVerticalWall(int id, AStar& navmesh, AIPlayroom& room,int y1, int y2, int x)

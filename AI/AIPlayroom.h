@@ -58,7 +58,7 @@ protected:
     void spawnBrickDebris(const std::shared_ptr<Entity>& tile);
 
 public:
-    std::stack<House::Room*> roomStack;
+    std::stack<std::shared_ptr<House::Room>> roomStack;
     std::shared_ptr<House::Room> currentRoom = nullptr;
     int ammoCount = 0;
     std::string behaviourName = "None";

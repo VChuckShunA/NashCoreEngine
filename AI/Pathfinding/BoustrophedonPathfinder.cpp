@@ -5,16 +5,13 @@
 
 std::vector<Vec2> BoustrophedonPathfinder::GeneratePath(const sf::FloatRect& areaBounds, const std::vector<std::vector<AStar::Node>>& navMesh)
 {
-    std::cout << "Funcation Called, Line 8 : " << std::endl;
     std::vector<Vec2> path;
     bool leftToRight = true;
     for (int y = areaBounds.top; y > areaBounds.top - areaBounds.height; --y) {
-        std::cout << "Funcation Called, Line 12 : " << std::endl;
         if (leftToRight)
         {
             for (int x = areaBounds.left; x < areaBounds.left + areaBounds.width; ++x) {
-                std::cout << "Funcation Called, Line 14 : " << std::endl;
-                std::cout << "Cell : " << x << " , " << y << std::endl;
+              //  std::cout << "Cell : " << x << " , " << y << std::endl;
                 Vec2 cell(x, y);
                 if (IsCellWalkableAndUnscanned(navMesh, cell)) {
                     path.push_back(cell);
@@ -25,8 +22,7 @@ std::vector<Vec2> BoustrophedonPathfinder::GeneratePath(const sf::FloatRect& are
         { 
             for (int x = areaBounds.left + areaBounds.width - 1; x >= areaBounds.left; --x) {
                 Vec2 cell(x, y);
-                std::cout << "Funcation Called, Line 27 : " << std::endl;
-                std::cout << "Cell : " << cell.x << " , " << cell.y << std::endl;
+               // std::cout << "Cell : " << cell.x << " , " << cell.y << std::endl;
                 if (IsCellWalkableAndUnscanned(navMesh, cell)) {
                       path.push_back(cell);
                 }
