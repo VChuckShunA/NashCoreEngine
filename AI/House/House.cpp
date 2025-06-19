@@ -51,12 +51,12 @@ void House::AddMainDoor(Vec2 mainDoorCords,bool horizonal)
     if (horizonal)
     {
         door->entryPoint1 = mainDoorCords - Vec2(1, 0);
-        door->entryPoint2 = mainDoorCords + Vec2(1, 0); // example offset, adjust to your logic
+        door->entryPoint2 = mainDoorCords + Vec2(1, 0);
     }
     if (!horizonal)
     {
         door->entryPoint1 = mainDoorCords - Vec2(0, 1);
-        door->entryPoint2 = mainDoorCords + Vec2(0, 1); // example offset, adjust to your logic
+        door->entryPoint2 = mainDoorCords + Vec2(0, 1);
     }
 
     mainDoors.push_back(door);
@@ -94,12 +94,12 @@ std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
        if((insideX) &&
            (insideY))
         {
-            std::cout << "Found Room "<<room->roomID << std::endl;
+           /* std::cout << "Found Room "<<room->roomID << std::endl;
             std::cout << "Agent Position " << cellX <<" , "<< cellY << std::endl;
             std::cout << "room->bounds.left " << room->bounds.left  << std::endl;
             std::cout << "room->bounds.left + room->bounds.width " << room->bounds.left + room->bounds.width << std::endl;
             std::cout << "room->bounds.top " << room->bounds.top << std::endl;
-            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl;
+            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl;*/
             return room;
         }
     }
@@ -143,12 +143,12 @@ std::shared_ptr<House::Door> House::Room::AddRoomDoor(Vec2 mainDoorCords, bool h
     if (horizontal)
     {
         door->entryPoint1 = mainDoorCords - Vec2(1, 0);
-        door->entryPoint2 = mainDoorCords + Vec2(1, 0); // example offset, adjust to your logic
+        door->entryPoint2 = mainDoorCords + Vec2(1, 0); 
     }
     if (!horizontal)
     {
         door->entryPoint1 = mainDoorCords - Vec2(0, 1);
-        door->entryPoint2 = mainDoorCords + Vec2(0, 1); // example offset, adjust to your logic
+        door->entryPoint2 = mainDoorCords + Vec2(0, 1); 
     }
     doors.push_back(door);
 

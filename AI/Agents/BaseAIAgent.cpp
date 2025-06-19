@@ -578,7 +578,7 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
-    std::cout << "House Searcg Update" << std::endl;
+    std::cout << "House Search Update" << std::endl;
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
    
     if (!agent.currentHouse)
@@ -633,7 +633,7 @@ Node::Status HouseSearch::update()
         {
             pathGenerated = false;
             agent.currentHouse->FindCurrentRoom(agentTile)->searched = true;
-            this->reset();
+          //  this->reset();
             return BH_SUCCESS; // Reached the point = success
         }
         return BH_SUCCESS;
@@ -665,6 +665,7 @@ void GoToNextRoom::onInitialize()
 
             // Navigate to the door leading to the next room
             Vec2 doorEntry = door->GetEntryPoint(agentTile);
+            std::cout << "Door Entry: " << doorEntry.x <<" , "<< doorEntry.y << "\n";
             agent.initializeMoveToPoint(doorEntry);
             return;
         }
@@ -683,16 +684,14 @@ void GoToNextRoom::onInitialize()
 
     // Nowhere to go: exploration complete
     std::cout << "No more rooms to explore.\n";
-    //Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    //if (agent.currentHouse->FindCurrentRoom(agentTile))
-    //{
-    //    agent.currentHouse->FindCurrentRoom(agentTile)->searched=true;
-    //    auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile).get();
-    //    auto closestDoor = currentRoom->GetClosestRoomDoor(agentTile);
-    //    //find current room
-    //    Vec2 doorLocation = closestDoor->GetEntryPoint(agentTile);
-    //    agent.initializeMoveToPoint(doorLocation);
-    //}
+
+}
+
+void GoToNextRoom::reset()
+{
+    //pathGenerated = false;
+    agent.destinationReached = false;
+    agent.currentpath.clear();
 }
 
 Node::Status GoToNextRoom::update()
@@ -732,24 +731,6 @@ Node::Status GoToNextRoom::update()
 
 
 
-   /* else
-    {
-        Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-        if (agent.currentHouse->FindCurrentRoom(agentTile).get())
-        {
-            std::cout << "GoToNextRoom END OF UPDATE" << std::endl;
-            return BH_FAILURE;
-        }
-        return BH_SUCCESS;
-    }*/
-    //else if (agent.destinationReached) {
-    //    /*Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    //    if (agent.currentHouse->FindCurrentRoom(agentTile))
-    //    {
-    //        return BH_FAILURE;
-    //    }*/
-    //    return BH_SUCCESS; // Reached the point = success
-    //}
 
 }
 

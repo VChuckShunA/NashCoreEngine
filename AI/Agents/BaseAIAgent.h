@@ -327,6 +327,7 @@ public:
 private:
     BaseAIAgent& agent;
     virtual void onInitialize() override;
+    virtual void reset() override;
     virtual Status update() override;
 };
 class WallTrace : public Node

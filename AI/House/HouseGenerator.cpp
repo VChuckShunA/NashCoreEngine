@@ -140,19 +140,19 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 
 	auto r2 = Mansion->AddRoom(4, 20, 8, 4, Mansion.get(), 2);
 	auto doorR2a = r2->AddRoomDoor(Vec2(19, 4));
-	auto doorR2b = r2->AddRoomDoor(Vec2(25, 5));
+	auto doorR2b = r2->AddRoomDoor(Vec2(25, 5),false);
 	auto doorR2c = r2->AddRoomDoor(Vec2(28, 1));
 
 	auto r3 = Mansion->AddRoom(8, 20, 6, 3, Mansion.get(), 3);
-	auto doorR3a = r3->AddRoomDoor(Vec2(25, 5));
+	auto doorR3a = r3->AddRoomDoor(Vec2(25, 5),false);
 
 	auto r4 = Mansion->AddRoom(4, 29, 3, 4, Mansion.get(), 4);
 	auto doorR4a = r4->AddRoomDoor(Vec2(28, 1));
-	auto doorR4b = r4->AddRoomDoor(Vec2(29, 5));
+	auto doorR4b = r4->AddRoomDoor(Vec2(29, 5),false);
 
 
 	auto r5 = Mansion->AddRoom(8, 27, 5, 3, Mansion.get(), 5);
-	auto doorR5a = r5->AddRoomDoor(Vec2(29, 5));
+	auto doorR5a = r5->AddRoomDoor(Vec2(29, 5),false);
 
 	doorR1->connectedRoom = r2;
 
