@@ -326,6 +326,7 @@ public:
     GoToNextRoom(BaseAIAgent& ag);
 private:
     BaseAIAgent& agent;
+    bool finishedSearching = false;
     virtual void onInitialize() override;
     virtual void reset() override;
     virtual Status update() override;

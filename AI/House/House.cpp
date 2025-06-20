@@ -5,7 +5,7 @@
 Vec2 House::Door::GetEntryPoint(Vec2 position)
 {
     //Compare entry points with position and get the furthest point
-    float dist1 = (entryPoint1 - position).length();  // If you have a Vec2::length() function
+    float dist1 = (entryPoint1 - position).length();
     float dist2 = (entryPoint2 - position).length();
 
     if (dist1 > dist2)
@@ -89,17 +89,17 @@ std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
     {
       
         bool insideX = cellX >= room->bounds.left && cellX <= room->bounds.left + room->bounds.width;
-        bool insideY = cellY <= room->bounds.top && cellY >= room->bounds.top - room->bounds.height-1;
+        bool insideY = cellY <= room->bounds.top && cellY >= room->bounds.top - room->bounds.height;
 
        if((insideX) &&
            (insideY))
         {
-           /* std::cout << "Found Room "<<room->roomID << std::endl;
+            std::cout << "Found Room "<<room->roomID << std::endl;
             std::cout << "Agent Position " << cellX <<" , "<< cellY << std::endl;
             std::cout << "room->bounds.left " << room->bounds.left  << std::endl;
             std::cout << "room->bounds.left + room->bounds.width " << room->bounds.left + room->bounds.width << std::endl;
             std::cout << "room->bounds.top " << room->bounds.top << std::endl;
-            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl;*/
+            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl;
             return room;
         }
     }

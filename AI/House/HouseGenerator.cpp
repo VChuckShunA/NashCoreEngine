@@ -29,7 +29,9 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 	navmesh.navMesh[15][30].insideHouse = true;
 	navmesh.navMesh[15][30].scannable = true;
 	Warehouse->AddMainDoor(Vec2(15, 30));
-	Warehouse->AddBounds(31,1,14,4);
+	//Warehouse->AddBounds(31,1,14,4);
+
+	auto r1 = Warehouse->AddRoom(31, 1, 14, 4, Warehouse.get(), 1);
 	generatedHouses.push_back(Warehouse);
 }
 
@@ -63,7 +65,9 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 	MarkAreaAsHouse(navmesh, 30, 31, 15, 26);
 	GenerateHorizontalWall(2, navmesh, room, 25, 29, 26);
 	LHouse->AddMainDoor(Vec2(25, 28));
-	LHouse->AddBounds(29, 26, 6, 15);
+	//LHouse->AddBounds(29, 26, 6, 15);
+
+	auto r1 = LHouse->AddRoom(29, 26, 6, 15, LHouse.get(), 1);
 	generatedHouses.push_back(LHouse);
 }
 
@@ -88,10 +92,26 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[9][18].scannable = true;
 	navmesh.navMesh[12][22].scannable = true;
 
-	EightHouse->AddMainDoor(Vec2(12, 22));
-	EightHouse->AddBounds(21, 9, 4, 8);
-	generatedHouses.push_back(EightHouse);
+	EightHouse->AddMainDoor(Vec2(12, 22),false);
+//	EightHouse->AddBounds(21, 9, 4, 8);
 
+	auto r1 = EightHouse->AddRoom(21, 9, 4, 3, EightHouse.get(), 1);
+	auto doorR1 = r1->AddRoomDoor(Vec2(9, 18),false);
+
+	auto r2 = EightHouse->AddRoom(17, 9, 4, 4, EightHouse.get(), 2);
+	auto doorR2 = r2->AddRoomDoor(Vec2(9, 18),false);
+
+	doorR1->connectedRoom = r2;
+	doorR2->connectedRoom = r1;
+
+	generatedHouses.push_back(EightHouse);
+	for (auto& room : EightHouse->rooms) {
+		std::cout << "Room " << room->roomID << " connects via doors to: ";
+		for (auto& d : room->doors) {
+			std::cout << d->connectedRoom->roomID << " ";
+		}
+		std::cout << "\n";
+	}
 }
 
 void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
@@ -133,7 +153,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[29][5].scannable = true;
 
 	Mansion->AddMainDoor(Vec2(13, 5));
-	Mansion->AddBounds(8, 14, 18, 8);
+	//Mansion->AddBounds(8, 14, 18, 8);
 	
 	auto r1 = Mansion->AddRoom(8,14,5,8, Mansion.get(), 1);
 	auto doorR1 = r1->AddRoomDoor(Vec2(19, 4));
