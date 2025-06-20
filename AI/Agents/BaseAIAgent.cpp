@@ -476,26 +476,26 @@ void WallTrace::onInitialize()
     agent.initializeMoveToPoint(doorPosition);
 }
 
-Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
-{
-    // 1) Get the raw direction from agent to brick
-    Vec2 raw = wallTile - agentTile;
-    Vec2 lastHitNormal;
-    // 2) Decide if this is mostly a horizontal or vertical contact
-    if (std::abs(raw.x) > std::abs(raw.y)) {
-        // The brick lies directly to our LEFT or RIGHT
-        // Normal points from the brick toward the agent, i.e. opposite of raw.x
-        float sx = (raw.x > 0 ? -1.0f : +1.0f);
-        lastHitNormal = Vec2(sx, 0);   // (–1,0) if brick is to our right; (+1,0) if brick is to our left
-    }
-    else {
-        // The brick lies directly ABOVE or BELOW
-        float sy = (raw.y > 0 ? -1.0f : +1.0f);
-        lastHitNormal = Vec2(0, sy);   // (0,–1) if brick is above; (0,+1) if brick is below
-    }
-
-    return lastHitNormal;
-}
+//Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
+//{
+//    // 1) Get the raw direction from agent to brick
+//    Vec2 raw = wallTile - agentTile;
+//    Vec2 lastHitNormal;
+//    // 2) Decide if this is mostly a horizontal or vertical contact
+//    if (std::abs(raw.x) > std::abs(raw.y)) {
+//        // The brick lies directly to our LEFT or RIGHT
+//        // Normal points from the brick toward the agent, i.e. opposite of raw.x
+//        float sx = (raw.x > 0 ? -1.0f : +1.0f);
+//        lastHitNormal = Vec2(sx, 0);   // (–1,0) if brick is to our right; (+1,0) if brick is to our left
+//    }
+//    else {
+//        // The brick lies directly ABOVE or BELOW
+//        float sy = (raw.y > 0 ? -1.0f : +1.0f);
+//        lastHitNormal = Vec2(0, sy);   // (0,–1) if brick is above; (0,+1) if brick is below
+//    }
+//
+//    return lastHitNormal;
+//}
 
 Node::Status WallTrace::update()
 {
@@ -579,13 +579,20 @@ void HouseSearch::reset()
 Node::Status HouseSearch::update()
 {
     std::cout << "House Search Update" << std::endl;
-    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
+    if (!agent.hasSeenWall)
+    {
+        std::cout << "House Search FAIL" << std::endl;
+        return BH_FAILURE;
+    }
+    std::cout << "House Search Update" << std::endl;
    
     if (!agent.currentHouse)
     {
+        std::cout << "House Search FAIL" << std::endl;
         return BH_FAILURE;
     } 
-    
+
+    Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     if (agent.currentHouse)
     {
         auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
@@ -646,6 +653,10 @@ GoToNextRoom::GoToNextRoom(BaseAIAgent& ag):agent(ag)
 
 void GoToNextRoom::onInitialize()
 {
+    if (!agent.currentHouse)
+    {
+        return;
+    }
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
 
@@ -690,6 +701,10 @@ void GoToNextRoom::onInitialize()
 
     Vec2 backtrackEntry = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
     finishedSearching = true;
+    agent.room->AddHouseToMemory(std::make_shared<House>(*agent.currentHouse));
+    agent.hasSeenWall = false;
+    agent.currentHouse = nullptr;
+    agent.room->isScanningWalls = true;
     agent.initializeMoveToPoint(backtrackEntry);
 }
 
@@ -703,24 +718,37 @@ void GoToNextRoom::reset()
 Node::Status GoToNextRoom::update()
 {
     std::cout << "GoToNextRoom RUNNING" << std::endl;
+    if (!agent.currentHouse)
+    {
+        std::cout << "GoToNextRoom FAILED" << std::endl;
+        return BH_SUCCESS;
+    }
+  /*  if (finishedSearching && agent.destinationReached)
+    {
+     
+        return BH_FAILURE;
+    }*/
     // Once the agent reaches the destination (the door),
     // we need to wait until the agent actually enters the next room
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
     if (!currentRoom)
     {
+        std::cout << "No Current Room" << std::endl;
         Vec2 frontDoor = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
         if (agent.currentpath.empty())
         {
+            agent.initializeMoveToPoint(frontDoor);
             agent.currentpath = agent.room->navmesh.FindPath(agentTile, frontDoor);
             agent.destinationReached = false;
         }
-
+        std::cout << "Following Path" << std::endl;
         agent.FollowPath();
         return BH_RUNNING;
     }
     if (!agent.destinationReached)
     {
+        std::cout << "Destination not reached" << std::endl;
         agent.FollowPath();
         return BH_RUNNING;
     }
@@ -731,8 +759,32 @@ Node::Status GoToNextRoom::update()
         std::cout << "Agent has entered new room: " << currentRoom->roomID << std::endl;
         return BH_SUCCESS; // Run House Search
     }
-
+    std::cout << "Running again" << std::endl;
     // Agent hasn't fully entered next room yet
-    return BH_RUNNING;
+   // return BH_RUNNING;
 
 }
+
+
+IsNearWall::IsNearWall(BaseAIAgent& ag) :agent(ag) {}
+
+Node::Status IsNearWall::update()
+{
+    if (!agent.agent->getComponent<CVision>().visibleBricks.empty()) {
+        agent.hasSeenWall = true;
+        // Store wall normal for tracing (simplified to vector difference)
+        agent.wallNormal = Physics::GetWallNormal(agent.agent->getComponent<CTransform>().pos, agent.agent->getComponent<CVision>().NearestBrick->getComponent<CTransform>().pos);
+
+    }
+   /* else {
+        agent.hasSeenWall = false;
+    }*/
+
+    if (agent.hasSeenWall)
+    {
+        return BH_SUCCESS;
+    }
+    // std::cout << "NO WALLL \n" << "Last known Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
+    return BH_FAILURE;
+}
+

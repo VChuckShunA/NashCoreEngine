@@ -33,6 +33,9 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 
 	auto r1 = Warehouse->AddRoom(31, 1, 14, 4, Warehouse.get(), 1);
 	generatedHouses.push_back(Warehouse);
+
+
+	std::cout << "Warehouse " << Warehouse->houseID << std::endl;
 }
 
 void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
@@ -65,10 +68,14 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 	MarkAreaAsHouse(navmesh, 30, 31, 15, 26);
 	GenerateHorizontalWall(2, navmesh, room, 25, 29, 26);
 	LHouse->AddMainDoor(Vec2(25, 28));
-	//LHouse->AddBounds(29, 26, 6, 15);
+	LHouse->AddBounds(29, 26, 6, 15);
 
 	auto r1 = LHouse->AddRoom(29, 26, 6, 15, LHouse.get(), 1);
 	generatedHouses.push_back(LHouse);
+
+
+	std::cout << "L House" << LHouse->houseID << std::endl;
+
 }
 
 void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
@@ -93,7 +100,7 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[12][22].scannable = true;
 
 	EightHouse->AddMainDoor(Vec2(12, 22),false);
-//	EightHouse->AddBounds(21, 9, 4, 8);
+	EightHouse->AddBounds(21, 9, 4, 8);
 
 	auto r1 = EightHouse->AddRoom(21, 9, 4, 3, EightHouse.get(), 1);
 	auto doorR1 = r1->AddRoomDoor(Vec2(9, 18),false);
@@ -112,6 +119,8 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 		}
 		std::cout << "\n";
 	}
+
+	std::cout <<"8 house"<< EightHouse->houseID << std::endl;
 }
 
 void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
@@ -153,7 +162,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[29][5].scannable = true;
 
 	Mansion->AddMainDoor(Vec2(13, 5));
-	//Mansion->AddBounds(8, 14, 18, 8);
+	Mansion->AddBounds(8, 14, 18, 8);
 	
 	auto r1 = Mansion->AddRoom(8,14,5,8, Mansion.get(), 1);
 	auto doorR1 = r1->AddRoomDoor(Vec2(19, 4));
@@ -206,6 +215,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 		std::cout << "\n";
 	}
 
+	std::cout << "Mansion" << Mansion->houseID << std::endl;
 }
 
 void HouseGenerator::GenerateVerticalWall(int id, AStar& navmesh, AIPlayroom& room,int y1, int y2, int x)

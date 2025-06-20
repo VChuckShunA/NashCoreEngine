@@ -81,6 +81,7 @@ public:
     std::vector<Vec2> path;
     const size_t INVENTORY_SIZE = 5;
     std::array<std::shared_ptr<Item>, 5> inventory;
+    std::array<std::shared_ptr<House>, 3> houseMemory;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     Vec2 positionToGridCordinates(const Vec2& cordinates);
     void MoveEntity(const std::shared_ptr<Entity>& entity, std::vector<Vec2>& path);
@@ -92,6 +93,9 @@ public:
     void drawVisionCone();
     void ManageInventory();
     void UpdateInventoryUI();
+    void AddHouseToMemory(const std::shared_ptr<House> house);
+    void UpdateHouseUI();
+    bool IsHouseInMemory(int id);
     void ResizeInventory();
     void drawWallCheckerRays();
     bool RayIntersectsAABB(
@@ -120,6 +124,7 @@ public:
     }
     std::string inventoryItem1, inventoryItem2, inventoryItem3, inventoryItem4, inventoryItem5 = " ";
 
+    std::string house1, house2, house3 = " ";
     void SpawnEnemies();
     bool pointInTriangle(const Vec2& P, const Vec2& A,
         const Vec2& B, const Vec2& C);

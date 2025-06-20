@@ -291,23 +291,8 @@ private:
     BaseAIAgent& agent;
 public:
 
-    IsNearWall(BaseAIAgent& ag) :agent(ag) {}
-    Status update() override {
-        
-            if (!agent.agent->getComponent<CVision>().visibleBricks.empty()) {
-                agent.hasSeenWall = true;
-                // Store wall normal for tracing (simplified to vector difference)
-                agent.wallNormal = Physics::GetWallNormal(agent.agent->getComponent<CTransform>().pos, agent.agent->getComponent<CVision>().NearestBrick->getComponent<CTransform>().pos);
-               
-            }
-
-            if (agent.hasSeenWall)
-            {
-                return BH_SUCCESS;
-            }
-           // std::cout << "NO WALLL \n" << "Last known Normall is " << agent.wallNormal.x << " , " << agent.wallNormal.y << std::endl;
-        return BH_FAILURE;
-    }
+    IsNearWall(BaseAIAgent& ag);
+    Status update();
 }; 
 
 class IsDoorVisible : public Node {
@@ -421,10 +406,6 @@ public:
        // wallTraceSequence->addChild(new HouseSearchDFS(agent));
         wallTraceSequence->addChild(new HouseSearch(agent));
         wallTraceSequence->addChild(new GoToNextRoom(agent));
-
-       /* StatefulSequence* houseSearchSequence = new StatefulSequence();
-        houseSearchSequence->addChild(new HouseSearch(agent));
-        houseSearchSequence->addChild(new GoToNextRoom(agent));*/
 
         addChild(wallTraceSequence);
         //addChild(houseSearchSequence);

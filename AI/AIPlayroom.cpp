@@ -45,16 +45,16 @@ void AIPlayroom::init(const std::string& levelPath) {
 
     navmesh.initializeNavMesh();
     //Spawn AI
-   // HouseGenerator::GenerateWareHouse(navmesh, *this);
-      HouseGenerator::GenerateLHouse(navmesh, *this);
-   // HouseGenerator::GenerateEightHouse(navmesh, *this);
-   // HouseGenerator::GenerateMansion(navmesh, *this);
+    HouseGenerator::GenerateWareHouse(navmesh, *this);
+    HouseGenerator::GenerateLHouse(navmesh, *this);
+    HouseGenerator::GenerateEightHouse(navmesh, *this);
+    HouseGenerator::GenerateMansion(navmesh, *this);
    
    // SpawnEnemies();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
-        gridToMidPixel(20, 29, p1),
+        gridToMidPixel(20, 17, p1),
         Vec2(0, 0),
         Vec2(1, 1),
         0
@@ -539,6 +539,7 @@ void AIPlayroom::ItemScanner()
 
 void AIPlayroom::WallChecker()
 {
+    std::cout << "WallCHecker Running" << std::endl;
     auto& vision = playerPtr->agent->getComponent<CVision>();
     auto& transform = playerPtr->agent->getComponent<CTransform>();
     Vec2  eye = transform.pos;
@@ -557,18 +558,20 @@ void AIPlayroom::WallChecker()
     for (auto& brick : m_entityManager.getEntities("Brick"))
     {
         Vec2 P = brick->getComponent<CTransform>().pos;
-
         //FOV + range test
         if (vision.IsTargetInFOV(eye, lookDir, P))
         {
-            // vision.Item = nullptr;
-            vision.seesWall = true;
-            //Add to Bricks
-            vision.LastKnownBrick = brick;
-            vision.visibleBricks.push_back(brick);
-            std::cout << "Wall at "<< positionToGridCordinates(brick).x << " , " << positionToGridCordinates(brick).y << std::endl;
-            UpdateNearesBrick();
-
+            if (!IsHouseInMemory(brick->m_buildingID))
+            {
+                // vision.Item = nullptr;
+                vision.seesWall = true;
+                //Add to Bricks
+                vision.LastKnownBrick = brick;
+                vision.visibleBricks.push_back(brick);
+                std::cout << "Wall at " << positionToGridCordinates(brick).x << " , " << positionToGridCordinates(brick).y << std::endl;
+                UpdateNearesBrick();
+            }
+           // vision.seesWall = false;
         }
         if (!vision.IsTargetInFOV(eye, lookDir, P))
         {
@@ -854,11 +857,11 @@ void AIPlayroom::UpdateInventoryUI()
     ResizeInventory();
     for (size_t i = 0; i < inventory.size(); ++i) {
        // if (inventory[i] == nullptr) {
-            std::cout << "NOT NULLPTR " << i<< std::endl;
+          //  std::cout << "NOT NULLPTR " << i<< std::endl;
             // Update the HUD for that slot
             if (inventory[0])
             {
-                std::cout << "Item 1 " <<std::endl;
+               // std::cout << "Item 1 " <<std::endl;
                 inventoryItem1 = enumToString(inventory[0]->type);
             }
             else
@@ -867,7 +870,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[1])
             {
-                std::cout << "Item 2 " << std::endl;
+               // std::cout << "Item 2 " << std::endl;
                 inventoryItem2 = enumToString(inventory[1]->type);
             }
             else
@@ -876,7 +879,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[2])
             {
-                std::cout << "Item 3 " << std::endl;
+               // std::cout << "Item 3 " << std::endl;
                 inventoryItem3 = enumToString(inventory[2]->type);
             }
             else
@@ -885,7 +888,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[3])
             {
-                std::cout << "Item 4 " << std::endl;
+                //std::cout << "Item 4 " << std::endl;
                 inventoryItem4 = enumToString(inventory[3]->type);
             }
             else
@@ -894,7 +897,7 @@ void AIPlayroom::UpdateInventoryUI()
             }
             if (inventory[4])
             {
-                std::cout << "Item 5 " << std::endl;
+               // std::cout << "Item 5 " << std::endl;
                 inventoryItem5 = enumToString(inventory[4]->type);
             }
             else
@@ -905,6 +908,53 @@ void AIPlayroom::UpdateInventoryUI()
           //  return; // done
        // }
     }    
+}
+
+void AIPlayroom::AddHouseToMemory(const std::shared_ptr<House> house)
+{
+    //if array is full, remove the first one
+    for (auto& h : houseMemory) {
+        if (!h) {
+            h = house;
+            UpdateHouseUI();
+            return;
+        }
+    }
+
+    houseMemory[0] = houseMemory[1];
+    houseMemory[1] = houseMemory[2];
+    houseMemory[2] = house;
+    UpdateHouseUI();
+}
+
+void AIPlayroom::UpdateHouseUI()
+{
+    if(houseMemory[0])
+    {
+        house1 = houseMemory[0]->houseLabel;
+    }
+    if (houseMemory[1])
+    {
+        house2 = houseMemory[1]->houseLabel;
+    }
+    if (houseMemory[2])
+    {
+        house3 = houseMemory[2]->houseLabel;
+    }
+}
+
+bool AIPlayroom::IsHouseInMemory(int id)
+{
+    // return true if house array contains house
+    for (const auto& h : houseMemory) {
+        if (h && h->houseID == id)
+        {
+            std::cout << "house is in memeory" << std::endl;
+            return true;
+        }
+    }
+    std::cout << "house NOT in memeory" << std::endl;
+    return false;
 }
 
 void AIPlayroom::ResizeInventory()
@@ -1761,6 +1811,7 @@ void AIPlayroom::sRender() {
   
     sf::Text HUD("health : " + std::to_string(currentHealth)+
         "\nitems : [" + inventoryItem1 + "] [" + inventoryItem2 + "] [" + inventoryItem3 + "] [" + inventoryItem4 +  "] [" + inventoryItem5 + "]"+
+        "\nmemory : [" + house1 + "][" + house2 + "] [" + house3 + "]" +
         "\nbehavior : "+ behaviourName +
         "\nstatus : " + behaviourSTatus +
         "\nSCORE : " + std::to_string(PlayerScore)
