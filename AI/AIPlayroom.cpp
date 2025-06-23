@@ -62,7 +62,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
    // p1->addComponent<CWallTracker>();
-    
+    /*
     auto item1 = m_entityManager.addEntity("health");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
@@ -135,18 +135,18 @@ void AIPlayroom::init(const std::string& levelPath) {
         0
     );
     item7->addComponent<CBoundingBox>(Vec2(64, 64));
-    
+    */
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
-    
+    /*
     items.emplace_back(std::make_shared<Health>(item1));
     items.emplace_back(std::make_shared<Ammo>(item2));
     items.emplace_back(std::make_shared<Coin>(item3));
     items.emplace_back(std::make_shared<Ammo>(item4));
     items.emplace_back(std::make_shared<Health>(item5));
     items.emplace_back(std::make_shared<Health>(item6));
-    items.emplace_back(std::make_shared<Health>(item7));
+    items.emplace_back(std::make_shared<Health>(item7));*/
 }
 
 
@@ -353,92 +353,95 @@ bool AIPlayroom::ShouldSpawnItem(int itemType)
     }
     switch (itemType)
     {
-    case 0: //NONE
-        return false;
-    case 1://HEALTH
-        if (playerPtr->needsFood()&&itemcount<5)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    case 2: //AMMO
-        if (playerPtr->needsAmmo() && itemcount < 5)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    case 3: //COIN
-        if (itemcount < 5)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+    case 0: // NONE
+        return true;
+
+    case 1: // HEALTH
+        return playerPtr->needsFood() && itemcount < 5;
+
+    case 2: // AMMO
+        return playerPtr->needsAmmo() && itemcount < 5;
+
+    case 3: // COIN
+        return itemcount < 5;
+
     default:
-        break;
+        return true;
     }
-    return false;
 }
 
 void AIPlayroom::SpawnRandomItem(Vec2 position)
 {
-    if (!navmesh.navMesh[position.x][position.y].walkable) return;
+    if (!navmesh.navMesh[position.x][position.y].walkable || !navmesh.navMesh[position.x][position.y].insideHouse) return;
     std::string itemTag;
     std::string itemAnimation;
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     int itemtype = std::rand() % 4;
 
+    std::cout << "X" << position.x << std::endl;
+    std::cout << "Y" << position.y << std::endl;
+    std::cout << "itemtype" << itemtype << std::endl;
     if (ShouldSpawnItem(itemtype))
     {
         switch (itemtype)
         {
-        case 0: //None
-            return;
-        case 1://Health
+        case 1: // Health
             itemTag = "health";
             itemAnimation = "FirstAid";
-        case 2://Ammo
+            break;
+
+        case 2: // Ammo
             itemTag = "ammo";
             itemAnimation = "Bullets";
-        case 3://Coin
+            break;
+
+        case 0: // None
+        case 3: // Coin
+        default:
             itemTag = "coin";
             itemAnimation = "CoinSpin";
+            break;
+        }
+        std::cout << "Item Tag" << itemTag << std::endl;
+        std::cout << "Item Animation" << itemAnimation << std::endl;
+        auto randomItem = m_entityManager.addEntity(itemTag);
+        randomItem->addComponent<CAnimation>(m_game->assets().getAnimation(itemAnimation), true);
+        randomItem->addComponent<CTransform>(
+            gridToMidPixel(position.x, position.y, randomItem),
+            Vec2(0, 0),
+            Vec2(1, 1),
+            0
+        );
+        randomItem->addComponent<CBoundingBox>(Vec2(64, 64));
+
+        switch (itemtype)
+        {
+        case 0: //None
+            items.emplace_back(std::make_shared<Coin>(randomItem));
+            return;
+        case 1://Health
+            items.emplace_back(std::make_shared<Health>(randomItem));
+            break;
+        case 2://Ammo
+            items.emplace_back(std::make_shared<Ammo>(randomItem));
+            break;
+        case 3://Coin
+            items.emplace_back(std::make_shared<Coin>(randomItem));
+            break;
         default:
+            items.emplace_back(std::make_shared<Coin>(randomItem));
             break;
         }
     }
+   
+}
 
-    auto randomItem = m_entityManager.addEntity(itemTag);
-    randomItem->addComponent<CAnimation>(m_game->assets().getAnimation(itemAnimation), true);
-    randomItem->addComponent<CTransform>(
-        gridToMidPixel(12, 3, randomItem),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    randomItem->addComponent<CBoundingBox>(Vec2(64, 64));
-
-    switch (itemtype)
-    {
-    case 0: //None
-        return;
-    case 1://Health
-        items.emplace_back(std::make_shared<Health>(randomItem));
-    case 2://Ammo
-        items.emplace_back(std::make_shared<Ammo>(randomItem));
-    case 3://Coin
-        items.emplace_back(std::make_shared<Coin>(randomItem));
-    default:
-        break;
+bool AIPlayroom::isInventoryFull()
+{
+    for (const auto& item : inventory) {
+        if (!item) return false;
     }
+    return true;
 }
 
 Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
@@ -637,7 +640,6 @@ void AIPlayroom::ItemScanner()
 
 void AIPlayroom::WallChecker()
 {
-    std::cout << "WallCHecker Running" << std::endl;
     auto& vision = playerPtr->agent->getComponent<CVision>();
     auto& transform = playerPtr->agent->getComponent<CTransform>();
     Vec2  eye = transform.pos;
@@ -859,12 +861,20 @@ void AIPlayroom::ManageInventory()
                 }
                 if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
                 {
-                    item->AddToPlayer(this);
+                    if (!isInventoryFull())
+                    {
+
+                        item->AddToPlayer(this);
+                    }
                     break;
                 }
                 if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
                 {
-                    item->AddToPlayer(this);
+                    if (!isInventoryFull())
+                    {
+
+                        item->AddToPlayer(this);
+                    }
                     break;
 
                 }
@@ -1018,15 +1028,8 @@ void AIPlayroom::AddHouseToMemory(const std::shared_ptr<House> house)
             return;
         }
     }
-    houseMemory[0]->ResetHouse();/*
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distX(room->bounds.left, room->bounds.left + room->bounds.width);
-    std::uniform_int_distribution<> distY(room->bounds.top, room->bounds.top - room->bounds.height);
-    int randomX = distX(gen);
-    int randomY = distY(gen);
-
-    SpawnRandomItem(Vec2(randomX, randomY));*/
+    houseMemory[0]->ResetHouse();
+    RepopuluateHouse(houseMemory[0]);
     houseMemory[0] = houseMemory[1];
     houseMemory[1] = houseMemory[2];
     houseMemory[2] = house;
@@ -1587,7 +1590,7 @@ Vec2 AIPlayroom::GetRandomWanderSpot()
     //Get Safe Spot
     Vec2 safeSpot{ static_cast<float>(xVal),static_cast<float>(yVal) };
     //check if it's walkable
-    if (navmesh.navMesh[safeSpot.x][safeSpot.y].walkable)
+    if (navmesh.navMesh[safeSpot.x][safeSpot.y].walkable && !navmesh.navMesh[safeSpot.x][safeSpot.y].insideHouse)
     {
         std::cout << "Found a random spot "<< safeSpot.x<< " , "<< safeSpot.y << std::endl;
         return safeSpot;
@@ -1634,6 +1637,22 @@ void AIPlayroom::UpdateNearesBrick()
             minDist = distSq;
             vision.NearestBrick = brick;
         }
+    }
+}
+
+void AIPlayroom::RepopuluateHouse(const std::shared_ptr<House> house)
+{
+    for (auto& room : house->rooms)
+    {
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distX(room->bounds.left, room->bounds.left + room->bounds.width);
+        std::uniform_int_distribution<> distY( room->bounds.top - room->bounds.height, room->bounds.top);
+        int randomX = distX(gen);
+        int randomY = distY(gen);
+        room->searched = false;
+        SpawnRandomItem(Vec2(randomX, randomY));
     }
 }
 
@@ -1858,28 +1877,7 @@ void AIPlayroom::sRender() {
     if(m_drawGrid)
         navmesh.DrawPath(m_game->window());
     drawVisionCone();
-    //// draw the grid 
-    //if (m_drawGrid) {
-    //    float leftX = float(m_game->window().getView().getCenter().x) - width() / 2.0f;
-    //    float rightX = leftX + width() + m_gridSize.x;
-    //    float nextGridX = leftX - float((int)leftX % (int)m_gridSize.x);
 
-    //    for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
-    //        drawLine(Vec2(x, 0), Vec2(x, height()));
-    //    }
-
-    //    for (float y = 0; y < height(); y += float(m_gridSize.y)) {
-    //        drawLine(Vec2(leftX, height() - y), Vec2(rightX, height() - y));
-
-    //        for (float x = nextGridX; x < rightX; x += float(m_gridSize.x)) {
-    //            std::string xCell = std::to_string((int)x / (int)m_gridSize.x);
-    //            std::string yCell = std::to_string(((int)y / (int)m_gridSize.y));
-    //            m_gridText.setString("(" + xCell + "," + yCell + ")");
-    //            m_gridText.setPosition(x + 3, height() - y - m_gridSize.y + 2);
-    //            m_game->window().draw(m_gridText);
-    //        }
-    //    }
-    //}
 
     if (m_drawGrid) {
     float leftX = 0.0f;

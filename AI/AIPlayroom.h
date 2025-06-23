@@ -83,6 +83,7 @@ public:
     std::vector<Vec2> path;
     const size_t INVENTORY_SIZE = 5;
     std::array<std::shared_ptr<Item>, 5> inventory;
+    bool isInventoryFull();
     std::array<std::shared_ptr<House>, 3> houseMemory;
     Vec2 positionToGridCordinates(const std::shared_ptr<Entity>& entity);
     Vec2 positionToGridCordinates(const Vec2& cordinates);
@@ -142,6 +143,6 @@ public:
     Vec2 GetRandomWanderSpot();
     void CreateEntity(std::string tag, Vec2 position, std::string AnimationName,int houseID);
     void UpdateNearesBrick();
-
+    void RepopuluateHouse(const std::shared_ptr<House> house);
     friend class BaseAIAgent;
 };

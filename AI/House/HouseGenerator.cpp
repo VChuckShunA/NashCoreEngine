@@ -34,7 +34,6 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 	auto r1 = Warehouse->AddRoom(31, 1, 14, 4, Warehouse.get(), 1);
 	generatedHouses.push_back(Warehouse);
 
-
 	std::cout << "Warehouse " << Warehouse->houseID << std::endl;
 }
 

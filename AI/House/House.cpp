@@ -103,12 +103,12 @@ std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
        if((insideX) &&
            (insideY))
         {
-            std::cout << "Found Room "<<room->roomID << std::endl;
+          /*  std::cout << "Found Room "<<room->roomID << std::endl;
             std::cout << "Agent Position " << cellX <<" , "<< cellY << std::endl;
             std::cout << "room->bounds.left " << room->bounds.left  << std::endl;
             std::cout << "room->bounds.left + room->bounds.width " << room->bounds.left + room->bounds.width << std::endl;
             std::cout << "room->bounds.top " << room->bounds.top << std::endl;
-            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl;
+            std::cout << "room->bounds.top - room->bounds.height " << room->bounds.top - room->bounds.height << std::endl*/;
             return room;
         }
     }

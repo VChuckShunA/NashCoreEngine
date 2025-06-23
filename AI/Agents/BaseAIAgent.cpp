@@ -345,8 +345,8 @@ EngageCombat::EngageCombat(BaseAIAgent& agent) : agent(agent) { Name = "Engage C
 
 Node::Status EngageCombat::update()
 {
-    // Here you might return BH_RUNNING until the enemy is neutralized,
-    // then return BH_SUCCESS (or BH_FAILURE if combat was interrupted).
+    // Return BH_RUNNING until the enemy is neutralized,
+    // Return BH_SUCCESS
     if (agent.hasAmmo())
     {
         if(agent.agent->getComponent<CVision>().Target) //NOTE: this had a agent.agent,  it was probably an overseight on my part, so I got rid of it. idk if it broke anything :|
@@ -446,12 +446,6 @@ Node::Status Wander::update()
         agent.agent->getComponent<CVision>().seesCoin ||
         (agent.agent->getComponent<CVision>().seesAmmo && agent.needsAmmo()) ||
         agent.agent->getComponent<CVision>().Target) {
-       // std::cout << "Wander: Interrupted by Perception. Returning BH_SUCCESS." << std::endl;
-        // You might want to log specifically *what* caused the interruption
-     /*   if (agent.hasSeenAmmo) std::cout << "  - Saw Ammo" << std::endl;
-        if (agent.hasSeenCoin) std::cout << "  - Saw Coin" << std::endl;
-        if (agent.hasSeenFood) std::cout << "  - Saw Food" << std::endl;
-        if (agent.agent->getComponent<CVision>().seesPlayer) std::cout << "  - Saw Player" << std::endl;*/
         return BH_SUCCESS; // Reached the point = success
     } 
 
@@ -476,26 +470,7 @@ void WallTrace::onInitialize()
     agent.initializeMoveToPoint(doorPosition);
 }
 
-//Vec2 WallTrace::getLastHitNormal(Vec2 wallTile, Vec2 agentTile)
-//{
-//    // 1) Get the raw direction from agent to brick
-//    Vec2 raw = wallTile - agentTile;
-//    Vec2 lastHitNormal;
-//    // 2) Decide if this is mostly a horizontal or vertical contact
-//    if (std::abs(raw.x) > std::abs(raw.y)) {
-//        // The brick lies directly to our LEFT or RIGHT
-//        // Normal points from the brick toward the agent, i.e. opposite of raw.x
-//        float sx = (raw.x > 0 ? -1.0f : +1.0f);
-//        lastHitNormal = Vec2(sx, 0);   // (–1,0) if brick is to our right; (+1,0) if brick is to our left
-//    }
-//    else {
-//        // The brick lies directly ABOVE or BELOW
-//        float sy = (raw.y > 0 ? -1.0f : +1.0f);
-//        lastHitNormal = Vec2(0, sy);   // (0,–1) if brick is above; (0,+1) if brick is below
-//    }
-//
-//    return lastHitNormal;
-//}
+
 
 Node::Status WallTrace::update()
 {
@@ -504,14 +479,6 @@ Node::Status WallTrace::update()
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     agent.room->isScanningWalls = false;
     if(agent.room->navmesh.navMesh[agentTile.x][agentTile.y].insideHouse) return BH_SUCCESS;
-    /*  std::cout << "THIS SHIT IS RUNNING"<< std::endl;
-    auto& transform = agent.agent->getComponent<CTransform>();
-    auto& vision = agent.agent->getComponent<CVision>();
-    auto& tracker = agent.agent->getComponent<CWallTracker>();
-    auto& navmesh = agent.room->navmesh.navMesh;
-
-
-    std::cout << "WALL ID " << vision.NearestBrick->m_buildingID << std::endl;*/
     if (agent.destinationReached) {
         //    std::cout << "Wander: Destination Reached. Returning BH_SUCCESS." << std::endl;
         return BH_SUCCESS;
@@ -522,36 +489,6 @@ Node::Status WallTrace::update()
     return BH_RUNNING; //Not reached destination 
 
 
-    ////  Vec2 normal = tracker.lastHitNormal;
-    //Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
-    //upPosition = agentTile + Vec2(0, 1);
-    //downPosition = agentTile + Vec2(0, -1);
-    //rightPosition = agentTile + Vec2(1, 0);
-    //leftPosition = agentTile + Vec2(-1, 0);
-    //diagDownLeft = agentTile + Vec2(-1, -1);
-    //diagDownRight = agentTile + Vec2(1, -1);
-    //diagUpLeft = agentTile + Vec2(-1, 1);
-    //diagUpRight = agentTile + Vec2(1, 1);
-    //float angleRad = transform.angle * (std::numbers::pi / 180.0f);
-    //Vec2 forward = { std::cos(angleRad), std::sin(angleRad) };
-    //Vec2 dir = { std::cos(transform.angle), std::sin(transform.angle) };
-    //Vec2 wallTile;
-    //Vec2 agentToWall = wallTile - agentTile;
-    //float side = dir.cross(agentToWall);
-    //bool wallRight = (side < 0);
-    //bool wallUp = false;
-    //agentToWall.normalize();
-    //float dot = dir.dot(agentToWall);
-    //
-    //bool moveLeft = false;
-    //bool moveRight = false;
-    //bool moveUp = false;
-    //bool moveDown = false;
-    //// Compute direction to wall
-    //Vec2 dirToWall = wallTile - agentTile;
-    //dirToWall.normalize();
-    //if (vision.seesDoor) return BH_SUCCESS;
-    // Early-out if we see no wall
    
 
 
@@ -706,6 +643,7 @@ void GoToNextRoom::onInitialize()
     agent.room->AddHouseToMemory(std::make_shared<House>(*agent.currentHouse));
     agent.hasSeenWall = false;
     agent.currentHouse = nullptr;
+    currentRoom->searched = true;
     agent.room->isScanningWalls = true;
     agent.initializeMoveToPoint(backtrackEntry);
 }
