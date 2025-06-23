@@ -14,6 +14,7 @@ public:
 		bool walkable;
 		bool insideHouse;
 		bool scannable;
+		bool foribidden = false;
 		Node* parent;
 
 		Node(Vec2 pos,bool isWalkable) : position(pos),gCost(0),hCost(0),walkable(isWalkable),parent(nullptr){

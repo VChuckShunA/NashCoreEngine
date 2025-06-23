@@ -604,6 +604,7 @@ void GoToNextRoom::onInitialize()
         return;
     }
 
+
     // Check for unsearched adjacent rooms first (DFS-style forward move)
     for (auto& door : currentRoom->doors) {
         auto nextRoom = door->connectedRoom;
@@ -643,7 +644,6 @@ void GoToNextRoom::onInitialize()
     agent.room->AddHouseToMemory(std::make_shared<House>(*agent.currentHouse));
     agent.hasSeenWall = false;
     agent.currentHouse = nullptr;
-    currentRoom->searched = true;
     agent.room->isScanningWalls = true;
     agent.initializeMoveToPoint(backtrackEntry);
 }
@@ -701,7 +701,7 @@ Node::Status GoToNextRoom::update()
     }
     std::cout << "Running again" << std::endl;
     // Agent hasn't fully entered next room yet
-    return BH_RUNNING;
+   // return BH_RUNNING;
 
 }
 

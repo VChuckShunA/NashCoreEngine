@@ -33,7 +33,16 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 
 	auto r1 = Warehouse->AddRoom(31, 1, 14, 4, Warehouse.get(), 1);
 	generatedHouses.push_back(Warehouse);
+	for (auto& room : Warehouse->rooms)
+	{
+		for (auto& door : room->doors)
+		{
+			navmesh.navMesh[door->doorPosition.x][door->doorPosition.y].foribidden = true;
 
+			navmesh.navMesh[door->entryPoint1.x][door->entryPoint1.y].foribidden = true;
+			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
+		}
+	}
 	std::cout << "Warehouse " << Warehouse->houseID << std::endl;
 }
 
@@ -72,7 +81,16 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 	auto r1 = LHouse->AddRoom(29, 26, 6, 15, LHouse.get(), 1);
 	generatedHouses.push_back(LHouse);
 
+	for (auto& room : LHouse->rooms)
+	{
+		for (auto& door : room->doors)
+		{
+			navmesh.navMesh[door->doorPosition.x][door->doorPosition.y].foribidden = true;
 
+			navmesh.navMesh[door->entryPoint1.x][door->entryPoint1.y].foribidden = true;
+			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
+		}
+	}
 	std::cout << "L House" << LHouse->houseID << std::endl;
 
 }
@@ -118,7 +136,16 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 		}
 		std::cout << "\n";
 	}
+	for (auto& room : EightHouse->rooms)
+	{
+		for (auto& door : room->doors)
+		{
+			navmesh.navMesh[door->doorPosition.x][door->doorPosition.y].foribidden = true;
 
+			navmesh.navMesh[door->entryPoint1.x][door->entryPoint1.y].foribidden = true;
+			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
+		}
+	}
 	std::cout <<"8 house"<< EightHouse->houseID << std::endl;
 }
 
@@ -213,7 +240,16 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 		}
 		std::cout << "\n";
 	}
+	for (auto& room : Mansion->rooms)
+	{
+		for (auto& door : room->doors)
+		{
+			navmesh.navMesh[door->doorPosition.x][door->doorPosition.y].foribidden = true;
 
+			navmesh.navMesh[door->entryPoint1.x][door->entryPoint1.y].foribidden = true;
+			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
+		}
+	}
 	std::cout << "Mansion" << Mansion->houseID << std::endl;
 }
 

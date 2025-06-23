@@ -375,8 +375,11 @@ void AIPlayroom::SpawnRandomItem(Vec2 position)
     if (!navmesh.navMesh[position.x][position.y].walkable || !navmesh.navMesh[position.x][position.y].insideHouse) return;
     std::string itemTag;
     std::string itemAnimation;
-    std::srand(static_cast<unsigned>(std::time(nullptr)));
-    int itemtype = std::rand() % 4;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, 3);
+
+    int itemtype = dist(gen);
 
     std::cout << "X" << position.x << std::endl;
     std::cout << "Y" << position.y << std::endl;
@@ -412,7 +415,7 @@ void AIPlayroom::SpawnRandomItem(Vec2 position)
             Vec2(1, 1),
             0
         );
-        randomItem->addComponent<CBoundingBox>(Vec2(64, 64));
+        randomItem->addComponent<CBoundingBox>(Vec2(32, 32));
 
         switch (itemtype)
         {
@@ -1649,9 +1652,20 @@ void AIPlayroom::RepopuluateHouse(const std::shared_ptr<House> house)
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distX(room->bounds.left, room->bounds.left + room->bounds.width);
         std::uniform_int_distribution<> distY( room->bounds.top - room->bounds.height, room->bounds.top);
-        int randomX = distX(gen);
-        int randomY = distY(gen);
+      //  int randomX = distX(gen);
+        //int randomY = distY(gen);
         room->searched = false;
+
+        int randomX, randomY;
+
+        do {
+            randomX = distX(gen);
+            randomY = distY(gen);
+        } while (
+            !navmesh.navMesh[randomX][randomY].walkable ||
+            !navmesh.navMesh[randomX][randomY].insideHouse||
+            navmesh.navMesh[randomX][randomY].foribidden
+            );
         SpawnRandomItem(Vec2(randomX, randomY));
     }
 }
