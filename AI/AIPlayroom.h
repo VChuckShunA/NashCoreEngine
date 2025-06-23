@@ -78,6 +78,8 @@ public:
         float xmin, float ymin, float xmax, float ymax);
     std::vector<std::unique_ptr<BaseAIAgent>> agents;
     std::vector<std::shared_ptr<Item>> items;
+    bool ShouldSpawnItem(int itemType);
+    void SpawnRandomItem(Vec2 position);
     std::vector<Vec2> path;
     const size_t INVENTORY_SIZE = 5;
     std::array<std::shared_ptr<Item>, 5> inventory;

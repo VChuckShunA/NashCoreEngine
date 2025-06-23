@@ -53,7 +53,7 @@ public:
 	std::string houseLabel; //L House, 8House,Warehouse, Mansion
 	House::Door* GetClosestMainDoor(Vec2& agentPosition);
 	Vec2 GetClosestEntryPoint();
-	void ResetAndPopulateHouse();
+	void ResetHouse();
 	void AddMainDoor(Vec2 mainDoorCords,bool horizontal=true);
 	std::shared_ptr<House::Room> AddRoom(int top, int left, int width, int height, House* house, int roomID);
 	void AddBounds(int top, int left, int width, int height);

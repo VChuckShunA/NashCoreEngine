@@ -62,7 +62,7 @@ void AIPlayroom::init(const std::string& levelPath) {
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
    // p1->addComponent<CWallTracker>();
-    /*
+    
     auto item1 = m_entityManager.addEntity("health");
     item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
     item1->addComponent<CTransform>(
@@ -135,18 +135,18 @@ void AIPlayroom::init(const std::string& levelPath) {
         0
     );
     item7->addComponent<CBoundingBox>(Vec2(64, 64));
-    */
+    
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
-    /*
+    
     items.emplace_back(std::make_shared<Health>(item1));
     items.emplace_back(std::make_shared<Ammo>(item2));
     items.emplace_back(std::make_shared<Coin>(item3));
     items.emplace_back(std::make_shared<Ammo>(item4));
     items.emplace_back(std::make_shared<Health>(item5));
     items.emplace_back(std::make_shared<Health>(item6));
-    items.emplace_back(std::make_shared<Health>(item7));*/
+    items.emplace_back(std::make_shared<Health>(item7));
 }
 
 
@@ -341,6 +341,104 @@ bool AIPlayroom::liangBarsky(float x0, float y0, float x1, float y1, float xmin,
         }
     }
     return true;;
+}
+
+bool AIPlayroom::ShouldSpawnItem(int itemType)
+{
+    int itemcount = 0;
+    for (auto& item : items)
+    {
+        if (item->type == itemType)
+            itemcount++;
+    }
+    switch (itemType)
+    {
+    case 0: //NONE
+        return false;
+    case 1://HEALTH
+        if (playerPtr->needsFood()&&itemcount<5)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case 2: //AMMO
+        if (playerPtr->needsAmmo() && itemcount < 5)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case 3: //COIN
+        if (itemcount < 5)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    default:
+        break;
+    }
+    return false;
+}
+
+void AIPlayroom::SpawnRandomItem(Vec2 position)
+{
+    if (!navmesh.navMesh[position.x][position.y].walkable) return;
+    std::string itemTag;
+    std::string itemAnimation;
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+    int itemtype = std::rand() % 4;
+
+    if (ShouldSpawnItem(itemtype))
+    {
+        switch (itemtype)
+        {
+        case 0: //None
+            return;
+        case 1://Health
+            itemTag = "health";
+            itemAnimation = "FirstAid";
+        case 2://Ammo
+            itemTag = "ammo";
+            itemAnimation = "Bullets";
+        case 3://Coin
+            itemTag = "coin";
+            itemAnimation = "CoinSpin";
+        default:
+            break;
+        }
+    }
+
+    auto randomItem = m_entityManager.addEntity(itemTag);
+    randomItem->addComponent<CAnimation>(m_game->assets().getAnimation(itemAnimation), true);
+    randomItem->addComponent<CTransform>(
+        gridToMidPixel(12, 3, randomItem),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    randomItem->addComponent<CBoundingBox>(Vec2(64, 64));
+
+    switch (itemtype)
+    {
+    case 0: //None
+        return;
+    case 1://Health
+        items.emplace_back(std::make_shared<Health>(randomItem));
+    case 2://Ammo
+        items.emplace_back(std::make_shared<Ammo>(randomItem));
+    case 3://Coin
+        items.emplace_back(std::make_shared<Coin>(randomItem));
+    default:
+        break;
+    }
 }
 
 Vec2 AIPlayroom::positionToGridCordinates(const std::shared_ptr<Entity>& entity)
@@ -920,7 +1018,15 @@ void AIPlayroom::AddHouseToMemory(const std::shared_ptr<House> house)
             return;
         }
     }
-    houseMemory[0]->ResetAndPopulateHouse();
+    houseMemory[0]->ResetHouse();/*
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distX(room->bounds.left, room->bounds.left + room->bounds.width);
+    std::uniform_int_distribution<> distY(room->bounds.top, room->bounds.top - room->bounds.height);
+    int randomX = distX(gen);
+    int randomY = distY(gen);
+
+    SpawnRandomItem(Vec2(randomX, randomY));*/
     houseMemory[0] = houseMemory[1];
     houseMemory[1] = houseMemory[2];
     houseMemory[2] = house;

@@ -1,6 +1,7 @@
 ﻿#include "House.h"
 #include <iostream>
 #include <memory>
+#include <random>
 #include <SFML/Graphics.hpp>
 Vec2 House::Door::GetEntryPoint(Vec2 position)
 {
@@ -44,7 +45,7 @@ House::Door* House::GetClosestMainDoor(Vec2& agentPosition)
     return closestDoor;
 }
 
-void House::ResetAndPopulateHouse()
+void House::ResetHouse()
 {
     for (const auto& room : rooms)
     {

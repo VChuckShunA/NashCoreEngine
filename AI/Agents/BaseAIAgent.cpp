@@ -566,7 +566,9 @@ void HouseSearch::onInitialize()
 {
     pathGenerated = false;   // reset flag
     agent.destinationReached = false;
-   
+    agent.hasSeenAmmo = false;
+    agent.hasSeenFood = false;
+    agent.hasSeenCoin = false;
 }
 
 void HouseSearch::reset()
