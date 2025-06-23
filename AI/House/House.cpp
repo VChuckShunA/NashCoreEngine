@@ -44,6 +44,14 @@ House::Door* House::GetClosestMainDoor(Vec2& agentPosition)
     return closestDoor;
 }
 
+void House::ResetAndPopulateHouse()
+{
+    for (const auto& room : rooms)
+    {
+        room->searched = false;
+    }
+}
+
 void House::AddMainDoor(Vec2 mainDoorCords,bool horizonal)
 {
     auto door = std::make_shared<Door>();

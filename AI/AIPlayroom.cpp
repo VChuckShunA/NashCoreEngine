@@ -187,14 +187,14 @@ void AIPlayroom::RemoveItem(Item* ptr)
         if (ptr->type == Item::ITM_COIN)
         {
             playerPtr->hasSeenCoin = false;
-            items.erase(it);     // deletes no object—because ptr is !null
+            items.erase(it);     
             return;
         }
-        // move the unique_ptr into the first empty slot:
+        // move the unique_ptr into the first empty slot
         for (auto& slot : inventory) {
             if (!slot) {
                 slot = std::move(*it);    // transfer ownership
-                items.erase(it);     // deletes no object—because ptr is !null
+                items.erase(it); 
                 if (ptr->type == Item::ITM_AMMO)
                 {
                     playerPtr->hasSeenAmmo = false;
@@ -920,7 +920,7 @@ void AIPlayroom::AddHouseToMemory(const std::shared_ptr<House> house)
             return;
         }
     }
-
+    houseMemory[0]->ResetAndPopulateHouse();
     houseMemory[0] = houseMemory[1];
     houseMemory[1] = houseMemory[2];
     houseMemory[2] = house;

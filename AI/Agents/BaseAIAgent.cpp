@@ -761,7 +761,7 @@ Node::Status GoToNextRoom::update()
     }
     std::cout << "Running again" << std::endl;
     // Agent hasn't fully entered next room yet
-   // return BH_RUNNING;
+    return BH_RUNNING;
 
 }
 
