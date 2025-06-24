@@ -100,7 +100,7 @@ void AIMenu::sRender()
     }
 
     // draw help
-    sf::Text help("                           K: Set Health to 22 C: Toggle Collisions  G: Toggle Grid ", m_game->assets().getFont("Mario"), 20);
+    sf::Text help("                           K: Killswitch C: Toggle Collisions  G: Toggle Grid ", m_game->assets().getFont("Mario"), 20);
     help.setFillColor(sf::Color::Black);
     help.setPosition(
         float(m_game->window().getSize().x) / 2.0f - float(26 * (help.getString().getSize() + 1)) / 2.0f,
