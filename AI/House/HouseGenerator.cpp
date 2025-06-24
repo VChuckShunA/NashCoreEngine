@@ -44,7 +44,7 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 		}
 	}
 	navmesh.navMesh[1][28].foribidden = true;
-	std::cout << "Warehouse " << Warehouse->houseID << std::endl;
+	//std::cout << "Warehouse " << Warehouse->houseID << std::endl;
 }
 
 void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
@@ -92,7 +92,7 @@ void HouseGenerator::GenerateLHouse(AStar& navmesh, AIPlayroom& room)
 			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
 		}
 	}
-	std::cout << "L House" << LHouse->houseID << std::endl;
+	//std::cout << "L House" << LHouse->houseID << std::endl;
 
 }
 
@@ -131,7 +131,7 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 
 	generatedHouses.push_back(EightHouse);
 	for (auto& room : EightHouse->rooms) {
-		std::cout << "Room " << room->roomID << " connects via doors to: ";
+	//	std::cout << "Room " << room->roomID << " connects via doors to: ";
 		for (auto& d : room->doors) {
 			std::cout << d->connectedRoom->roomID << " ";
 		}
@@ -164,7 +164,7 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[11][14].foribidden = true;
 
 
-	std::cout <<"8 house"<< EightHouse->houseID << std::endl;
+	//std::cout <<"8 house"<< EightHouse->houseID << std::endl;
 }
 
 void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
@@ -240,7 +240,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 
 	doorR5a->connectedRoom = r4;
 	generatedHouses.push_back(Mansion);
-	std::cout << "Room 1 doors " << Mansion->rooms[0]->doors.size() << std::endl;
+	/*std::cout << "Room 1 doors " << Mansion->rooms[0]->doors.size() << std::endl;
 	std::cout << "Room 1 ID " << Mansion->rooms[0]->roomID<< std::endl;
 	std::cout << "Room 2 doors " << Mansion->rooms[1]->doors.size() << std::endl;
 	std::cout << "Room 2 ID " << Mansion->rooms[1]->roomID << std::endl;
@@ -249,15 +249,15 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	std::cout << "Room 4 doors " << Mansion->rooms[3]->doors.size() << std::endl;
 	std::cout << "Room 4 ID " << Mansion->rooms[3]->roomID << std::endl;
 	std::cout << "Room 5 doors " << Mansion->rooms[4]->doors.size() << std::endl;
-	std::cout << "Room 5 ID " << Mansion->rooms[4]->roomID << std::endl;
+	std::cout << "Room 5 ID " << Mansion->rooms[4]->roomID << std::endl;*/
 	
-	for (auto& room : Mansion->rooms) {
+	/*for (auto& room : Mansion->rooms) {
 		std::cout << "Room " << room->roomID << " connects via doors to: ";
 		for (auto& d : room->doors) {
 			std::cout << d->connectedRoom->roomID << " ";
 		}
 		std::cout << "\n";
-	}
+	}*/
 	for (auto& room : Mansion->rooms)
 	{
 		for (auto& door : room->doors)
@@ -293,7 +293,7 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 	navmesh.navMesh[16][6].foribidden = true;
 	navmesh.navMesh[16][7].foribidden = true;
 
-	std::cout << "Mansion" << Mansion->houseID << std::endl;
+	//std::cout << "Mansion" << Mansion->houseID << std::endl;
 }
 
 void HouseGenerator::GenerateVerticalWall(int id, AStar& navmesh, AIPlayroom& room,int y1, int y2, int x)

@@ -24,7 +24,7 @@ void GreenAgent::update()
 
 void GreenAgent::HandleDeath()
 {
-    room->PlayerScore+=25;
+    room->PlayerScore+=100;
     BaseAIAgent::HandleDeath();
 }
 

@@ -98,6 +98,7 @@ public:
     void ManageInventory();
     void UpdateInventoryUI();
     void AddHouseToMemory(const std::shared_ptr<House> house);
+    void RespawnEnemies();
     void UpdateHouseUI();
     bool IsHouseInMemory(int id);
     void ResizeInventory();
@@ -123,7 +124,7 @@ public:
     };
     std::string enumToString(int item)
     {
-        std::cout << "enum to String " << itemToString[item] << std::endl;
+      //  std::cout << "enum to String " << itemToString[item] << std::endl;
         return itemToString[item];
     }
     std::string inventoryItem1, inventoryItem2, inventoryItem3, inventoryItem4, inventoryItem5 = " ";

@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
+    <ClCompile Include="AI\AIScoreRoom.cpp" />
     <ClCompile Include="AI\AIMenu.cpp" />
     <ClCompile Include="AI\AIPlayroom.cpp" />
     <ClCompile Include="AI\Ammo.cpp" />
@@ -199,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
+    <ClInclude Include="AI\AIScoreRoom.h" />
     <ClInclude Include="AI\AIMenu.h" />
     <ClInclude Include="AI\AIPlayroom.h" />
     <ClInclude Include="AI\BehaviourTrees\Loop.h" />

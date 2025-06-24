@@ -16,6 +16,8 @@
 #include <math.h>
 #include<numbers>
 #include <random>
+#include "AIMenu.h"
+#include "AIScoreRoom.h"
 AIPlayroom::AIPlayroom(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_levelPath(levelPath) {
     init(levelPath);
@@ -142,7 +144,7 @@ void AIPlayroom::spawnBullet(const std::shared_ptr<Entity>& entity, const std::s
         if (entity.get()->tag() == "player")
         {
             ammoCount--;
-            if (!ammoCount % 3)
+            if (ammoCount % 3==0)
             {
                 std::cout << "Remove Ammo Now!" << std::endl;
                 for (auto it = inventory.rbegin(); it != inventory.rend(); ++it) {
@@ -226,6 +228,7 @@ void AIPlayroom::update() {
         //std::cout << "Needs Food : " << needfood << std::endl;
         //std::cout << "Needs Ammo : " << needammo << std::endl;
         m_currentFrame++;
+        RespawnEnemies();
     }
     sAnimation();
     sRender();
@@ -304,9 +307,9 @@ void AIPlayroom::SpawnRandomItem(Vec2 position)
 
     int itemtype = dist(gen);
 
-    std::cout << "X" << position.x << std::endl;
-    std::cout << "Y" << position.y << std::endl;
-    std::cout << "itemtype" << itemtype << std::endl;
+  //  std::cout << "X" << position.x << std::endl;
+   // std::cout << "Y" << position.y << std::endl;
+  //  std::cout << "itemtype" << itemtype << std::endl;
     if (ShouldSpawnItem(itemtype))
     {
         switch (itemtype)
@@ -328,8 +331,8 @@ void AIPlayroom::SpawnRandomItem(Vec2 position)
             itemAnimation = "CoinSpin";
             break;
         }
-        std::cout << "Item Tag" << itemTag << std::endl;
-        std::cout << "Item Animation" << itemAnimation << std::endl;
+     //   std::cout << "Item Tag" << itemTag << std::endl;
+     //   std::cout << "Item Animation" << itemAnimation << std::endl;
         auto randomItem = m_entityManager.addEntity(itemTag);
         randomItem->addComponent<CAnimation>(m_game->assets().getAnimation(itemAnimation), true);
         randomItem->addComponent<CTransform>(
@@ -501,9 +504,10 @@ void AIPlayroom::sVisionCone()
 
 void AIPlayroom::ItemScanner()
 {
-
-    auto& vision = playerPtr->agent->getComponent<CVision>();
-    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    auto& players = m_entityManager.getEntities("player");
+    if (players.empty()) return;
+    auto& vision = players[0]->getComponent<CVision>();
+    auto& transform = players[0]->getComponent<CTransform>();
     Vec2  eye = transform.pos;
 
     // Reset visibility
@@ -566,8 +570,10 @@ void AIPlayroom::ItemScanner()
 
 void AIPlayroom::WallChecker()
 {
-    auto& vision = playerPtr->agent->getComponent<CVision>();
-    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    auto& players = m_entityManager.getEntities("player");
+    if (players.empty()) return;
+    auto& vision = players[0]->getComponent<CVision>();
+    auto& transform = players[0]->getComponent<CTransform>();
     Vec2  eye = transform.pos;
 
     // Reset visibility
@@ -594,7 +600,7 @@ void AIPlayroom::WallChecker()
                 //Add to Bricks
                 vision.LastKnownBrick = brick;
                 vision.visibleBricks.push_back(brick);
-                std::cout << "Wall at " << positionToGridCordinates(brick).x << " , " << positionToGridCordinates(brick).y << std::endl;
+               // std::cout << "Wall at " << positionToGridCordinates(brick).x << " , " << positionToGridCordinates(brick).y << std::endl;
                 UpdateNearesBrick();
             }
            // vision.seesWall = false;
@@ -624,9 +630,10 @@ void AIPlayroom::WallChecker()
 
 void AIPlayroom::EnemyScanner()
 {
-    auto& vision = playerPtr->agent->getComponent<CVision>();
     auto& players = m_entityManager.getEntities("player");
-    auto& transform = playerPtr->agent->getComponent<CTransform>();
+    if (players.empty())return;
+    auto& vision = players[0]->getComponent<CVision>();
+    auto& transform = players[0]->getComponent<CTransform>();
     Vec2  eye = transform.pos;
      if (agents.empty())
     {
@@ -1134,6 +1141,17 @@ void AIPlayroom::AddHouseToMemory(const std::shared_ptr<House> house)
     UpdateHouseUI();
 }
 
+void AIPlayroom::RespawnEnemies()
+{
+    if (m_currentFrame%3600==0) {
+        std::cout << "A Minute has passed" << std::endl;
+        if (m_entityManager.getEntities("agent").empty())
+        {
+            SpawnEnemies();
+        }
+    }
+}
+
 void AIPlayroom::UpdateHouseUI()
 {
     if(houseMemory[0])
@@ -1156,11 +1174,11 @@ bool AIPlayroom::IsHouseInMemory(int id)
     for (const auto& h : houseMemory) {
         if (h && h->houseID == id)
         {
-            std::cout << "house is in memeory" << std::endl;
+        //    std::cout << "house is in memory" << std::endl;
             return true;
         }
     }
-    std::cout << "house NOT in memeory" << std::endl;
+  //  std::cout << "house NOT in memory" << std::endl;
     return false;
 }
 
@@ -1677,12 +1695,12 @@ Vec2 AIPlayroom::GetSafeSpot(Vec2 oppositeDirection, Vec2  playePosition)
     //check if it's walkable
     if (navmesh.navMesh[safeSpot.x][safeSpot.y].walkable)
     {
-        std::cout << "Found a safe spot" << std::endl;
+        //std::cout << "Found a safe spot" << std::endl;
         return safeSpot;
     }
     else
     {
-        std::cout << "Can't walk to safe spot, trying again" << std::endl;
+       // std::cout << "Can't walk to safe spot, trying again" << std::endl;
         GetSafeSpot(oppositeDirection, playePosition);
     }
 }
@@ -1701,12 +1719,12 @@ Vec2 AIPlayroom::GetRandomWanderSpot()
     //check if it's walkable
     if (navmesh.navMesh[safeSpot.x][safeSpot.y].walkable && !navmesh.navMesh[safeSpot.x][safeSpot.y].insideHouse)
     {
-        std::cout << "Found a random spot "<< safeSpot.x<< " , "<< safeSpot.y << std::endl;
+      //  std::cout << "Found a random spot "<< safeSpot.x<< " , "<< safeSpot.y << std::endl;
         return safeSpot;
     }
     else
     {
-        std::cout << "Can't walk to random spot, trying again" << std::endl;
+     //   std::cout << "Can't walk to random spot, trying again" << std::endl;
         GetRandomWanderSpot();
     }
 }
@@ -1908,6 +1926,9 @@ void AIPlayroom::sCollision() {
     {
         ManageInventory();
     }
+    else {
+        m_game->changeScene("MENU", std::make_shared<AIScoreRoom>(m_game,PlayerScore));
+    }
 }
 
 void AIPlayroom::sAnimation()
@@ -1933,7 +1954,7 @@ void AIPlayroom::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        else if (action.name() == "MoveAgent") { playerPtr->health=22; }
+        else if (action.name() == "MoveAgent") { playerPtr->health=0; }
 
       
     }
@@ -1944,7 +1965,7 @@ void AIPlayroom::sDoAction(const Action& action) {
 void AIPlayroom::onEnd() {
     // when the scene ends, change back to the MENU scene
     // use m_game->changeScene(correct params);
-    m_game->changeScene("MENU", std::make_shared<Scene_Menu>(m_game));
+    m_game->changeScene("MENU", std::make_shared<AIMenu>(m_game));
 }
 
 void AIPlayroom::sRender() {

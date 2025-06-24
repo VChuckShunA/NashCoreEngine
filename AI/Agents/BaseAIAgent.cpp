@@ -68,7 +68,7 @@ void BaseAIAgent::consumeFood()
                 agent->getComponent<CAnimation>().animation = room->m_game->assets().getAnimation("Healing");
                // room->removeSlotAndCompact(removeCount);
                 room->UpdateInventoryUI();
-                std::cout << "INventory size " << room->inventory.size();
+              //  std::cout << "INventory size " << room->inventory.size();
                 break; // Exit after removing the first matching item from the end
             }
         }
@@ -334,7 +334,7 @@ Node::Status IsEnemyVisible::update()
     //agent.enemyState == VISIBLE
     //agent.agent->getComponent<CVision>().seesPlayer
     if (agent.agent->getComponent<CVision>().Target) {
-        std::cout << "Sees target" << std::endl;
+       // std::cout << "Sees target" << std::endl;
         return Status::BH_SUCCESS;
     }
     return Status::BH_FAILURE;
@@ -356,7 +356,7 @@ Node::Status EngageCombat::update()
             
         return BH_SUCCESS;
     }
-    return BH_RUNNING;
+    return BH_FAILURE;
 }
 
 TurnTowardsTarget::TurnTowardsTarget(BaseAIAgent& agent, int randomDeviation) :randDev(randomDeviation), agent(agent)
@@ -390,7 +390,7 @@ Node::Status  FleeToSafePosition::update()
     if (!agent.destinationReached)
                 {
                     agent.FollowPath();
-                    std::cout << "Fleeing to " << safeSpot.x << " , "<< safeSpot.y << std::endl;
+                   // std::cout << "Fleeing to " << safeSpot.x << " , "<< safeSpot.y << std::endl;
                     return BH_RUNNING; //Not reached destination 
                 }
                 else if (agent.destinationReached) {
@@ -519,18 +519,18 @@ void HouseSearch::reset()
 
 Node::Status HouseSearch::update()
 {
-    std::cout << "House Search Update" << std::endl;
+  //  std::cout << "House Search Update" << std::endl;
     if (!agent.hasSeenWall)
     {
-        std::cout << "House Search FAIL" << std::endl;
+    //    std::cout << "House Search FAIL" << std::endl;
 
         return BH_FAILURE;
     }
-    std::cout << "House Search Update" << std::endl;
+   // std::cout << "House Search Update" << std::endl;
    
     if (!agent.currentHouse)
     {
-        std::cout << "House Search FAIL" << std::endl;
+   //     std::cout << "House Search FAIL" << std::endl;
 
         return BH_FAILURE;
     } 
@@ -540,7 +540,7 @@ Node::Status HouseSearch::update()
     {
         auto& bounds = agent.currentHouse->FindCurrentRoom(agentTile)->bounds;
        // if (!agent.currentHouse->FindCurrentRoom(agentTile)) return BH_RUNNING;
-        if(agent.currentHouse->FindCurrentRoom(agentTile))  std::cout << "CURRENT ROOM ID : " << agent.currentHouse->FindCurrentRoom(agentTile)->roomID << std::endl;
+        if(agent.currentHouse->FindCurrentRoom(agentTile)) // std::cout << "CURRENT ROOM ID : " << agent.currentHouse->FindCurrentRoom(agentTile)->roomID << std::endl;
 
 
         if (!pathGenerated && agent.currentHouse->FindCurrentRoom(agentTile)!=nullptr) {
@@ -564,7 +564,7 @@ Node::Status HouseSearch::update()
             pathGenerated = true;
            
          
-            std::cout << "Generated path of size " << agent.currentpath.size() << "\n";
+           // std::cout << "Generated path of size " << agent.currentpath.size() << "\n";
         }
 
        
@@ -607,7 +607,7 @@ void GoToNextRoom::onInitialize()
     auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
 
     if (!currentRoom) {
-        std::cout << "Agent not in a valid room!\n";
+       // std::cout << "Agent not in a valid room!\n";
         return;
     }
 
@@ -616,14 +616,14 @@ void GoToNextRoom::onInitialize()
     for (auto& door : currentRoom->doors) {
         auto nextRoom = door->connectedRoom;
         if (nextRoom && !nextRoom->searched) {
-            std::cout << "Found unsearched adjacent room: " << nextRoom->roomID << "\n";
+          //  std::cout << "Found unsearched adjacent room: " << nextRoom->roomID << "\n";
 
             // Push current room onto DFS stack for potential backtrack
             agent.room->roomStack.push(currentRoom);
 
             // Navigate to the door leading to the next room
             Vec2 doorEntry = door->GetEntryPoint(agentTile);
-            std::cout << "Door Entry: " << doorEntry.x <<" , "<< doorEntry.y << "\n";
+           // std::cout << "Door Entry: " << doorEntry.x <<" , "<< doorEntry.y << "\n";
             agent.initializeMoveToPoint(doorEntry);
             return;
         }
@@ -635,7 +635,7 @@ void GoToNextRoom::onInitialize()
         agent.room->roomStack.pop();
         if (backtrackRoom->GetClosestRoomDoor(agentTile))
         {
-            std::cout << "Backtracking to room: " << backtrackRoom->roomID << "\n";
+          //  std::cout << "Backtracking to room: " << backtrackRoom->roomID << "\n";
             Vec2 backtrackEntry = backtrackRoom->GetClosestRoomDoor(agentTile)->GetEntryPoint(agentTile);
             agent.initializeMoveToPoint(backtrackEntry);
             return;
@@ -644,7 +644,7 @@ void GoToNextRoom::onInitialize()
     }
 
     // Nowhere to go: exploration complete
-    std::cout << "No more rooms to explore.\n";
+  //  std::cout << "No more rooms to explore.\n";
 
     Vec2 backtrackEntry = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
     finishedSearching = true;
@@ -665,10 +665,10 @@ void GoToNextRoom::reset()
 
 Node::Status GoToNextRoom::update()
 {
-    std::cout << "GoToNextRoom RUNNING" << std::endl;
+    //std::cout << "GoToNextRoom RUNNING" << std::endl;
     if (!agent.currentHouse)
     {
-        std::cout << "GoToNextRoom FAILED" << std::endl;
+   //     std::cout << "GoToNextRoom FAILED" << std::endl;
 
         return BH_SUCCESS;
     }
@@ -679,7 +679,7 @@ Node::Status GoToNextRoom::update()
     auto currentRoom = agent.currentHouse->FindCurrentRoom(agentTile);
     if (!currentRoom)
     {
-        std::cout << "No Current Room" << std::endl;
+      //  std::cout << "No Current Room" << std::endl;
         Vec2 frontDoor = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
         if (agent.currentpath.empty())
         {
@@ -687,14 +687,14 @@ Node::Status GoToNextRoom::update()
             agent.currentpath = agent.room->navmesh.FindPath(agentTile, frontDoor);
             agent.destinationReached = false;
         }
-        std::cout << "Following Path" << std::endl;
+     //   std::cout << "Following Path" << std::endl;
         agent.FollowPath();
 
         return BH_RUNNING;
     }
     if (!agent.destinationReached)
     {
-        std::cout << "Destination not reached" << std::endl;
+     //   std::cout << "Destination not reached" << std::endl;
         agent.FollowPath();
         return BH_RUNNING;
     }
@@ -702,10 +702,10 @@ Node::Status GoToNextRoom::update()
 
     if (currentRoom && !currentRoom->searched)
     {
-        std::cout << "Agent has entered new room: " << currentRoom->roomID << std::endl;
+     //   std::cout << "Agent has entered new room: " << currentRoom->roomID << std::endl;
         return BH_SUCCESS; // Run House Search
     }
-    std::cout << "Running again" << std::endl;
+   // std::cout << "Running again" << std::endl;
     // Agent hasn't fully entered next room yet
    // return BH_RUNNING;
 

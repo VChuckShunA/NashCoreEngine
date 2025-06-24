@@ -7,7 +7,7 @@ Health::Health(const std::shared_ptr<Entity>& entity) :Item(std::move(entity))
 
 void Health::AddToPlayer(AIPlayroom* room)
 {
-	std::cout << "Added Health to Player" << std::endl;
+	//std::cout << "Added Health to Player" << std::endl;
 	HandleRemoval(room);
 }
 

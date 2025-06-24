@@ -138,6 +138,9 @@
     <ClCompile Include="AI\AIMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AI\AIScoreRoom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -282,6 +285,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AI\AIMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\AIScoreRoom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

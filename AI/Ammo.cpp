@@ -7,6 +7,6 @@ Ammo::Ammo(const std::shared_ptr<Entity>& entity) :Item(std::move(entity)) {
 void Ammo::AddToPlayer(AIPlayroom* room)
 {
 	room->ammoCount += 3;
-	std::cout << "Added Ammo to Player" << std::endl;
+	//std::cout << "Added Ammo to Player" << std::endl;
 	HandleRemoval(room);
 }

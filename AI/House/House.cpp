@@ -112,7 +112,7 @@ std::shared_ptr<House::Room> House::FindCurrentRoom(Vec2 agentPosition)
             return room;
         }
     }
-    std::cout << "DID NOT FIND ROOM " << std::endl;
+ //   std::cout << "DID NOT FIND ROOM " << std::endl;
     return nullptr; // not found
 }
 
