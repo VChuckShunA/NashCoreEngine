@@ -673,7 +673,7 @@ void AIPlayroom::PlayerScanner()
 {
    
     auto& players = m_entityManager.getEntities("player");
-    if (agents.empty()) return;
+    if (agents.empty() || players.empty()) return;
 
     for (auto& enemy : agents) {
         auto& vision = enemy->agent->getComponent<CVision>();
