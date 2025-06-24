@@ -73,7 +73,8 @@ public:
 
     // Rotate the agent continually in place to the right (CW) at a fixed rate:
     void turnRight();
-
+  //  std::string currentBehaviour = "None";
+  //  std::string currentStatus = "None";
 protected:
 
 
@@ -83,7 +84,8 @@ protected:
 class LowHealth : public Node
 {
 public:
-    LowHealth(BaseAIAgent& agent) :greenAgent(agent) { Name = "Low Health Check"; }
+    LowHealth(BaseAIAgent& agent) :greenAgent(agent) { 
+    }
 private:
 	BaseAIAgent& greenAgent;
 	virtual Status update() override {
@@ -121,7 +123,6 @@ class HasAmmo : public Node {
 public:
     HasAmmo(BaseAIAgent& agent) :agent(agent)
     {
-        Name = "Has Ammo?";
     }
     virtual Status update() override
     {
@@ -147,7 +148,6 @@ class MoveToPoint : public Node
 {
 public:
     MoveToPoint(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
-        Name = "Move To Point";
         // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
     }
 private:
@@ -189,7 +189,6 @@ public:
     WaitForSeconds(BaseAIAgent& agent, float durationSeconds)
         : agent(agent), duration(durationSeconds), elapsed(0.0f)
     {
-        Name = "Wait For Seconds";
     }
 
     // When starting, reset the elapsed time and restart the clock.
@@ -229,7 +228,7 @@ public:
     float time1 = 0.3;
     float time2 = 0.5;
     float time3 = 0.7;
-    Patrol() { Name = "Patrol"; }
+    Patrol() {  }
     Patrol(BaseAIAgent& agent) {
         addChild(new MoveToPoint(agent, agent.Waypoint1));
         addChild(new WaitForSeconds(agent, time1));
@@ -246,10 +245,10 @@ public:
 class CombatSequence : public StatefulSequence
 {
 public:
-    CombatSequence() { Name = "Combat Sequence"; }
+    CombatSequence() { }
     CombatSequence(BaseAIAgent& agent) {
         addChild(new IsEnemyVisible(agent));
-            addChild(new TurnTowardsTarget(agent,12));
+            addChild(new TurnTowardsTarget(agent,5));
             addChild(new EngageCombat(agent));
             addChild(new WaitForSeconds(agent, 0.5));
             addChild(new EngageCombat(agent));
@@ -342,7 +341,6 @@ class EnterThroughDoor : public Node
 {
 public:
     EnterThroughDoor(BaseAIAgent& agent, Vec2& point) :greenAgent(agent), Waypoint(point) {
-        Name = "Move To Point";
         // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
     }
 private:
@@ -415,12 +413,12 @@ public:
 class BlueAgentCombatSequence : public Selector
 {
 public:
-    BlueAgentCombatSequence() { Name = "Combat Sequence"; }
+    BlueAgentCombatSequence() { }
     BlueAgentCombatSequence(BaseAIAgent& agent) {
         StatefulSequence* engageSequence = new StatefulSequence();
         engageSequence->addChild(new IsEnemyVisible(agent));
         engageSequence->addChild(new HasAmmo(agent));
-        engageSequence->addChild(new TurnTowardsTarget(agent, 12));
+        engageSequence->addChild(new TurnTowardsTarget(agent, 5));
         engageSequence->addChild(new EngageCombat(agent));
         engageSequence->addChild(new WaitForSeconds(agent, 0.5));
         engageSequence->addChild(new EngageCombat(agent));
@@ -442,7 +440,7 @@ public:
 class CheckSeesFood : public Node {
     BaseAIAgent& ag;
 public:
-    CheckSeesFood(BaseAIAgent& a) :ag(a) { Name = "Check Sees Food"; }
+    CheckSeesFood(BaseAIAgent& a) :ag(a) { }
     Status update() override {
         return ag.hasSeenFood
             ? BH_SUCCESS
@@ -453,7 +451,8 @@ public:
 class CheckNeedsFood : public Node {
     BaseAIAgent& ag;
 public:
-    CheckNeedsFood(BaseAIAgent& a) :ag(a) { Name = "Check Needs Food"; }
+    CheckNeedsFood(BaseAIAgent& a) :ag(a) { 
+    }
 
     virtual void onInitialize() override {
 
@@ -473,7 +472,8 @@ public:
 class CheckSeesAmmo : public Node {
     BaseAIAgent& ag;
 public:
-    CheckSeesAmmo(BaseAIAgent& a) :ag(a) { Name = "Check Sees Ammo"; }
+    CheckSeesAmmo(BaseAIAgent& a) :ag(a) { 
+    }
     Status update() override {
         return ag.hasSeenAmmo
             ? BH_SUCCESS
@@ -491,7 +491,8 @@ public:
     }
 
 
-    CheckNeedsAmmo(BaseAIAgent& a) :ag(a) { Name = "Check Needs Ammo "; }
+    CheckNeedsAmmo(BaseAIAgent& a) :ag(a) {
+    }
     Status update() override {
        // ag.UpdateItemPosition();
         //&& ag.health < ag.maxHealth
@@ -506,7 +507,8 @@ public:
 class CheckSeesCoin : public Node {
     BaseAIAgent& ag;
 public:
-    CheckSeesCoin(BaseAIAgent& a) :ag(a) { Name = "Check Sees Coin"; }
+    CheckSeesCoin(BaseAIAgent& a) :ag(a) { 
+    }
 
     virtual void onInitialize() override {
 
@@ -525,8 +527,6 @@ public:
 class ItemFetchSelector : public Selector {
 public:
     ItemFetchSelector(BaseAIAgent& ag) {
-        Name = "FetchItems";
-        
         // Food branch
         Sequence* fetchFood = new Sequence();
         fetchFood->addChild(new CheckSeesFood(ag));
@@ -556,7 +556,7 @@ public:
 
 class PatrolSelector : public Selector {
 public:
-    PatrolSelector(){ Name = "Patrol Selector"; }
+    PatrolSelector(){  }
     PatrolSelector(BaseAIAgent& agent) {
       //  addChild(new LowHealth(agent));  // First, try healing
         addChild(new CombatSequence(agent)); //If Enemy is in Range, Engage in Combat
@@ -566,8 +566,9 @@ public:
 class SurvivalSelector : public Selector {
 public:
     Vec2 testPosition = { 15,13 };
-    SurvivalSelector(){ Name = "Survival Selector"; }
+    SurvivalSelector(){  }
     SurvivalSelector(BaseAIAgent& agent) {
+
         addChild(new LowHealth(agent));  // First, try healing
         addChild(new BlueAgentCombatSequence(agent)); //If Enemy is in Range, Engage in Combat
         addChild(new ItemFetchSelector(agent)); //Check for items

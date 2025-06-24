@@ -5,6 +5,7 @@
 #include <fstream>
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "AI/AIMenu.h"
 
 GameEngine::GameEngine(const std::string& path) {
     init(path);
@@ -13,11 +14,13 @@ GameEngine::GameEngine(const std::string& path) {
 void GameEngine::init(const std::string& path) {
     m_assets.loadFromFile(path);
 
-    m_window.create(sf::VideoMode(1280, 768), "Nashcore Engine -  Ashura's Revengence");
+    //m_window.create(sf::VideoMode(1280, 768), "Nashcore Engine -  Ashura's Revengence");
+    m_window.create(sf::VideoMode(1280, 768), "Nashcore Engine -  Boustrophedon Behaviour Trees");
     m_window.setFramerateLimit(60);
 
    // changeScene("MENU", std::make_shared<AshuraMenu>(this));
-    changeScene("MENU", std::make_shared<Scene_Menu>(this));
+    //changeScene("MENU", std::make_shared<Scene_Menu>(this));
+    changeScene("MENU", std::make_shared<AIMenu>(this));
 }
 
 std::shared_ptr<Scene> GameEngine::currentScene() {
@@ -25,7 +28,7 @@ std::shared_ptr<Scene> GameEngine::currentScene() {
 }
 
 bool GameEngine::isRunning() {
-    return m_running & m_window.isOpen(); // maybe '&&' instead of '&'?
+    return m_running && m_window.isOpen(); // maybe '&&' instead of '&'?
 }
 
 sf::RenderWindow& GameEngine::window() {

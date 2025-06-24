@@ -3,7 +3,7 @@
 #include <vector>
 class Sequence : public Node {
 public:
-    Sequence(){ Name = "Sequence"; }
+    Sequence(){ }
     void addChild(Node* child) {
         m_Children.emplace_back(std::move(child));
     }

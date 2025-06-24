@@ -326,7 +326,6 @@ bool BaseAIAgent::needsAmmo()
 
 IsEnemyVisible::IsEnemyVisible(BaseAIAgent& agent) : agent(agent)
 {
-    Name = "Is Enemy Visible";
 }
 
 Node::Status IsEnemyVisible::update()
@@ -341,7 +340,8 @@ Node::Status IsEnemyVisible::update()
     return Status::BH_FAILURE;
 }
 
-EngageCombat::EngageCombat(BaseAIAgent& agent) : agent(agent) { Name = "Engage Combat"; }
+EngageCombat::EngageCombat(BaseAIAgent& agent) : agent(agent) { 
+}
 
 Node::Status EngageCombat::update()
 {
@@ -361,7 +361,6 @@ Node::Status EngageCombat::update()
 
 TurnTowardsTarget::TurnTowardsTarget(BaseAIAgent& agent, int randomDeviation) :randDev(randomDeviation), agent(agent)
 {
-    Name = "Turn Towards Target";
 }
 
 
@@ -374,7 +373,6 @@ Node::Status TurnTowardsTarget::update()
 
 
 FleeToSafePosition::FleeToSafePosition(BaseAIAgent& ag):agent(ag) {
-            Name = "Flee To Safe Position";
         }
 
 void FleeToSafePosition::onInitialize()
@@ -402,7 +400,6 @@ Node::Status  FleeToSafePosition::update()
 
 Wander::Wander(BaseAIAgent& ag):elapsed(0.0f), agent(ag),timeout(10.0f)
 {
-    Name = "Wandering";
 }
 
 void Wander::onInitialize()
@@ -451,13 +448,13 @@ Node::Status Wander::update()
 
     agent.FollowPath();
   //  std::cout << "Wandering (Still Running)" << std::endl;
+
         return BH_RUNNING; //Not reached destination 
     
 
 }
 
 WallTrace::WallTrace(BaseAIAgent& ag) :agent(ag) {
-    Name = "Wall Trace";
     // std::cout << "Moving Way Point" << Waypoint.x << " , " << Waypoint.y << std::endl;
 }
 
@@ -467,6 +464,7 @@ void WallTrace::onInitialize()
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
     doorPosition = agent.currentHouse->GetClosestMainDoor(agentTile)->GetEntryPoint(agentTile);
     agent.room->isScanningWalls = false;
+
     agent.initializeMoveToPoint(doorPosition);
 }
 
@@ -481,11 +479,13 @@ Node::Status WallTrace::update()
     if(agent.room->navmesh.navMesh[agentTile.x][agentTile.y].insideHouse) return BH_SUCCESS;
     if (agent.destinationReached) {
         //    std::cout << "Wander: Destination Reached. Returning BH_SUCCESS." << std::endl;
+
         return BH_SUCCESS;
     }
 
     agent.FollowPath();
     //  std::cout << "Wandering (Still Running)" << std::endl;
+
     return BH_RUNNING; //Not reached destination 
 
 
@@ -506,6 +506,7 @@ void HouseSearch::onInitialize()
     agent.hasSeenAmmo = false;
     agent.hasSeenFood = false;
     agent.hasSeenCoin = false;
+
 }
 
 void HouseSearch::reset()
@@ -513,6 +514,7 @@ void HouseSearch::reset()
     pathGenerated = false;
      agent.destinationReached = false;
      agent.currentpath.clear();
+
 }
 
 Node::Status HouseSearch::update()
@@ -521,6 +523,7 @@ Node::Status HouseSearch::update()
     if (!agent.hasSeenWall)
     {
         std::cout << "House Search FAIL" << std::endl;
+
         return BH_FAILURE;
     }
     std::cout << "House Search Update" << std::endl;
@@ -528,6 +531,7 @@ Node::Status HouseSearch::update()
     if (!agent.currentHouse)
     {
         std::cout << "House Search FAIL" << std::endl;
+
         return BH_FAILURE;
     } 
 
@@ -572,6 +576,7 @@ Node::Status HouseSearch::update()
        // if (agent.currentHouse->FindCurrentRoom(agentTile)->searched) return  BH_SUCCESS;
        
         agent.FollowPath();
+
         return BH_RUNNING; //Not reached destination 
     }
     else if (agent.destinationReached) {
@@ -580,8 +585,10 @@ Node::Status HouseSearch::update()
             pathGenerated = false;
             agent.currentHouse->FindCurrentRoom(agentTile)->searched = true;
             this->reset();
+
             return BH_SUCCESS; 
         }
+
         return BH_SUCCESS;
     }
 }
@@ -653,6 +660,7 @@ void GoToNextRoom::reset()
     //pathGenerated = false;
     agent.destinationReached = false;
     agent.currentpath.clear();
+
 }
 
 Node::Status GoToNextRoom::update()
@@ -661,13 +669,10 @@ Node::Status GoToNextRoom::update()
     if (!agent.currentHouse)
     {
         std::cout << "GoToNextRoom FAILED" << std::endl;
+
         return BH_SUCCESS;
     }
-  /*  if (finishedSearching && agent.destinationReached)
-    {
-     
-        return BH_FAILURE;
-    }*/
+  
     // Once the agent reaches the destination (the door),
     // we need to wait until the agent actually enters the next room
     Vec2 agentTile = agent.room->positionToGridCordinates(agent.agent);
@@ -684,6 +689,7 @@ Node::Status GoToNextRoom::update()
         }
         std::cout << "Following Path" << std::endl;
         agent.FollowPath();
+
         return BH_RUNNING;
     }
     if (!agent.destinationReached)
@@ -706,7 +712,8 @@ Node::Status GoToNextRoom::update()
 }
 
 
-IsNearWall::IsNearWall(BaseAIAgent& ag) :agent(ag) {}
+IsNearWall::IsNearWall(BaseAIAgent& ag) :agent(ag) {
+}
 
 Node::Status IsNearWall::update()
 {

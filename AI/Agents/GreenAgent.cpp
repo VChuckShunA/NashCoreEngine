@@ -6,11 +6,14 @@
 
 
 
-GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom) : BaseAIAgent(std::move(entity), playroom)
+GreenAgent::GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom, Vec2 waypoint1, Vec2 waypoint2, Vec2 waypoint3) : BaseAIAgent(std::move(entity), playroom)
 {
    
     BehaviourTree = std::make_unique<PatrolSelector>(*this);
-    baseDamageAmount = 10;
+    baseDamageAmount = 25;
+    Waypoint1 = waypoint1;
+    Waypoint2 = waypoint2;
+    Waypoint3 = waypoint3;
 }
 
 void GreenAgent::update()
@@ -21,7 +24,7 @@ void GreenAgent::update()
 
 void GreenAgent::HandleDeath()
 {
-    room->PlayerScore++;
+    room->PlayerScore+=25;
     BaseAIAgent::HandleDeath();
 }
 

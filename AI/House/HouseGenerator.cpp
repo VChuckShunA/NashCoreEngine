@@ -43,6 +43,7 @@ void HouseGenerator::GenerateWareHouse(AStar& navmesh,AIPlayroom& room)
 			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
 		}
 	}
+	navmesh.navMesh[1][28].foribidden = true;
 	std::cout << "Warehouse " << Warehouse->houseID << std::endl;
 }
 
@@ -146,6 +147,23 @@ void HouseGenerator::GenerateEightHouse(AStar& navmesh, AIPlayroom& room)
 			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
 		}
 	}
+
+	navmesh.navMesh[9][14].foribidden = true;
+
+	navmesh.navMesh[9][16].foribidden = true;
+	navmesh.navMesh[9][15].foribidden = true;
+	navmesh.navMesh[9][14].foribidden = true;
+
+	navmesh.navMesh[10][16].foribidden = true;
+	navmesh.navMesh[10][15].foribidden = true;
+	navmesh.navMesh[10][14].foribidden = true;
+
+
+	navmesh.navMesh[11][16].foribidden = true;
+	navmesh.navMesh[11][15].foribidden = true;
+	navmesh.navMesh[11][14].foribidden = true;
+
+
 	std::cout <<"8 house"<< EightHouse->houseID << std::endl;
 }
 
@@ -250,6 +268,31 @@ void HouseGenerator::GenerateMansion(AStar& navmesh, AIPlayroom& room)
 			navmesh.navMesh[door->entryPoint2.x][door->entryPoint2.y].foribidden = true;
 		}
 	}
+
+	navmesh.navMesh[14][1].foribidden = true;
+	navmesh.navMesh[31][6].foribidden = true;
+
+
+	navmesh.navMesh[14][3].foribidden = true;
+	navmesh.navMesh[14][4].foribidden = true;
+	navmesh.navMesh[14][5].foribidden = true;
+	navmesh.navMesh[14][6].foribidden = true;
+	navmesh.navMesh[14][7].foribidden = true;
+
+
+	navmesh.navMesh[15][3].foribidden = true;
+	navmesh.navMesh[15][4].foribidden = true;
+	navmesh.navMesh[15][5].foribidden = true;
+	navmesh.navMesh[15][6].foribidden = true;
+	navmesh.navMesh[15][7].foribidden = true;
+
+
+	navmesh.navMesh[16][3].foribidden = true;
+	navmesh.navMesh[16][4].foribidden = true;
+	navmesh.navMesh[16][5].foribidden = true;
+	navmesh.navMesh[16][6].foribidden = true;
+	navmesh.navMesh[16][7].foribidden = true;
+
 	std::cout << "Mansion" << Mansion->houseID << std::endl;
 }
 

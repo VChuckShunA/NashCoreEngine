@@ -10,7 +10,7 @@ public:
     BH_RUNNING,
 };
 
-    std::string Name = "BaseNode";
+    //std::string Name = "BaseNode";
 
    
     virtual Status update() = 0;

@@ -94,6 +94,7 @@ public:
     void EnemyScanner();
     void PlayerScanner();
     void drawVisionCone();
+    void SpawnStartItems();
     void ManageInventory();
     void UpdateInventoryUI();
     void AddHouseToMemory(const std::shared_ptr<House> house);

@@ -50,7 +50,8 @@ void AIPlayroom::init(const std::string& levelPath) {
     HouseGenerator::GenerateEightHouse(navmesh, *this);
     HouseGenerator::GenerateMansion(navmesh, *this);
    
-   // SpawnEnemies();
+    SpawnEnemies();
+    SpawnStartItems();
     auto p1 = m_entityManager.addEntity("player");
     p1->addComponent<CAnimation>(m_game->assets().getAnimation("BlueAgent"), true);
     p1->addComponent<CTransform>(
@@ -62,91 +63,13 @@ void AIPlayroom::init(const std::string& levelPath) {
     p1->addComponent<CBoundingBox>(Vec2(64, 64));
     p1->addComponent<CVision>();
    // p1->addComponent<CWallTracker>();
-    /*
-    auto item1 = m_entityManager.addEntity("health");
-    item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
-    item1->addComponent<CTransform>(
-        gridToMidPixel(10, 3, item1),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item1->addComponent<CBoundingBox>(Vec2(64, 64));
-    //std::shared_ptr<Health> healthItem = std::make_shared<Health>(item1);
-
-    auto item2 = m_entityManager.addEntity("ammo");
-    item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
-    item2->addComponent<CTransform>(
-        gridToMidPixel(4, 3, item2),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item2->addComponent<CBoundingBox>(Vec2(64, 64));
-  //  std::shared_ptr<Ammo> ammoItem = std::make_shared<Ammo>(item2);
-
-    auto item3 = m_entityManager.addEntity("coin");
-    item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
-    item3->addComponent<CTransform>(
-        gridToMidPixel(17, 5, item3),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item3->addComponent<CBoundingBox>(Vec2(64, 64));
-    //std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
-    auto item4 = m_entityManager.addEntity("ammo");
-    item4->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
-    item4->addComponent<CTransform>(
-        gridToMidPixel(19, 10, item4),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item4->addComponent<CBoundingBox>(Vec2(64, 64));
-
-    auto item5 = m_entityManager.addEntity("health");
-    item5->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
-    item5->addComponent<CTransform>(
-        gridToMidPixel(11, 3, item5),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item5->addComponent<CBoundingBox>(Vec2(64, 64));
-
-
-    auto item6 = m_entityManager.addEntity("health");
-    item6->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
-    item6->addComponent<CTransform>(
-        gridToMidPixel(4, 11, item6),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item6->addComponent<CBoundingBox>(Vec2(64, 64));
-
-    auto item7 = m_entityManager.addEntity("health");
-    item7->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
-    item7->addComponent<CTransform>(
-        gridToMidPixel(12, 3, item7),
-        Vec2(0, 0),
-        Vec2(1, 1),
-        0
-    );
-    item7->addComponent<CBoundingBox>(Vec2(64, 64));
-    */
+    
+  
+ 
     //Health(healthItem);
     agents.emplace_back(make_unique<BlueAgent>(p1, this));
     playerPtr = static_cast<BlueAgent*>(agents.back().get());
-    /*
-    items.emplace_back(std::make_shared<Health>(item1));
-    items.emplace_back(std::make_shared<Ammo>(item2));
-    items.emplace_back(std::make_shared<Coin>(item3));
-    items.emplace_back(std::make_shared<Ammo>(item4));
-    items.emplace_back(std::make_shared<Health>(item5));
-    items.emplace_back(std::make_shared<Health>(item6));
-    items.emplace_back(std::make_shared<Health>(item7));*/
+  
 }
 
 
@@ -566,11 +489,11 @@ void AIPlayroom::sVisionCone()
 {
     PlayerScanner();
     EnemyScanner();
-    ItemScanner();
 
     if (isScanningWalls)
     {
         WallChecker();
+        ItemScanner();
     }
 
     //drawWallCheckerRays();
@@ -757,7 +680,7 @@ void AIPlayroom::PlayerScanner()
         float angleRad = transform.angle * (std::numbers::pi / 180.0f);
         Vec2  lookDir{ std::cos(angleRad), std::sin(angleRad) };
 
-        Vec2 playerPos = playerPtr->agent->getComponent<CTransform>().pos;
+        Vec2 playerPos = players[0]->getComponent<CTransform>().pos;
         // Single FOV + range check
         if (!vision.IsTargetInFOV(eye, lookDir, playerPos)) {
             vision.seesPlayer = false;
@@ -844,121 +767,293 @@ void AIPlayroom::drawVisionCone()
     }
 }
 
+void AIPlayroom::SpawnStartItems()
+{
+    auto item1 = m_entityManager.addEntity("health");
+    item1->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item1->addComponent<CTransform>(
+        gridToMidPixel(3, 29, item1),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item1->addComponent<CBoundingBox>(Vec2(32, 32));
+    //std::shared_ptr<Health> healthItem = std::make_shared<Health>(item1);
+
+    auto item2 = m_entityManager.addEntity("ammo");
+    item2->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item2->addComponent<CTransform>(
+        gridToMidPixel(32, 31, item2),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item2->addComponent<CBoundingBox>(Vec2(32, 32));
+    //  std::shared_ptr<Ammo> ammoItem = std::make_shared<Ammo>(item2);
+
+    auto item3 = m_entityManager.addEntity("coin");
+    item3->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
+    item3->addComponent<CTransform>(
+        gridToMidPixel(18, 1, item3),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item3->addComponent<CBoundingBox>(Vec2(32, 32));
+    //std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
+    auto item4 = m_entityManager.addEntity("ammo");
+    item4->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item4->addComponent<CTransform>(
+        gridToMidPixel(32, 11, item4),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item4->addComponent<CBoundingBox>(Vec2(32, 32));
+
+    auto item5 = m_entityManager.addEntity("health");
+    item5->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item5->addComponent<CTransform>(
+        gridToMidPixel(31, 15, item5),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item5->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+    auto item6 = m_entityManager.addEntity("health");
+    item6->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item6->addComponent<CTransform>(
+        gridToMidPixel(12, 15, item6),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item6->addComponent<CBoundingBox>(Vec2(32, 32));
+
+    auto item7 = m_entityManager.addEntity("health");
+    item7->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item7->addComponent<CTransform>(
+        gridToMidPixel(20, 6, item7),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item7->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+    auto item8 = m_entityManager.addEntity("ammo");
+    item8->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item8->addComponent<CTransform>(
+        gridToMidPixel(1, 12, item8),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item8->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+    auto item9 = m_entityManager.addEntity("ammo");
+    item9->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item9->addComponent<CTransform>(
+        gridToMidPixel(30, 7, item9),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item9->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+    auto item10 = m_entityManager.addEntity("coin");
+    item10->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
+    item10->addComponent<CTransform>(
+        gridToMidPixel(31, 4, item10),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item10->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+    auto item11 = m_entityManager.addEntity("coin");
+    item11->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
+    item11->addComponent<CTransform>(
+        gridToMidPixel(10, 20, item11),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item11->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+    auto item12 = m_entityManager.addEntity("coin");
+    item12->addComponent<CAnimation>(m_game->assets().getAnimation("CoinSpin"), true);
+    item12->addComponent<CTransform>(
+        gridToMidPixel(18, 24, item12),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item12->addComponent<CBoundingBox>(Vec2(32, 32));
+    //std::shared_ptr<Coin> coinItem = std::make_shared<Coin>(item3);
+    auto item13 = m_entityManager.addEntity("ammo");
+    item13->addComponent<CAnimation>(m_game->assets().getAnimation("Bullets"), true);
+    item13->addComponent<CTransform>(
+        gridToMidPixel(24, 21, item13),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item13->addComponent<CBoundingBox>(Vec2(32, 32));
+
+    auto item14 = m_entityManager.addEntity("health");
+    item14->addComponent<CAnimation>(m_game->assets().getAnimation("FirstAid"), true);
+    item14->addComponent<CTransform>(
+        gridToMidPixel(26, 11, item14),
+        Vec2(0, 0),
+        Vec2(1, 1),
+        0
+    );
+    item14->addComponent<CBoundingBox>(Vec2(32, 32));
+
+
+
+
+    items.emplace_back(std::make_shared<Health>(item1));
+    items.emplace_back(std::make_shared<Ammo>(item2));
+    items.emplace_back(std::make_shared<Coin>(item3));
+    items.emplace_back(std::make_shared<Ammo>(item4));
+    items.emplace_back(std::make_shared<Health>(item5));
+    items.emplace_back(std::make_shared<Health>(item6));
+    items.emplace_back(std::make_shared<Health>(item7));
+    items.emplace_back(std::make_shared<Ammo>(item8));
+    items.emplace_back(std::make_shared<Ammo>(item9));
+    items.emplace_back(std::make_shared<Coin>(item10));
+    items.emplace_back(std::make_shared<Coin>(item11));
+    items.emplace_back(std::make_shared<Coin>(item12));
+    items.emplace_back(std::make_shared<Ammo>(item13));
+    items.emplace_back(std::make_shared<Health>(item14));
+
+}
+
 void AIPlayroom::ManageInventory()
 {
-    
-    for (const auto& item : items)
+    if (playerPtr && playerPtr->agent)
     {
-        Vec2 overlap = Physics::GetOverlap(item->entity, playerPtr->agent);
-        Vec2 pOverlap = Physics::GetPreviousOverlap(item->entity, playerPtr->agent);
-
- 
-        if (0 < overlap.y && -m_gridSize.x < overlap.x)
+        for (const auto& item : items)
         {
-            if (0 <= overlap.x && pOverlap.x <= 0)
+            Vec2 overlap = Physics::GetOverlap(item->entity, playerPtr->agent);
+            Vec2 pOverlap = Physics::GetPreviousOverlap(item->entity, playerPtr->agent);
+
+
+            if (0 < overlap.y && -m_gridSize.x < overlap.x)
             {
-                if (item->type == Item::ITM_COIN)
+                if (0 <= overlap.x && pOverlap.x <= 0)
                 {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
-                {
-                    if (!isInventoryFull())
+                    if (item->type == Item::ITM_COIN)
                     {
-
                         item->AddToPlayer(this);
+                        break;
                     }
-                    break;
-                }
-                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
-                {
-                    if (!isInventoryFull())
+                    if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
                     {
+                        if (!isInventoryFull())
+                        {
 
-                        item->AddToPlayer(this);
+                            item->AddToPlayer(this);
+                        }
+                        break;
                     }
-                    break;
+                    if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                    {
+                        if (!isInventoryFull())
+                        {
+
+                            item->AddToPlayer(this);
+                        }
+                        break;
+
+                    }
 
                 }
-
             }
-        }
-        else if (0 < overlap.x && -m_gridSize.y < overlap.y)
-        {
-            if (0 <= overlap.y && pOverlap.y <= 0)
+            else if (0 < overlap.x && -m_gridSize.y < overlap.y)
             {
+                if (0 <= overlap.y && pOverlap.y <= 0)
+                {
 
-                if (item->type == Item::ITM_COIN)
-                {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
-                {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
-                {
-                    item->AddToPlayer(this);
-                    break;
+                    if (item->type == Item::ITM_COIN)
+                    {
+                        item->AddToPlayer(this);
+                        break;
+                    }
+                    if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                    {
+                        item->AddToPlayer(this);
+                        break;
+                    }
+                    if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                    {
+                        item->AddToPlayer(this);
+                        break;
+
+                    }
 
                 }
-               
             }
-        }
-        // check if player hits the tile from the bottom
-        else if (0 < overlap.x && -m_gridSize.y < overlap.y)
-        {
-            if (0 <= overlap.y && pOverlap.y <= 0)
+            // check if player hits the tile from the bottom
+            else if (0 < overlap.x && -m_gridSize.y < overlap.y)
             {
+                if (0 <= overlap.y && pOverlap.y <= 0)
+                {
 
-                if (item->type == Item::ITM_COIN)
-                {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
-                {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
-                {
-                    item->AddToPlayer(this);
-                    break;
+                    if (item->type == Item::ITM_COIN)
+                    {
+                        item->AddToPlayer(this);
+                        break;
+                    }
+                    if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                    {
+                        item->AddToPlayer(this);
+                        break;
+                    }
+                    if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                    {
+                        item->AddToPlayer(this);
+                        break;
+
+                    }
 
                 }
-              
             }
-        }
-        // check player and tile side collide
-        else if (0 < overlap.y && -m_gridSize.x < overlap.x)
-        {
-            if (0 <= overlap.x && pOverlap.x <= 0)
+            // check player and tile side collide
+            else if (0 < overlap.y && -m_gridSize.x < overlap.x)
             {
-                if (item->type == Item::ITM_COIN)
+                if (0 <= overlap.x && pOverlap.x <= 0)
                 {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
-                {
-                    item->AddToPlayer(this);
-                    break;
-                }
-                if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
-                {
-                    item->AddToPlayer(this);
-                    break;
+                    if (item->type == Item::ITM_COIN)
+                    {
+                        item->AddToPlayer(this);
+                        break;
+                    }
+                    if (item->type == Item::ITM_AMMO && playerPtr->needsAmmo())
+                    {
+                        item->AddToPlayer(this);
+                        break;
+                    }
+                    if (item->type == Item::ITM_HEALTH && playerPtr->needsFood())
+                    {
+                        item->AddToPlayer(this);
+                        break;
+
+                    }
 
                 }
-             
             }
-        }
 
-      
+
+        }
     }
 
 }
@@ -1322,7 +1417,7 @@ void AIPlayroom::SpawnEnemies()
     auto e1 = m_entityManager.addEntity("agent");
     e1->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e1->addComponent<CTransform>(
-        gridToMidPixel(0, 11, e1),
+        gridToMidPixel(11, 24, e1),
         Vec2(3, 0),
         Vec2(1, 1),
         0
@@ -1333,7 +1428,7 @@ void AIPlayroom::SpawnEnemies()
     auto e2 = m_entityManager.addEntity("agent");
     e2->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
     e2->addComponent<CTransform>(
-        gridToMidPixel(11, 0, e2),
+        gridToMidPixel(6, 19, e2),
         Vec2(3, 0),
         Vec2(1, 1),
         0
@@ -1341,9 +1436,20 @@ void AIPlayroom::SpawnEnemies()
     e2->addComponent<CBoundingBox>(Vec2(64, 64));
     e2->addComponent<CVision>();
 
+    auto e3 = m_entityManager.addEntity("agent");
+    e3->addComponent<CAnimation>(m_game->assets().getAnimation("GreenAgent"), true);
+    e3->addComponent<CTransform>(
+        gridToMidPixel(4, 2, e3),
+        Vec2(3, 0),
+        Vec2(1, 1),
+        0
+    );
+    e3->addComponent<CBoundingBox>(Vec2(64, 64));
+    e3->addComponent<CVision>();
 
-    agents.emplace_back(make_unique<GreenAgent>(e1, this));
-    agents.emplace_back(make_unique<GreenAgent>(e2, this));
+    agents.emplace_back(make_unique<GreenAgent>(e1, this,Vec2(13,26), Vec2(1, 26), Vec2(1, 15)));
+    agents.emplace_back(make_unique<GreenAgent>(e2, this, Vec2(6, 14), Vec2(1, 24), Vec2(6, 24)));
+    agents.emplace_back(make_unique<GreenAgent>(e3, this, Vec2(12, 2), Vec2(1, 10), Vec2(1, 2)));
 }
 
 
@@ -1797,8 +1903,11 @@ void AIPlayroom::sCollision() {
             }
         }
     }
-
-    ManageInventory();
+    
+    if (!m_entityManager.getEntities("player").empty())
+    {
+        ManageInventory();
+    }
 }
 
 void AIPlayroom::sAnimation()
@@ -1930,8 +2039,6 @@ void AIPlayroom::sRender() {
     sf::Text HUD("health : " + std::to_string(currentHealth)+
         "\nitems : [" + inventoryItem1 + "] [" + inventoryItem2 + "] [" + inventoryItem3 + "] [" + inventoryItem4 +  "] [" + inventoryItem5 + "]"+
         "\nmemory : [" + house1 + "][" + house2 + "] [" + house3 + "]" +
-        "\nbehavior : "+ behaviourName +
-        "\nstatus : " + behaviourSTatus +
         "\nSCORE : " + std::to_string(PlayerScore)
         , m_game->assets().getFont("Mario"), 20);
     HUD.setFillColor(sf::Color::White);

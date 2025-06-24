@@ -3,7 +3,7 @@
 #include <vector>
 class Selector : public Node {
 public:
-    Selector(){ Name = "Selector"; }
+    Selector(){  }
     void addChild(Node* child) {
         m_Children.emplace_back(std::move(child));
     }

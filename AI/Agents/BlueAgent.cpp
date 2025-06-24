@@ -5,6 +5,7 @@ BlueAgent::BlueAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom
 {
 	BehaviourTree = std::make_unique<SurvivalSelector>(*this);
 	health = 100;
+	baseDamageAmount = 10;
 	//std::cout << "Blue Agent Initialized" << std::endl;
 }
 

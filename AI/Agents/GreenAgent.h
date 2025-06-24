@@ -16,7 +16,7 @@
     {
         
     public:
-        GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom); 
+        GreenAgent(const std::shared_ptr<Entity>& entity, AIPlayroom* playroom,Vec2 waypoint1, Vec2 waypoint2, Vec2 waypoint3);
         void update() override;
         void HandleDeath() override;
     };

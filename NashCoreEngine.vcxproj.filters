@@ -135,6 +135,9 @@
     <ClCompile Include="AI\Pathfinding\BoustrophedonPathfinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AI\AIMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -276,6 +279,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AI\Pathfinding\BoustrophedonPathfinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\AIMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

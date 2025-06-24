@@ -57,7 +57,7 @@ public:
             return m_Children[currentIndex].get();
         
     }
-    StatefulSequence(){ Name = "Stateful Sequence"; }
+    StatefulSequence(){  }
     ~StatefulSequence() = default;
 private:
     std::vector<std::unique_ptr<Node>>  m_Children;
