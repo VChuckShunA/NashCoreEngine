@@ -49,69 +49,22 @@ This framework is designed to facilitate the rapid development of 2D games and i
 
 ---
 
-## 📁 Directory Structure
-
-```bash
-NashcoreEngine/
-├── assets/              # Sprites, maps, and animation data
-├── src/
-│   ├── core/            # Main game loop, entity manager, ECS framework
-│   ├── components/      # Component definitions (Transform, BoundingBox, etc.)
-│   ├── systems/         # Systems: Movement, Rendering, Collision, AI, etc.
-│   ├── ai/
-│   │   ├── behavior/    # Behavior Tree nodes and runner
-│   │   └── steering/    # Wall-tracing, obstacle avoidance, etc.
-│   ├── math/            # Vec2, Geometry utils, AABB, ray casting
-│   └── game/            # Game-specific setup: scenes, entities, gameplay logic
-├── include/             # Engine headers
-├── build/               # Build system files (CMake or Make)
-└── main.cpp             # Entry point
-```
-
----
-
-## 🚀 How to Build
-
-### Prerequisites
-
-* C++17 or higher
-* SFML 2.5+
-* CMake 3.15+ (recommended)
-
-### Build Steps
-
-```bash
-git clone https://github.com/yourusername/NashcoreEngine.git
-cd NashcoreEngine
-mkdir build && cd build
-cmake ..
-make
-./NashcoreEngine
-```
-
----
-
 ## 🧪 Example Projects Using Nashcore
 
-### Ashura's Revenge
+### Ashura's Revengence
 
-A top-down shooter using:
+A 2D Shootem up using:
 
-* Wave Function Collapse for procedural level generation
-* Quadtree for enemy movement and avoidance
-* Custom BT system for enemy behaviors
+* Wave Function Collapse for procedural background generation
+* Quadtree for enemy collision detection
 
 ### Behavior Tree Demo
 
 A sandbox where:
 
 * Enemies patrol, detect the player, fire with cooldown logic
+* Custom BT system for enemy behaviors
 * Blackboard memory is used for visibility and ammo tracking
-
-### Debug Tools
-
-* Toggle overlays for AI tree states, bounding boxes, and quadtree nodes
-* Profiling flags for frame time and active entities
 
 ---
 
@@ -120,15 +73,6 @@ A sandbox where:
 * No sound or music module (yet)
 * Physics system is AABB-only (no rotation or mass-based forces)
 * Not currently optimized for mobile or web export
-
----
-
-## 📌 Future Improvements
-
-* Editor tools for building levels and configuring BTs visually
-* Lua or JSON-based scripting for enemy behaviors
-* Improved pathfinding (A\*) with tile integration
-* Animation graph system
 
 ---
 
